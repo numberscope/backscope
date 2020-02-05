@@ -2,9 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Numberscope</title>
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <!-- JavaScript -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- Base.js -->
+    <script src="../static/js/base.js"></script>
+    {% block scripts %}
+    {% endblock %}
 </head>
 <body>
-
+    <h1>Welcome to Numberscope</h1>
+    <a href="{{ url_for('tool_page') }}">Tool Page</a>
+    <main>
+        {% block main %}
+        {% endblock %}
+    </main>
 </body>
 </html>
