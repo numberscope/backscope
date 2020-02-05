@@ -20,3 +20,7 @@ pip install -r requirements.txt
 On the command line
 
 ## To run
+
+```console
+./run.sh
+```
