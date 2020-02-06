@@ -1,4 +1,4 @@
-const { src, dest, series } = require('gulp');
+const { src, dest, series, watch } = require('gulp');
 const sass = require('gulp-sass');
 sass.compiler = require('node-sass');
 
@@ -14,4 +14,7 @@ function cssMinify(cb) {
     return cb();
 }
 
-exports.default = series(compileSass, cssMinify);
+exports.default = function(){
+    watch('./src/scss/**/*.scss', series(compileSass, cssMinify));
+}
+
