@@ -1,0 +1,22 @@
+{
+  "name": "numberscopeflask",
+  "version": "1.0.0",
+  "description": "## Installing Dependencies",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/katestange/NumberscopeFlask.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/katestange/NumberscopeFlask/issues"
+  },
+  "homepage": "https://github.com/katestange/NumberscopeFlask#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  }
+}
