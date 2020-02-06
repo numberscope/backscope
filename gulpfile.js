@@ -1,12 +1,17 @@
-
-const { series } = require('gulp');
+const { src, dest, series } = require('gulp');
+const sass = require('gulp-sass');
+sass.compiler = require('node-sass');
 
 // Compile SASS to CSS and puts it all into styles.css in static/css/ folder
-function sass() {
+function compileSass() {
+  return src('./sass/**/*.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(dest('./static/css'));
 }
 
 // Minifies styles.css into styles.css.min
-function cssMinify() {
+function cssMinify(cb) {
+    return cb();
 }
 
-exports.default = series(sass, cssMinify);
+exports.default = series(compileSass, cssMinify);
