@@ -4,7 +4,7 @@ sass.compiler = require('node-sass');
 
 // Compile SASS to CSS and puts it all into styles.css in static/css/ folder
 function compileSass() {
-  return src('./sass/**/*.scss')
+  return src('./src/scss/**/*.scss')
     .pipe(sass().on('error', sass.logError))
     .pipe(dest('./static/css'));
 }
