@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block header_extra %}
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="/static/css/homepage.css">
+{% endblock %}
+
+
+{% block main %}
+  <!-- Brief Introduction -->
+<div class="w3-row-padding w3-theme-dark-blue w3-padding-48 w3-center w3-display-container">
+      <div class="w3-third w3-hover-text-orange">
+             <div class="container">
+             <img src="/static/legacy_resources/homepage/turtle.png" class="w3-round w3-image w3-center w3-opacity" style="width:70%">
+             <h2 class="centered"><b>Turtle Graphics</b></h2>
+             </div>
+             <p class="margin-left  bottom b">Imagine a small turtle sitting on a paper. It can move forward and rotate, and as it moves it leaves a trail of ink behind it. The visualization of integer sequences with turtle graphics can thus be constructed with parameters from the numbers of given sequences. Most integer sequences will produce mindless scribbling. Some produce surprising geometric figures.</p>
+      </div>
+       <div class="w3-third w3-hover-text-orange">
+            <div class="container">
+            <img src="/static/legacy_resources/homepage/gof.png" class="w3-round w3-image w3-center w3-opacity" style="width:70%">
+            <h2 class="centered"><b>Game of Life</b></h2>
+            </div>
+            <p class="margin-left margin-right bottom b">The Game of Life is a cellular automaton model. The playing field for Game of Life is a grid of cells. Each cell can be either alive or dead and has eight neighbors, those being the cells directly touching it horizontally, vertically, and diagonally. Certain rules dictate whether or not a given cell will be alive in the next generation.</p>
+       </div>
+       <div class="w3-third w3-hover-text-orange">
+            <div class="container">
+            <img src="/static/legacy_resources/homepage/sc.png" class="w3-round w3-image w3-center w3-opacity" style="width:70%">
+            <h2 class="centered" style="width:100%"><b>Shift Comparison</b></h2>
+             </div>
+            <p class="margin-right bottom b">The shift comparison picture of a<sub>n</sub> is formed by
+setting the pixel at position (x,y) to be white if a<sub>x</sub>=a<sub>x+y</sub>,
+and black otherwise. The picture captures how a<sub>n</sub> repeats. Many
+interesting sequences do not repeat, but by taking the sequence mod n, that is, taking the remainders after dividing by n, we get sequences that do
+repeat. </p>
+        </div>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 @font-face {
   font-family: Infinity;
-  src: url('../website/resources/toolpage/Infinity.ttf');
+  src: url('/static/legacy_resources/toolpage/Infinity.ttf');
 }
 
 :root {
@@ -13,7 +13,7 @@
 /*Body*/
 body {
   margin: 0;
-  background-image: url("../website/resources/toolpage/background4.jpg");
+  background-image: url("/static/legacy_resources/toolpage/background4.jpg");
   background-attachment: fixed;
   background-size: cover;
   text-align: center;
