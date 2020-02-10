@@ -12,3 +12,8 @@ def index():
 @app.route('/tool_page')
 def tool_page():
     return render_template('tool.html')
+
+@app.route('/staging')
+def staging_page():
+    return render_template('staging.html')
+

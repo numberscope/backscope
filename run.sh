@@ -2,6 +2,7 @@
 
 echo 'Starting up Numberscope Server'
 FLASK_ENV=development
+npm run-script build
 export FLASK_ENV
 export FLASK_APP=run.py
 export FLASK_RUN_PORT=5001
