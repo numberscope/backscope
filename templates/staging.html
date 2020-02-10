@@ -1,5 +1,9 @@
 {% extends 'index.html' %}
 
+{% block header_extra %}
+<link rel="stylesheet" type="text/css" href="/static/css/sandbox.css">
+{% endblock %}
+
 {% block main %}
   <div id="canvasArea">
   </div>
@@ -29,4 +33,5 @@
   <script src="/static/js/NScore_bundle_legacy.js"></script>
   <script src="/static/js/staging/setup.js"></script>
   <script src="/static/js/staging/sandbox.js"></script>
+  
 {% endblock %}

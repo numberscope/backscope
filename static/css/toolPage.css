@@ -1,0 +1,699 @@
+@font-face {
+  font-family: Infinity;
+  src: url('../resources/toolpage/Infinity.ttf');
+}
+
+:root {
+  --logoColor: #afafdc;
+  --topBarColor: #f75c03;
+  --sideNavColor: #416788;
+  --sideNavColor2: #70cad1;
+}
+
+/*Body*/
+body {
+  margin: 0;
+  background-image: url("../resources/toolpage/background4.jpg");
+  background-attachment: fixed;
+  background-size: cover;
+  text-align: center;
+  /*background-repeat: no-repeat;*/
+}
+
+/*Header*/
+header {
+  background-color: var(--topBarColor);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 3.365em;
+  overflow: hidden;
+}
+
+header a {
+  float: left;
+  position: relative;
+  left: 4.5em;
+  font-family: "Infinity", sans-serif;
+  font-size: 2.75em;
+  color: #ffffff;
+  text-decoration: none;
+  transition: 0.5s
+}
+
+header button {
+  float: right;
+  font-family: "Infinity", sans-serif;
+  font-size: 2em;
+  color: #ffffff;
+  background-color: var(--sideNavColor2);
+  border: none;
+  border-radius: 10%;
+  padding-left: .25em;
+  padding-right: .25em;
+  margin-top: .2em;
+  margin-right: .4em;
+}
+
+header button:hover:not(.active) {
+  color: #000000;
+}
+
+#logArea {
+  right: 0%;
+  top: 3.35em;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  background-color: var(--sideNavColor);
+  box-shadow: 10px 10px grey;
+  width: 40em;
+  height: 80%;
+  position: fixed;
+  overflow:scroll;
+  scrollbar-width: none;
+}
+
+#innerLogArea{
+  padding-left: 2px;
+  margin-top: 20px;
+  display: inline-block;
+  background: var(--sideNavColor);
+  height: 90%;
+  width: 80%;
+
+}
+
+#innerLogArea p {
+  color: red;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1em;
+  font-weight: 800;
+  float: left;
+  margin-bottom: auto;
+  text-align: justify;
+}
+
+#loadArea {
+  display: none;
+  position: absolute;
+  top: 12.5%;
+  right: 30%;
+  width: 40%;
+  height: 75%;
+  background: rgb(105, 105, 105);
+  border: 2px solid #000000;
+  padding: 10px;
+  z-index: 12;
+}
+
+#loadArea textarea{
+  position: absolute;
+  height: 88%;
+  left: 10%;
+  right: 10%;
+  resize: none;
+}
+
+#loadArea button {
+  display: none;
+  position: absolute;
+  width: 25%;
+  height: 7%;
+  bottom: 1%;
+  left: 10%;
+  background: #416788;
+  border: 0;
+}
+
+#hider {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 11;
+}
+
+
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+
+#Upload {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+#canvasArea {
+  position: fixed;
+  left: 192px;
+  top: 53.833px;
+  display: flex;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  height: 100%;
+  width: 100%;
+}
+
+.canvasClass {
+  padding: 3px;
+}
+
+/*Main Side Navagation Bar*/
+.sideNav {
+  top: 3.35em;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  background-color: var(--sideNavColor);
+  width: 12em;
+  height: 100%;
+  position: fixed;
+  /*overflow: auto;*/
+  font-family: "Infinity", sans-serif;
+  color: #ffffff;
+  transition: margin-left 0.3s
+}
+
+.sideNav a {
+  display: block;
+  margin-bottom: 0em;
+  padding: .5em;
+  text-align: center;
+  transition: margin-left 0.3s;
+}
+
+.sideNav a:hover {
+  transition: 0.3s;
+  background-color: var(--sideNavColor2) !important;
+}
+
+#logo {
+  background-color: var(--logoColor);
+  margin-bottom: 0em;
+  padding: .5em;
+}
+
+#logo:hover {
+  background-color: var(--logoColor) !important;
+}
+
+/*Examples Navigation Bar*/
+.exNav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: var(--topBarColor);
+  overflow-x: hidden;
+  transition: 0.3s;
+  white-space: nowrap;
+}
+
+.exNav a {
+  font-family: "Infinity", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 2em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+
+.exNav a:hover {
+  background-color: var(--sideNavColor) !important;
+  color: #f1f1f1;
+}
+
+.exNav .closebtn {
+  top: 0;
+  font-size: 2.15em;
+  padding-top: .1em;
+  padding-bottom: .3em;
+}
+
+#exCloseBtn:hover {
+  background-color: var(--topBarColor) !important;
+}
+
+/* @media screen and (max-height: 450px) {
+  .exNav {padding-top: 15px;}
+  .exNav a {font-size: 18px;}
+} */
+
+/*Step Navigation Bars*/
+.stepNav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  top: 3.365em;
+  left: 12em;
+  z-index: 10;
+  background-color: var(--sideNavColor2);
+  overflow-x: hidden;
+  transition: 0.3s;
+}
+
+.stepNav a {
+  float: left;
+  width: 100%;
+  font-family: "Infinity", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 3em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+
+.stepNav a:hover {
+  background-color: var(--logoColor) !important;
+  color: #f1f1f1;
+}
+
+.stepNav .stepClosebtn {
+  top: 0;
+  font-size: 2.15em;
+  width: 50%;
+}
+
+.stepNav .stepClosebtn:hover {
+  background-color: var(--sideNavColor2) !important;
+}
+
+.stepNav .stepAddbtn {
+  top: 0;
+  font-size: 2.15em;
+  width: 50%;
+}
+
+/* @media screen and (max-height: 450px) {
+  .stepNav {padding-top: 15px;}
+  .stepNav a {font-size: 18px;}
+} */
+.mainColumn {
+  float: left;
+  width: 40%;
+  height: auto;
+}
+
+.numColumn {
+  float: left;
+  width: 10%;
+  height: auto;
+}
+
+.xColumn {
+  float: left;
+  width: 10%;
+  height: auto;
+}
+
+/* Clear floats after the columns */
+.ROW:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.numColumn a:hover {
+  background-color: var(--sideNavColor2) !important;
+}
+
+.xColumn a:hover {
+  background-color: var(--sideNavColor2) !important;
+  color: var(--logoColor) !important;
+}
+
+.stepNav select {
+  font-family: "Infinity", sans-serif;
+  font-size: 3em;
+  color: #ffffff;
+  height: auto;
+  background-color: var(--sideNavColor2);
+  border-width: 0em;
+  padding: .033em;
+  margin: 0;
+}
+
+.stepNav option {
+  position: absolute;
+  background-color: #f1f1f1;
+  color: #000000;
+  top: 100%;
+  border-style: none;
+}
+
+.stepNav option:active {
+  background-color: var(--logoColor);
+}
+
+.select-selected {
+  background-color: var(--logoColor);
+}
+
+#canvasArea {
+  z-index: -1;
+}
+
+#mainCanvas {
+  position: fixed;
+  left: 12em;
+  top: 3.365em;
+  width: 0;
+  height: 100%;
+  z-index: 1;
+  color: #ffffff;
+  background-color: #ffffff;
+  transition: 0.3s;
+}
+
+/*Select Navigation Bars*/
+.selectNav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  top: 3.365em;
+  left: 24em;
+  z-index: 4;
+  background-color: var(--logoColor);
+  overflow-x: hidden;
+  transition: 0.3s;
+  white-space: nowrap;
+}
+
+.selectNav a {
+  font-family: "Infinity", sans-serif;
+  /* padding: .217em; */
+  border: solid;
+  border-width: .217em;
+  border-color: var(--logoColor);
+  /* border-left-color: var(--sideNavColor); */
+  text-align: center;
+  text-decoration: none;
+  font-size: 2.5em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+
+.selectNav a:hover {
+  background-color: var(--topBarColor) !important;
+  border-color: var(--topBarColor) !important;
+  border-left-color: var(--sideNavColor) !important;
+  color: #f1f1f1;
+}
+
+/* #toolNav a {
+  padding: .28em;
+  font-size: 2em;
+} */
+/* #toolNav .selectClosebtn{
+  top: 0;
+  font-size: 2.15em;
+  padding: 0;
+} */
+.selectNav .selectClosebtn {
+  top: 0;
+  font-size: 2.15em;
+  border-width: 0;
+  padding: 0;
+}
+
+.selectNav .selectClosebtn:hover {
+  background-color: var(--logoColor) !important;
+}
+
+/* @media screen and (max-height: 450px) {
+  .selectNav {padding-top: 15px;}
+  .selectNav a {font-size: 18px;}
+} */
+
+.selectNav form {
+  font-family: "Infinity", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 2.5em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+
+
+.controls input{
+  display: block;
+  margin: 0 auto;
+}
+/* 
+.selectNav input[type=text],
+select,
+textarea { */
+  /* width: auto;
+  font-size: 10 */
+  /* padding: .25em;
+  margin-top: .25em;
+  border: 1px solid #ccc;
+  border-radius: 4px; */
+/* } */
+
+/* .seqNameRow .seqNameText{
+  float: left;
+  width: 40%;
+  height: auto;
+  overflow: hidden;
+}
+.seqNameRow .seqNameInput{
+  float: left;
+  width: 60%;
+  height: 3em;
+  overflow: hidden;
+}
+.seqNameText li{
+  font-family: "Infinity", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 2.5em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+.seqNameInput input[type=text], select, textarea{
+  font-size: 2.5em;
+  width: 60%;
+  height: 2em;
+  padding: .25em;
+  margin-top: .25em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.seqNameRow:after{
+  content: "";
+  display: table;
+  clear: both;
+} */
+
+
+/*Seq Input Navigation Bars*/
+.seqInputNav {
+  padding: 0;
+  height: 100%;
+  width: 0;
+  position: fixed;
+  top: 3.365em;
+  left: 44em;
+  z-index: 3;
+  background-color: var(--topBarColor);
+  overflow-x: hidden;
+  transition: 0.3s;
+  /* white-space: nowrap; */
+}
+
+.seqInputNav a {
+  font-family: "Infinity", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 2em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+
+.seqInputNav li {
+  font-family: "Infinity", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 2em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+
+.seqInputNav select {
+  font-family: "Infinity", sans-serif;
+  font-size: 2em;
+  color: #ffffff;
+  height: auto;
+  background-color: var(--topBarColor);
+  border-width: 0em;
+  padding: .033em;
+  margin: 0;
+}
+
+.seqInputNav option {
+  position: absolute;
+  background-color: #f1f1f1;
+  color: #000000;
+  top: 100%;
+  border-style: none;
+}
+
+.seqInputNav option:active {
+  background-color: var(--logoColor);
+}
+
+.select-selected {
+  background-color: var(--logoColor);
+}
+
+.seqInputNav input[type=text],
+select,
+textarea {
+  width: 80%;
+  height: 100%;
+  padding: .25em;
+  margin-top: .25em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  font-size: 1.25em;
+}
+
+.seqInputNav .closebtn {
+  top: 0;
+  font-size: 2.15em;
+}
+
+/* @media screen and (max-height: 450px) {
+  .seqInputNav {padding-top: 15px;}
+  .seqInputNav a {font-size: 18px;}
+} */
+.oeisNum {
+  height: 2em;
+  resize: none;
+}
+
+/*Natural Number Checkbox*/
+.seqInputNav .natNumForm {
+  font-family: "Infinity", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0em;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+  opacity: 1;
+  margin-top: .25em;
+}
+
+.seqInputNav .natNumForm input[type=checkbox] {
+  /* width: 1.5em;
+  height: 1.5em; */
+  width: 0;
+  height: 0;
+  transition: 0.3s;
+  opacity: 1;
+  color: var(--sideNavColor2);
+}
+
+/*Linear Recurrence Input*/
+.seqInputNav .linRecDef {
+  /* visibility: hidden; */
+  font-size: 0em;
+  width: auto;
+  overflow: hidden;
+  transition: 0;
+  margin-top: .5em;
+}
+
+.kRow .kLabel {
+  float: left;
+  width: 15%;
+  margin-left: 8em;
+  height: auto;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 1;
+  transition: 0.3s;
+}
+
+.kLabel li {
+  font-size: 2em;
+  opacity: 1;
+}
+
+.kRow .kSelect {
+  float: left;
+  width: 20%;
+  height: auto;
+  margin-left: -0.5em;
+  margin-right: 1em;
+  margin-bottom: .5em;
+  visibility: hidden;
+  transition: 0;
+}
+
+.kRow:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.ListColumn {
+  float: left;
+  width: 15%;
+  height: auto;
+  margin-left: 2em;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.TextColumn {
+  float: left;
+  width: 15%;
+  height: auto;
+  overflow: hidden;
+}
+
+.TextColumn input[type=text] {
+  height: 1.25em;
+  padding: none;
+  border: none;
+  margin: none;
+  resize: none;
+  /* margin-bottom: .41em; */
+  margin-bottom: .69em;
+  overflow: hidden;
+  visibility: hidden;
+  font-size: 1em;
+  opacity: 1;
+}
+
+.ListColumn li {
+  font-size: 0;
+}
+
+.linRecRow:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.btn-primary {
+  visibility: hidden;
+}

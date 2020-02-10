@@ -41,9 +41,9 @@ setup ={
     parameters: {
       m: 5
     },
-    moduleKey: 'FractalMap',
+    moduleKey: 'Zeta',
     config: {
-        n: 20,
+        n: 5,
         Levels: 2
     },
 };

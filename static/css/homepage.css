@@ -1,0 +1,41 @@
+.w3-theme-light-purple{
+color:#fff !important;background-color:#afafdc !important}
+.w3-theme-light-blue{
+color:#fff !important;background-color:#70cad1 !important}
+.w3-theme-dark-blue{
+color:#fff !important;background-color:#416788 !important}
+.w3-theme-orange{
+color:#fff !important;background-color:#f75c03 !important}
+.w3-theme-light-orange{
+color:#fff !important;background-color:#f88e52 !important}
+.container {
+    position: relative;
+    text-align: center;
+    color: white;
+}
+p.main {
+    text-align: justify;
+}
+.container {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+.centered {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+p.bottom {
+    margin-bottom: 50px;
+}
+p.margin-left {
+    margin-left: 25px;
+}
+p.margin-right {
+    margin-right: 25px;
+}
+p.b {
+    line-height: 1.8;
+}

@@ -18,16 +18,15 @@ class VIZ_Zeta {
                 this.sketch.pixelDensity(1);
                 this.sketch.frameRate(1);
 
-                this.workingSequence = [];
+                // this.workingSequence = [];
                 var j = 0;
                 var k = 1;
-                for(let i = 0; i < this.sketch.width; ++i) {
-                        this.workingSequence.push(k % 40);
-                        var temp = j;
-                        j = k;
-                        k = k + temp;
-                        console.log(k % 40);
-                }
+                // for(let i = 0; i < this.sketch.width; ++i) {
+                //         this.workingSequence.push(k % 40);
+                //         var temp = j;
+                //         j = k;
+                //         k = k + temp;
+                // }
         }
 
 
@@ -61,7 +60,6 @@ class VIZ_Zeta {
         //
 
         drawMap(maxiterations){
-
                 this.sketch.background(0);
                 const w = 4;
                 const h = (w * this.sketch.height) / this.sketch.width;
@@ -69,6 +67,8 @@ class VIZ_Zeta {
                 const xmin = -w/2;
                 const ymin = -h/2;
 
+                console.log(this.sketch);
+                console.log(this.sketch.pixels);
                 this.sketch.loadPixels();
 
                 const xmax = xmin + w;

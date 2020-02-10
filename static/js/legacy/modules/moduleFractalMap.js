@@ -17,7 +17,6 @@ class Line {
           this.x1 = x1;
           this.y0 = y0;
           this.y1 = y1;
-          console.log("here22");
         }
 
         draw(sketch) {
@@ -36,6 +35,7 @@ class VIZ_FractalMap {
         this.seq = seq
         this.sketch = sketch
         this.itters = 14;
+        console.log("here22");
     }
     setup(){
         this.lines = []

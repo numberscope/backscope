@@ -1,5 +1,3 @@
-
-
 function start(setup){
     moduleObj = { 
         ID: 0,
