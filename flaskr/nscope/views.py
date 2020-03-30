@@ -21,15 +21,16 @@ from werkzeug.exceptions import abort
 from sqlalchemy import or_, func
 
 from flaskr import db
-from flaskr.auth.views import login_required
-#  from flaskr.nscop.models import *
+from flaskr.nscope.models import *
 
 bp = Blueprint("nscope", __name__)
 
+# Creating a simple index route (this will error because we currently dont have an index.thml"j
 @bp.route("/index")
 def index():
     return render_template("index.html")
 
+# Sending simple json to the front end
 @bp.route("/vuetest", methods=["GET"])
 def vuetest():
     return jsonify({"Answer" : "This is a test", "Data" : [4.5123, 4.123, 9.123, 1.12309]})

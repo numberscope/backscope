@@ -24,17 +24,25 @@ from dotenv import load_dotenv
 
 from .config import config
 
+# This statement loads all environment variables from .env
 load_dotenv()
+
+# Create a new sql alchemy database object
 db = SQLAlchemy()
 
+# default environment is development, otherwie specified by .env
 def create_app(environment='development'):
     
+    # Get app type from .env
     environment = os.environ.get('APP_ENVIRONMENT', environment)
 
     # Initial app and configuration
     app = Flask(__name__, instance_relative_config=True)
+
+    # Upload config from config.py
     app.config.from_object(config[environment])
 
+    # Need to be more cognisant of this in the future
     CORS(app, resources={r'/*' : {'origins' : '*'}})
     
     # Logging
@@ -45,24 +53,19 @@ def create_app(environment='development'):
     stdout.setLevel(logging.DEBUG)
     app.logger.addHandler(stdout)
 
+    # Initialize the application
     db.init_app(app)
     
-    #  db_url = os.environ.get("DATABASE_URL")
-    #
-    #  app.config.from_mapping(
-    #          SECRET_KEY='dev',
-    #          SQLALCHEMY_TRACK_MODIFICATIONS = False,
-    #          SQLALCHEMY_DATABASE_URI = db_url,
-    #          DEBUG=True
-    #  )
-
+    # Add a command line interface to the application
     app.cli.add_command(init_db_command)
 
-    from flaskr import nscope, auth
+    # The nscope endpoint application
+    from flaskr import nscope
 
+    # The blueprint is specified via nscope
     app.register_blueprint(nscope.bp)
-    app.register_blueprint(auth.bp)
 
+    # The primary application
     return app
 
 
