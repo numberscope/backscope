@@ -17,6 +17,7 @@ from flaskr.nscope.models import *
 
 bp = Blueprint("nscope", __name__)
 
+
 # Creating a simple index route (this will error because we currently dont have an index.thml"j
 @bp.route("/index")
 def index():
@@ -26,3 +27,18 @@ def index():
 @bp.route("/vuetest", methods=["GET"])
 def vuetest():
     return jsonify({"Answer" : "This is a test", "Data" : [4.5123, 4.123, 9.123, 1.12309]})
+
+@bp.route("/get_sequence/<id>", methods=["GET"])
+def get_sequence(id):
+    # get database entry
+    seq = Sequence.get_seq_by_id(id)
+    id = seq.id
+    name = seq.name
+    vals = seq.first_100_entries
+    print(id, name, vals)
+
+    # jsonify the data
+    data = jsonify({'id': id, 'name': name, 'values': vals})
+
+    # return the data
+    return data

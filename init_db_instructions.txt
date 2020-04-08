@@ -1,0 +1,22 @@
+To populate sequences with the init.sql file, follow these isntructions:
+
+Follow instructions in README for getting the database set up
+
+su <db_user> # password may be required depending on how you set up the database
+
+cd /NumberscopeFlaskLocation/
+
+psql <db_name>
+
+\ir init.sql
+
+\q
+
+After these, try running flask and go to the endpoint
+
+http://127.0.0.1:5000/get_sequence/A0001
+
+Should return json data!
+
+
+

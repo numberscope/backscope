@@ -27,3 +27,15 @@ class User(db.Model):
 
     def check_password(self, value):
         return check_password_hash(self.password, value)
+
+class Sequence(db.Model):
+    __tablename__ = 'sequences'
+
+    id = db.Column(db.String, unique=True, nullable=False, primary_key=True)
+    name = db.Column(db.String, unique=False, nullable=True)
+    first_100_entries = db.Column(db.ARRAY(db.INTEGER), unique=False, nullable=False)
+
+    @classmethod
+    def get_seq_by_id(self, id):
+        return self.query.filter_by(id=id).first()
+

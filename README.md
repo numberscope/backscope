@@ -45,9 +45,9 @@ Set up initial dependencies:
 
    ```bash
    $ sudo systemctl start postgresql
-   $ python3 manage.py init # initializes tables inside database
-   $ python3 manage.py migrate # migrate data models found in the project to database
-   $ python3 manage.py upgrade # Upgrade changes to database
+   $ python3 manage.py db init # initializes tables inside database
+   $ python3 manage.py db migrate # migrate data models found in the project to database
+   $ python3 manage.py db upgrade # Upgrade changes to database
    
    $ psql -d <database_name>
    db=# \d 
