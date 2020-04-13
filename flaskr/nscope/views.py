@@ -24,22 +24,21 @@ def index():
     return render_template("index.html")
 
 # Sending simple json to the front end
-@bp.route("/vuetest", methods=["GET"])
+@bp.route("/api/vuetest", methods=["GET"])
 def vuetest():
     return jsonify({"Answer" : "This is a test", "Data" : [4.5123, 4.123, 9.123, 1.12309]})
 
-@bp.route("/get_sequence/<id>", methods=["GET"])
+@bp.route("/api/get_sequence/<id>", methods=["GET"])
 def get_sequence(id):
     # get database entry
     seq = Sequence.get_seq_by_id(id)
 
     if seq == None:
-        return f"Error Invalid sequence: {id}"
+        return "Error Invalid sequence: " + str(id)
 
     id = seq.id
     name = seq.name
     vals = seq.first_100_entries
-    print(id, name, vals)
 
     # jsonify the data
     data = jsonify({'id': id, 'name': name, 'values': vals})
