@@ -37,5 +37,12 @@ class Sequence(db.Model):
 
     @classmethod
     def get_seq_by_id(self, id):
-        return self.query.filter_by(id=id).first()
+        ret = self.query.filter_by(id=id).first()
+        return ret
+
+
+
+
+
+
 

@@ -32,6 +32,10 @@ def vuetest():
 def get_sequence(id):
     # get database entry
     seq = Sequence.get_seq_by_id(id)
+
+    if seq == None:
+        return f"Error Invalid sequence: {id}"
+
     id = seq.id
     name = seq.name
     vals = seq.first_100_entries
