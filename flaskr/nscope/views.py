@@ -12,6 +12,7 @@ from flask_login import LoginManager, current_user, login_user
 from werkzeug.exceptions import abort
 from sqlalchemy import or_, func
 import numpy as np
+import requests
 
 
 from flaskr import db
@@ -20,7 +21,7 @@ from flaskr.nscope.models import *
 bp = Blueprint("nscope", __name__)
 
 
-# Creating a simple index route (this will error because we currently dont have an index.thml"j
+# Creating a simple index route (this will error because we currently dont have an index.html"j
 @bp.route("/index")
 def index():
     return render_template("index.html")
@@ -38,7 +39,6 @@ def get_sequence(id, num_elements, modulus):
     if seq == None:
         return "Error Invalid sequence: " + str(id)
     
-    
     id = seq.id
     name = seq.name
 
@@ -55,3 +55,14 @@ def get_sequence(id, num_elements, modulus):
 
     # return the data
     return data
+
+@bp.route("/api/get_oeis_sequence/<oeis_id>/<num_elements>", methods=["GET"])
+def get_oeis_seqence(oeis_id, num_elements):
+   page = requests.get("https://oeis.org/A000055/list")
+   seq_start_idx = page.text.find("<pre>") + 6 # consume up to the first array bracket
+   seq_end_idx = page.text.find("</pre>") - 1 # consume back to the last array bracket
+   sequence = page.text[seq_start_idx:seq_end_idx].replace('\n','').split(',')
+   sequence = list(map(int,sequence))
+   data = jsonify({'id': oeis_id, 'name': 'name', 'values': sequence})
+   print(sequence)
+   return data
