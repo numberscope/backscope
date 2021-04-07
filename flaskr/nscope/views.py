@@ -58,7 +58,7 @@ def get_sequence(id, num_elements, modulus):
 
 @bp.route("/api/get_oeis_sequence/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_seqence(oeis_id, num_elements):
-   page = requests.get("https://oeis.org/A000055/list")
+   page = requests.get("https://oeis.org/{}/list".format(oeis_id))
    seq_start_idx = page.text.find("<pre>") + 6 # consume up to the first array bracket
    seq_end_idx = page.text.find("</pre>") - 1 # consume back to the last array bracket
    sequence = page.text[seq_start_idx:seq_end_idx].replace('\n','').split(',')
