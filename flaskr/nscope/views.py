@@ -58,11 +58,20 @@ def get_sequence(id, num_elements, modulus):
 
 @bp.route("/api/get_oeis_sequence/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_seqence(oeis_id, num_elements):
-   page = requests.get("https://oeis.org/{}/list".format(oeis_id))
-   seq_start_idx = page.text.find("<pre>") + 6 # consume up to the first array bracket
-   seq_end_idx = page.text.find("</pre>") - 1 # consume back to the last array bracket
-   sequence = page.text[seq_start_idx:seq_end_idx].replace('\n','').split(',')
+   r = requests.get("https://oeis.org/{}/list".format(oeis_id))
+
+   if r.status_code == 404:
+       return "Error invalid OEIS ID: {}".format(oeis_id)
+
+   seq_start_idx = r.text.find("<pre>") + 6 # consume up to the first array bracket
+   seq_end_idx = r.text.find("</pre>") - 1 # consume back to the last array bracket
+   sequence = r.text[seq_start_idx:seq_end_idx].replace('\n','').split(',')
    sequence = list(map(int,sequence))
-   data = jsonify({'id': oeis_id, 'name': 'name', 'values': sequence})
-   print(sequence)
+
+   # Only concatenate the sequence if user requests less than what's available
+   if len(sequence) > int(num_elements):
+       sequence = sequence[:int(num_elements)]
+
+   data = jsonify({'id': oeis_id, 'name': 'OEIS Sequence {}'.format(oeis_id), 'values': sequence})
+
    return data
