@@ -7,6 +7,9 @@ migrations
 __pycache__/
 *.py[cod]
 
+# Sequence Files
+b000027.txt
+
 # local env files
 .env.local
 *.env.*.local
@@ -26,3 +29,5 @@ yarn-error.log*
 *.sln
 *.sw?
 *.venv
+
+

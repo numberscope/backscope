@@ -13,6 +13,7 @@ from werkzeug.exceptions import abort
 from sqlalchemy import or_, func
 import numpy as np
 import requests
+from os import path
 
 
 from flaskr import db
@@ -58,20 +59,17 @@ def get_sequence(id, num_elements, modulus):
 
 @bp.route("/api/get_oeis_sequence/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_seqence(oeis_id, num_elements):
-   r = requests.get("https://oeis.org/{}/list".format(oeis_id))
+    oeis_filename = "b{}.txt".format(oeis_id[1:])
+    if not path.exists(oeis_filename):
+        with open(oeis_filename, 'w') as seq_file:
+            seq_addr = "https://oeis.org/{}/b{}.txt".format(oeis_id, oeis_id[1:])
+            r = requests.get(seq_addr)
+            if r.status_code == 404:
+                return "Error invalid OEIS ID: {}".format(oeis_id)
+            seq_file.write(r.text)
 
-   if r.status_code == 404:
-       return "Error invalid OEIS ID: {}".format(oeis_id)
+    sequence = list(np.loadtxt(oeis_filename, usecols=(1), max_rows=int(num_elements)))
 
-   seq_start_idx = r.text.find("<pre>") + 6 # consume up to the first array bracket
-   seq_end_idx = r.text.find("</pre>") - 1 # consume back to the last array bracket
-   sequence = r.text[seq_start_idx:seq_end_idx].replace('\n','').split(',')
-   sequence = list(map(int,sequence))
+    data = jsonify({'id': oeis_id, 'name': 'OEIS Sequence {}'.format(oeis_id), 'values': sequence})
 
-   # Only concatenate the sequence if user requests less than what's available
-   if len(sequence) > int(num_elements):
-       sequence = sequence[:int(num_elements)]
-
-   data = jsonify({'id': oeis_id, 'name': 'OEIS Sequence {}'.format(oeis_id), 'values': sequence})
-
-   return data
+    return data
