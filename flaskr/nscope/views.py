@@ -13,7 +13,8 @@ from werkzeug.exceptions import abort
 from sqlalchemy import or_, func
 import numpy as np
 import requests
-from os import path
+import os
+import sys
 
 
 from flaskr import db
@@ -26,11 +27,6 @@ bp = Blueprint("nscope", __name__)
 @bp.route("/index")
 def index():
     return render_template("index.html")
-
-# Sending simple json to the front end
-@bp.route("/api/vuetest", methods=["GET"])
-def vuetest():
-    return jsonify({"Answer" : "This is a test", "Data" : [4.5123, 4.123, 9.123, 1.12309]})
 
 @bp.route("/api/get_sequence/<id>/<num_elements>/<modulus>", methods=["GET"])
 def get_sequence(id, num_elements, modulus):
@@ -50,7 +46,6 @@ def get_sequence(id, num_elements, modulus):
     if int(num_elements) < len(vals):
         vals = vals[0:int(num_elements)]
 
-
     # jsonify the data
     data = jsonify({'id': id, 'name': name, 'values': vals.tolist()})
 
@@ -59,8 +54,10 @@ def get_sequence(id, num_elements, modulus):
 
 @bp.route("/api/get_oeis_sequence/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_seqence(oeis_id, num_elements):
-    oeis_filename = "b{}.txt".format(oeis_id[1:])
-    if not path.exists(oeis_filename):
+    if not os.path.exists("temp"):
+        os.makedirs('temp')
+    oeis_filename = "temp/b{}.txt".format(oeis_id[1:])
+    if not os.path.exists(oeis_filename):
         with open(oeis_filename, 'w') as seq_file:
             seq_addr = "https://oeis.org/{}/b{}.txt".format(oeis_id, oeis_id[1:])
             r = requests.get(seq_addr)
@@ -68,8 +65,20 @@ def get_oeis_seqence(oeis_id, num_elements):
                 return "Error invalid OEIS ID: {}".format(oeis_id)
             seq_file.write(r.text)
 
-    sequence = list(np.loadtxt(oeis_filename, usecols=(1), max_rows=int(num_elements)))
+    # All values are returned as strings to be handled by JS bigint on the client side
+    # This will work even when values are bigger than sys.maxsize
+    # JS can handle massive numbers, Python cannot
+    sequence = list(np.loadtxt(oeis_filename, dtype=str, usecols=(1), max_rows=int(num_elements)))
 
-    data = jsonify({'id': oeis_id, 'name': 'OEIS Sequence {}'.format(oeis_id), 'values': sequence})
+    # If we want to handle them as ints, we need to do a trick by converting from 
+    # numpy ints to python ints and then mapping and then listing
+    # this is the way to do that
+    # this will fail if the ints are bigger than sys.maxsize
+
+    #sequence = list(map(int, list(np.loadtxt(oeis_filename, dtype=int, usecols=(1), max_rows=int(num_elements)))))
+
+    response = {'id':oeis_id, 'name':'OEIS Sequence {}'.format(oeis_id), 'values': sequence}
+
+    data = jsonify(response)
 
     return data
