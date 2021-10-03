@@ -1,3 +1,10 @@
+As of 2021 Sep, the instructions below are at least partly obsolete, in that
+the server appears to work without performing an init.sql step, and moreover
+the endpoint URL given does not work. An example working URL is given in the
+README.
+
+---
+
 To populate sequences with the init.sql file, follow these isntructions:
 
 Follow instructions in README for getting the database set up
