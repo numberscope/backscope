@@ -46,6 +46,8 @@ Set up initial dependencies:
    ```bash
    $ sudo systemctl start postgresql
    $ python3 manage.py db init # initializes tables inside database
+   $ # Note the previous command will issue a message about editing
+   $ # alembic.ini, which is safe to ignore - the default works fine
    $ python3 manage.py db migrate # migrate data models found in the project to database
    $ python3 manage.py db upgrade # Upgrade changes to database
    
