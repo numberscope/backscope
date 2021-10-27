@@ -1,11 +1,8 @@
-As of 2021 Sep, the instructions below are at least partly obsolete, in that
-the server appears to work without performing an init.sql step, and moreover
+As of 2021 Oct, the instructions below are at least partly obsolete, as
 the endpoint URL given does not work. An example working URL is given in the
 README.
 
 ---
-
-To populate sequences with the init.sql file, follow these isntructions:
 
 Follow instructions in README for getting the database set up
 
@@ -14,8 +11,6 @@ su <db_user> # password may be required depending on how you set up the database
 cd /NumberscopeFlaskLocation/
 
 psql <db_name>
-
-\ir init.sql
 
 \q
 
