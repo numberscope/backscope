@@ -11,7 +11,7 @@ certainly not be the final setup. Once the repos are updated, we'll at least
 want to set up a generic PostgreSQL user, and create a separate
 Nginx file in the `sites-available` directory. (Right now, the
 `sites-available/default` file is being used.) Once things are set up properly,
-I will add documentation for server aministration. 
+I will add documentation for server administration. 
 
 1. SSH to the Numberscope server.
 2. `cd /srv`.
