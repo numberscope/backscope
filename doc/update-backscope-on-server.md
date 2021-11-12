@@ -28,7 +28,7 @@ I will add documentation for server administration.
    $ pip install -r requirements.txt
    ``` 
 5. Copy NumberscopeFlask's `.env` file to `/srv/backscope`. As of this writing,
-   backscope use python-dotenv to read key-value pairs from a `.env` file
+   backscope uses python-dotenv to read key-value pairs from a `.env` file
    (whose location is typically the root directory of the Git repository) and
    load those key-value pairs into Python's environment variables. That is,
    you should be able to use `os.getenv("KEY")` to get the value for `KEY`.
