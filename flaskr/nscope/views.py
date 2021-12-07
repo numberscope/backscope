@@ -15,6 +15,7 @@ import numpy as np
 import requests
 import os
 import sys
+import json
 
 
 from flaskr import db
@@ -83,13 +84,13 @@ def get_oeis_seqence(oeis_id, num_elements):
 
     return data
 
-# Returns the name and cross reference of a given sequence and stores it in a temp file
+# Returns the name and cross reference of a given sequence and stores it in a temp JSON file
 # This will return an error message if sequence does not have cross reference data or valid OEIS ID
 @bp.route("/api/get_metadata/<oeis_id>", methods = ["GET"])
 def get_metadata(oeis_id):
     if not os.path.exists("temp"):
         os.makedirs('temp')
-    meta_filename= "temp/meta{}.txt".format(oeis_id[1:])
+    meta_filename= "temp/meta{}.json".format(oeis_id[1:])
     if not os.path.exists(meta_filename):
         with open(meta_filename, 'w') as seq_meta:
             json_addr = "https://oeis.org/search?q=id:{}&fmt=json".format(oeis_id, oeis_id[1:]) #URL for JSON format
@@ -101,21 +102,23 @@ def get_metadata(oeis_id):
             #Checking for valid OEIS ID
             if req['results'] != None: #Checking for valid OEIS ID
                 results = req['results'][0]
-                
                 if 'name' in results.keys():
                     seq_name = results['name']
-                    seq_meta.write(f'{seq_name}\n')
+                    seq_data = {'name':seq_name}
                 else:
-                    seq_meta.write(f' Sequence A{oeis_id[1:]} has no name\n')
+                    seq_data = {'name':f' Sequence A{oeis_id[1:]} has no name.'}
                 if 'xref' in results.keys():
                     seq_xref = results['xref']
-                    seq_meta.writelines(seq_xref)
+                    seq_data['xref'] = seq_xref
                 else: 
-                    seq_meta.write(f'Sequence A{oeis_id[1:]} has no cross reference data.')
-            else: 
+                    seq_data['xref'] = f' Sequence A{oeis_id[1:]} has no xref data.'
+                json_dump = json.dumps(seq_data)
+                seq_meta.write(json_dump)
+            else:
+                error_data = {'ERROR':f'ERROR invalid OEIS ID: {oeis_id}'}
+                json_dump = json.dumps(error_data)
+                seq_meta.write(json_dump)
                 return f'ERROR invalid OEIS ID: {oeis_id}'
-        
-    seq_txt = list(np.loadtxt(meta_filename, dtype = str,delimiter='\n'))
-    seq_dict = {'metadata': seq_txt}
-    metadata = jsonify(seq_dict)
-    return metadata
+    seq_file = open(meta_filename)
+    seq_dict = json.load(seq_file)
+    return (jsonify(seq_dict))
