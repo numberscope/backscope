@@ -122,3 +122,4 @@ def get_metadata(oeis_id):
     seq_file = open(meta_filename)
     seq_dict = json.load(seq_file)
     return (jsonify(seq_dict))
+    
