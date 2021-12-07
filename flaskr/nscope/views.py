@@ -82,3 +82,40 @@ def get_oeis_seqence(oeis_id, num_elements):
     data = jsonify(response)
 
     return data
+
+# Returns the name and cross reference of a given sequence and stores it in a temp file
+# This will return an error message if sequence does not have cross reference data or valid OEIS ID
+@bp.route("/api/get_metadata/<oeis_id>", methods = ["GET"])
+def get_metadata(oeis_id):
+    if not os.path.exists("temp"):
+        os.makedirs('temp')
+    meta_filename= "temp/meta{}.txt".format(oeis_id[1:])
+    if not os.path.exists(meta_filename):
+        with open(meta_filename, 'w') as seq_meta:
+            json_addr = "https://oeis.org/search?q=id:{}&fmt=json".format(oeis_id, oeis_id[1:]) #URL for JSON format
+            req = requests.get(json_addr).json()
+            #pulling the results key from req
+            #req contains the OEIS greeting message and sequence results in a dict
+            #results contains all of the data about a given sequence
+            #results is a list containing a dictionary
+            #Checking for valid OEIS ID
+            if req['results'] != None: #Checking for valid OEIS ID
+                results = req['results'][0]
+                
+                if 'name' in results.keys():
+                    seq_name = results['name']
+                    seq_meta.write(f'{seq_name}\n')
+                else:
+                    seq_meta.write(f' Sequence A{oeis_id[1:]} has no name\n')
+                if 'xref' in results.keys():
+                    seq_xref = results['xref']
+                    seq_meta.writelines(seq_xref)
+                else: 
+                    seq_meta.write(f'Sequence A{oeis_id[1:]} has no cross reference data.')
+            else: 
+                return f'ERROR invalid OEIS ID: {oeis_id}'
+        
+    seq_txt = list(np.loadtxt(meta_filename, dtype = str,delimiter='\n'))
+    seq_dict = {'metadata': seq_txt}
+    metadata = jsonify(seq_dict)
+    return metadata
