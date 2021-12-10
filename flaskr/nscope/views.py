@@ -102,14 +102,13 @@ def get_metadata(oeis_id):
             #Checking for valid OEIS ID
             if req['results'] != None: #Checking for valid OEIS ID
                 results = req['results'][0]
+                seq_data = {}
                 if 'name' in results.keys():
-                    seq_name = results['name']
-                    seq_data = {'name':seq_name}
+                    seq_data['name'] = results['name']
                 else:
-                    seq_data = {'name':f' Sequence A{oeis_id[1:]} has no name.'}
+                    seq_data['name'] = f' Sequence A{oeis_id[1:]} has no name.'
                 if 'xref' in results.keys():
-                    seq_xref = results['xref']
-                    seq_data['xref'] = seq_xref
+                    seq_data['xref'] = results['xref']
                 else: 
                     seq_data['xref'] = f' Sequence A{oeis_id[1:]} has no xref data.'
                 json_dump = json.dumps(seq_data)
