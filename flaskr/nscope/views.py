@@ -52,8 +52,8 @@ def get_sequence(id, num_elements, modulus):
     # return the data
     return data
 
-@bp.route("/api/get_oeis_sequence/<oeis_id>/<num_elements>", methods=["GET"])
-def get_oeis_seqence(oeis_id, num_elements):
+def ensure_oeis_file(oeis_id):
+    """Obtains the oeis b-file data in a file and returns the filename"""
     if not os.path.exists("temp"):
         os.makedirs('temp')
     oeis_filename = "temp/b{}.txt".format(oeis_id[1:])
@@ -64,6 +64,11 @@ def get_oeis_seqence(oeis_id, num_elements):
             if r.status_code == 404:
                 return "Error invalid OEIS ID: {}".format(oeis_id)
             seq_file.write(r.text)
+    return oeis_filename
+
+@bp.route("/api/get_oeis_sequence/<oeis_id>/<num_elements>", methods=["GET"])
+def get_oeis_seqence(oeis_id, num_elements):
+    oeis_filename = ensure_oeis_file(oeis_id)
 
     # All values are returned as strings to be handled by JS bigint on the client side
     # This will work even when values are bigger than sys.maxsize
@@ -82,3 +87,23 @@ def get_oeis_seqence(oeis_id, num_elements):
     data = jsonify(response)
 
     return data
+
+@bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
+def get_oeis_values(oeis_id, num_elements):
+    oeis_filename = ensure_oeis_file(oeis_id)
+    sequence = {}
+    elements = 0
+    num_elements = int(num_elements)
+    with open(oeis_filename, 'r') as seq_file:
+        for line in seq_file:
+            if elements >= num_elements: break
+            if line[0] == '#': continue
+            column = line.split()
+            if len(column) < 2: continue
+            sequence[int(column[0])] = column[1]
+            elements += 1
+
+    response = {'id': oeis_id,
+                'name': f"OEIS Sequence {oeis_id}",
+                'values': sequence}
+    return jsonify(response)
