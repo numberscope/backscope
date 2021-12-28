@@ -9,6 +9,8 @@ from flask import redirect
 from flask import url_for
 from flask import Flask, request, jsonify, render_template, send_file
 from flask_login import LoginManager, current_user, login_user
+from flaskr import db
+
 from werkzeug.exceptions import abort
 from sqlalchemy import or_, func
 import numpy as np
@@ -48,6 +50,8 @@ def find_oeis_sequence(oeis_id):
     for line in r.text.split("\n"):
         if not line: continue
         if line[0] == '#':
+            # Some sequences have info in first comment that we can use as a
+            # stopgap until the real name is obtained.
             if not name: name = line[1:]
             continue
         column = line.split()
@@ -59,8 +63,14 @@ def find_oeis_sequence(oeis_id):
     if last < first:
         return IndexError(f"No terms found for ID '{oeis_id}'.")
     vals = [seq_vals[i] for i in range(first,last+1)]
-    if not name: name = 'Currently unknown'
-    return Sequence(id=oeis_id, name=name, offset=first, values=vals)
+    # Fill in some placeholder until we look up the real name.
+    # Should we flag this in some way so it can be filtered from display?
+    if not name: name = f"{oeis_id} [name not yet loaded]"
+    seq = Sequence(id=oeis_id, name=name, shift=first, values=vals)
+    # Save it in the database
+    db.session.add(seq)
+    db.session.commit()
+    return seq
 
 @bp.route("/api/oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
 def oeis_values(oeis_id, num_elements):
@@ -71,7 +81,7 @@ def oeis_values(oeis_id, num_elements):
     wants = int(num_elements)
     if wants and wants < len(raw_vals):
         raw_vals = raw_vals[0:wants]
-    vals = {(i+seq.offset):raw_vals[i] for i in range(len(raw_vals))}
+    vals = {(i+seq.shift):raw_vals[i] for i in range(len(raw_vals))}
 
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
