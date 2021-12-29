@@ -78,8 +78,8 @@ def find_oeis_sequence(oeis_id):
     executor.submit(save_oeis_sequence, seq)
     return seq
 
-@bp.route("/api/oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
-def oeis_values(oeis_id, num_elements):
+@bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
+def get_oeis_values(oeis_id, num_elements):
     seq = find_oeis_sequence(oeis_id)
     if isinstance(seq, Exception):
         return f"Error: {seq}"
@@ -90,37 +90,3 @@ def oeis_values(oeis_id, num_elements):
     vals = {(i+seq.shift):raw_vals[i] for i in range(len(raw_vals))}
 
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
-
-def ensure_oeis_file(oeis_id):
-    """Obtains the oeis b-file data in a file and returns the filename"""
-    if not os.path.exists("temp"):
-        os.makedirs('temp')
-    oeis_filename = "temp/b{}.txt".format(oeis_id[1:])
-    if not os.path.exists(oeis_filename):
-        with open(oeis_filename, 'w') as seq_file:
-            seq_addr = "https://oeis.org/{}/b{}.txt".format(oeis_id, oeis_id[1:])
-            r = requests.get(seq_addr)
-            if r.status_code == 404:
-                return "Error invalid OEIS ID: {}".format(oeis_id)
-            seq_file.write(r.text)
-    return oeis_filename
-
-@bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
-def get_oeis_values(oeis_id, num_elements):
-    oeis_filename = ensure_oeis_file(oeis_id)
-    sequence = {}
-    elements = 0
-    num_elements = int(num_elements)
-    with open(oeis_filename, 'r') as seq_file:
-        for line in seq_file:
-            if elements >= num_elements: break
-            if line[0] == '#': continue
-            column = line.split()
-            if len(column) < 2: continue
-            sequence[int(column[0])] = column[1]
-            elements += 1
-
-    response = {'id': oeis_id,
-                'name': f"OEIS Sequence {oeis_id}",
-                'values': sequence}
-    return jsonify(response)

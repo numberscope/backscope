@@ -88,6 +88,27 @@ messages should be the URL the server is running on, typically
 try visiting "<URL>/api/get_oeis_sequence/A00045/50" (substitute in the server
 URL for "<URL>" -- this should display the first 50 terms of the sum recurrence.
 
+## Resetting the database
+
+If you need to clear out the entire database and start from scratch -- for
+example, when pulling a commit that modifies the database schema -- the easiest
+thing to do is delete the database and reinitialize an empty database:
+
+```bash
+# From the top-level backscope directory:
+$ dropdb <database_name>
+$ createdb <database_name>
+$ rm -r migrations
+# As above, the next command will give an ignorable message about alembic.ini
+$ python3 manage.py db init
+$ python3 manage.py db migrate
+$ python3 manage.py db upgrade
+```
+
+Now you should again be ready to run the backscope server.
+
+## Other information about the backscope project
+
 ### Description of Directories:
 
 ---
