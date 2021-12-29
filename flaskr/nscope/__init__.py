@@ -2,4 +2,4 @@
 Init file for nscope
 """
 
-from .views import bp
+from .views import bp, executor

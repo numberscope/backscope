@@ -54,7 +54,8 @@ def create_app(environment='development'):
     # The nscope endpoint application
     from flaskr import nscope
 
-    # The blueprint is specified via nscope
+    # The executor and blueprint are specified via nscope
+    nscope.executor.init_app(app)
     app.register_blueprint(nscope.bp)
 
     # The primary application

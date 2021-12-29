@@ -8,6 +8,7 @@ from flask import g
 from flask import redirect
 from flask import url_for
 from flask import Flask, request, jsonify, render_template, send_file
+from flask_executor import Executor
 from flask_login import LoginManager, current_user, login_user
 from flaskr import db
 
@@ -22,6 +23,7 @@ import sys
 from flaskr import db
 from flaskr.nscope.models import *
 
+executor = Executor()
 bp = Blueprint("nscope", __name__)
 
 
@@ -29,6 +31,10 @@ bp = Blueprint("nscope", __name__)
 @bp.route("/index")
 def index():
     return render_template("index.html")
+
+def save_oeis_sequence(seq):
+    db.session.add(seq)
+    db.session.commit()
 
 def find_oeis_sequence(oeis_id):
     """ Returns either a Sequence object, or an Error object if ID invalid, etc.
@@ -67,9 +73,9 @@ def find_oeis_sequence(oeis_id):
     # Should we flag this in some way so it can be filtered from display?
     if not name: name = f"{oeis_id} [name not yet loaded]"
     seq = Sequence(id=oeis_id, name=name, shift=first, values=vals)
-    # Save it in the database
-    db.session.add(seq)
-    db.session.commit()
+    # Schedule the database interaction so we can respond to the
+    # request immediately:
+    executor.submit(save_oeis_sequence, seq)
     return seq
 
 @bp.route("/api/oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
