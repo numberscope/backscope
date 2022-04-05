@@ -85,7 +85,7 @@ This should print a series of messages starting with
 "Serving Flask app 'flaskr'" and ending with debugger information. One of these
 messages should be the URL the server is running on, typically
 `http://127.0.0.1:5000/`. To test that the server is working correctly,
-try visiting "<URL>/api/get_oeis_sequence/A00045/50" (substitute in the server
+try visiting "<URL>/api/get_oeis_values/A00045/50" (substitute in the server
 URL for "<URL>" -- this should display the first 50 terms of the sum recurrence.
 
 ## Resetting the database
