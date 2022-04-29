@@ -24,7 +24,41 @@ Set up initial dependencies:
 
    If you use a different python package manager, install requirements through this instead
 
-2. Setup your database and environment
+2. Install and configure postgresql and create an empty database
+
+   Specific instructions for PostgreSQL installation are unfortunately beyond
+   the current scope of this README, as they depend greatly on the particulars
+   of the operating system you are using. You need to end up with a running
+   postgresql server on your machine that will accept localhost connections
+   with password/md5 authentication.
+
+   Specifically, once you are set up, it should be possible to execute
+   `psql -U <user name> -W -l` with some usre name, enter some password at
+   the prompt, and be shown a list of databases. Depending on your setup, it
+   may also be possible also to simply execute `psql -l`, and so in all of
+   the examples below we drop the `-U <user name>` and `-W` options, but
+   either or both may be necessary any time you invoke postgres
+   command-line programs.
+
+   The USERNAME and password that work for psql are the ones that you need to
+   include in the `.env` file detailed in the next step.
+
+   Finally, once the server is set up and running, pick a database_name, and
+   execute:
+
+   ```bash
+   $ psql    # or perhaps psql -U <user name> -W
+   # The <user name>=# at the beginning of the next line represents the
+   # psql prompt; everything after that represents what you type:
+   <user name>=# CREATE DATABASE <database_name>;
+   CREATE DATABASE
+   <user name>=# \q
+   $
+   ```
+
+   You will need the database_name again for the .env file in the next step.
+
+3. Setup your environment and initialize the database
 
    This project uses python-dotenv. In order to detect your database username / password, you must include a file called .env in the root of your directory. This file should contain:
 
@@ -44,7 +78,6 @@ Set up initial dependencies:
    Start your database and setup database access
 
    ```bash
-   $ sudo systemctl start postgresql
    $ python3 manage.py db init # initializes tables inside database
    $ # Note the previous command will issue a message about editing
    $ # alembic.ini, which is safe to ignore - the default works fine
@@ -85,8 +118,32 @@ This should print a series of messages starting with
 "Serving Flask app 'flaskr'" and ending with debugger information. One of these
 messages should be the URL the server is running on, typically
 `http://127.0.0.1:5000/`. To test that the server is working correctly,
-try visiting "<URL>/api/get_oeis_sequence/A00045/50" (substitute in the server
+try visiting "<URL>/api/get_oeis_values/A000045/50" (substitute in the server
 URL for "<URL>" -- this should display the first 50 terms of the sum recurrence.
+
+## Resetting the database
+
+If you need to clear out the entire database and start from scratch -- for
+example, when pulling a commit that modifies the database schema -- the easiest
+thing to do is delete the database and reinitialize an empty database.
+An example session for this is below; make sure before executing these
+commands that you have activated the virtual environment (venv) for the
+backscope project.
+
+```bash
+# From the top-level backscope directory:
+$ dropdb <database_name>    # or dropdb -U <user name> -W <database_name>
+$ createdb <database_name>  # may need the same options as well
+$ rm -r migrations
+# As above, the next command will give an ignorable message about alembic.ini
+$ python3 manage.py db init
+$ python3 manage.py db migrate
+$ python3 manage.py db upgrade
+```
+
+Now you should again be ready to run the backscope server.
+
+## Other information about the backscope project
 
 ### Description of Directories:
 

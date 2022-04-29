@@ -33,7 +33,11 @@ class Sequence(db.Model):
 
     id = db.Column(db.String, unique=True, nullable=False, primary_key=True)
     name = db.Column(db.String, unique=False, nullable=True)
-    first_100_entries = db.Column(db.ARRAY(db.BigInteger), unique=False, nullable=False)
+    # The following is called the "offset" in the OEIS, but that is a
+    # Postgres reserved word, so we use a different name.
+    shift = db.Column(db.Integer, unique=False, nullable=False, default=0)
+    values = db.Column(db.ARRAY(db.String), unique=False, nullable=False)
+    raw_refs = db.Column(db.String, unique=False, nullable=True)
 
     @classmethod
     def get_seq_by_id(self, id):
