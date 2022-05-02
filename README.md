@@ -143,6 +143,71 @@ $ python3 manage.py db upgrade
 
 Now you should again be ready to run the backscope server.
 
+## Endpoints
+
+This section documents all of the endpoints provided by the backscope server.
+All of them return JSON data with the specified keys and values. Also, every
+endpoint includes the key 'id' with value the OEIS id for the sake of verifying
+that it is the data as requested. In case of an OEIS_ID that does not match
+anything in the OEIS, an error string is returned. Note that the angle brackets
+<> in the URLS indicate where subsitutions are made, they should not be present
+in the URLs actually used.
+
+Also note that if any of the requests are made for a given sequence, then the
+back end will in the background obtain all of the data necessary to respond
+to all of the endpoints for future requests concerning that sequence without
+going back to the OEIS.
+
+### URL: api/get_oeis_values/<OEIS_ID>/<COUNT>
+
+This is the most rapid endpoint, it makes at most one request to the OEIS server
+(and only if the OEIS_ID has not previously been requested).
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID,
+if already known to backscope, or a temporary name if not.
+
+#### Key: values
+
+An array of _strings_ (of digits) giving the first COUNT values of the sequence
+with id OEIS_ID. Since some sequence values correspond to extremely large
+numbers, strings are used to avoid the limitations of any particular numeric
+datatype.
+
+### URL: api/get_oeis_name_and_values/<OEIS_ID>
+
+Potentially a bit slower than the above URL, it may make an extra request to
+ensure that the name is correct.
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID
+
+#### Key: values
+
+An array of strings (of digits) giving all values of the sequence with id
+OEIS_ID known to the OEIS.
+
+### URL: api/get_oeis_metadata/<OEIS_ID>
+
+A potentially very slow endpoint (if the sequence is unknown to the backscope);
+may make hundreds of requests to the OEIS to generate all of the back
+references to the sequence.
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID
+
+#### Key: xrefs
+
+A string which is the concatenation (separated by newlines) of all of the
+OEIS text "xref" records for the sequence with id OEIS_ID.
+
+#### Key: backrefs
+
+An array of strings giving all OEIS ids that mention the given OEIS_ID.
+
 ## Other information about the backscope project
 
 ### Description of Directories:

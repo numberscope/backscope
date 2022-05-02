@@ -38,6 +38,7 @@ class Sequence(db.Model):
     shift = db.Column(db.Integer, unique=False, nullable=False, default=0)
     values = db.Column(db.ARRAY(db.String), unique=False, nullable=False)
     raw_refs = db.Column(db.String, unique=False, nullable=True)
+    backrefs = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
 
     @classmethod
     def get_seq_by_id(self, id):

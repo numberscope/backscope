@@ -1,1 +1,0 @@
-- [ ] have a way to handle offset sequences that start at a non-zero index
