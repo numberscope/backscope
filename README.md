@@ -157,9 +157,11 @@ in the URLs actually used.
 Also note that if any of the requests are made for a given sequence, then the
 back end will in the background obtain all of the data necessary to respond
 to all of the endpoints for future requests concerning that sequence without
-going back to the OEIS.
+going back to the OEIS. Note that this background work may take an appreciable
+amount of time, especially if the sequence has lots of references within the
+OEIS.
 
-### URL: api/get_oeis_values/<OEIS_ID>/<COUNT>
+### URL: `api/get_oeis_values/<OEIS_ID>/<COUNT>`
 
 This is the most rapid endpoint, it makes at most one request to the OEIS server
 (and only if the OEIS_ID has not previously been requested). If you are running
@@ -179,24 +181,25 @@ with id OEIS_ID. Since some sequence values correspond to extremely large
 numbers, strings are used to avoid the limitations of any particular numeric
 datatype.
 
-### URL: api/get_oeis_name_and_values/<OEIS_ID>
+### URL: `api/get_oeis_name_and_values/<OEIS_ID>`
 
-Potentially a bit slower than the above URL, it may make an extra request to
-ensure that the name is correct. If you are running the server on your local
-host, a full URL would be `http://127.0.0.1:5000/api/get_oeis_values/A003173`
-which will return the nine Heegner numbers and their full name as an OEIS
+This one is potentially a bit slower than the above URL, as it may make
+an extra request to ensure that the name is correct. If you are running
+the server on your local host, a full URL would be
+`http://127.0.0.1:5000/api/get_oeis_name_and_values/A003173`, which will
+return the nine Heegner numbers and their full name as an OEIS
 sequence (basically, the name describes what a Heegner number is).
 
 #### Key: name
 
-A string giving the official name of the OEIS sequence with id OEIS_ID
+A string giving the official name of the OEIS sequence with id OEIS_ID.
 
 #### Key: values
 
 An array of strings (of digits) giving all values of the sequence with id
 OEIS_ID known to the OEIS.
 
-### URL: api/get_oeis_metadata/<OEIS_ID>
+### URL: `api/get_oeis_metadata/<OEIS_ID>`
 
 A potentially very slow endpoint (if the sequence is unknown to the backscope);
 may make hundreds of requests to the OEIS to generate all of the back
@@ -208,7 +211,7 @@ references, and the IDs of the ten sequences that refer to it.
 
 #### Key: name
 
-A string giving the official name of the OEIS sequence with id OEIS_ID
+A string giving the official name of the OEIS sequence with id OEIS_ID.
 
 #### Key: xrefs
 

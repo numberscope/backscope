@@ -35,7 +35,13 @@ def index():
 def save_oeis_sequence(seq):
     # When we arrive here, we have a Sequence object seq which has had its
     # values filled in. We grab its metadata and incorporate that, and then
-    # add it to the database, and return the fleshed-out sequence
+    # add it to the database, and return the fleshed-out sequence.
+    # NOTE however that nothing currently prevents two requests
+    # for the same newly-encountered sequence ending up both getting to this
+    # code at roughly the same time (if the second comes in before the first
+    # has had a chance to fill in the database). In that case, all of the
+    # lookup work will be duplicated, although Postgres should ensure that when
+    # all is said and done, the database is left in an OK state.
     match_url = f"https://oeis.org/search?q={seq.id}&fmt=json"
     r = requests.get(match_url).json()
     if r['results'] != None: # Found some metadata
