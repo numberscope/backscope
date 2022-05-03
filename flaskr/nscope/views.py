@@ -91,6 +91,9 @@ def find_oeis_sequence(oeis_id, detail = ''):
             continue
         column = line.split()
         if len(column) < 2: continue
+        if not column[0][0].isdigit():
+            return LookupError(
+                f"Unparseable b-file line for ID '{oeis_id}': {line}")
         index = int(column[0])
         if index < first: first = index
         if index > last:  last  = index
