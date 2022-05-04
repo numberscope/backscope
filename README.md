@@ -118,8 +118,9 @@ This should print a series of messages starting with
 "Serving Flask app 'flaskr'" and ending with debugger information. One of these
 messages should be the URL the server is running on, typically
 `http://127.0.0.1:5000/`. To test that the server is working correctly,
-try visiting "<URL>/api/get_oeis_values/A000045/50" (substitute in the server
-URL for "<URL>" -- this should display the first 50 terms of the sum recurrence.
+try visiting "<URL>/api/get_oeis_values/A000030/50" (substitute in the server
+URL for "<URL>" -- this should display the first digits of the numbers from
+0 through 49.
 
 ## Resetting the database
 
@@ -142,6 +143,84 @@ $ python3 manage.py db upgrade
 ```
 
 Now you should again be ready to run the backscope server.
+
+## Endpoints
+
+This section documents all of the endpoints provided by the backscope server.
+All of them return JSON data with the specified keys and values. Also, every
+endpoint includes the key 'id' with value the OEIS id for the sake of verifying
+that it is the data as requested. In case of an OEIS_ID that does not match
+anything in the OEIS, an error string is returned. Note that the angle brackets
+<> in the URLS indicate where subsitutions are made; they should not be present
+in the URLs actually used.
+
+Also note that if any of the requests are made for a given sequence, then the
+back end will in the background obtain all of the data necessary to respond
+to all of the endpoints for future requests concerning that sequence without
+going back to the OEIS. Note that this background work may take an appreciable
+amount of time, especially if the sequence has lots of references within the
+OEIS.
+
+### URL: `api/get_oeis_values/<OEIS_ID>/<COUNT>`
+
+This is the most rapid endpoint, it makes at most one request to the OEIS server
+(and only if the OEIS_ID has not previously been requested). If you are running
+the server to test it on your local host, a full URL would be
+`http://127.0.0.1:5000/api/get_oeis_values/A000030/50` which will return the
+first digits of the numbers 0 through 49.
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID,
+if already known to backscope, or a temporary name if not.
+
+#### Key: values
+
+An array of _strings_ (of digits) giving the first COUNT values of the sequence
+with id OEIS_ID. Since some sequence values correspond to extremely large
+numbers, strings are used to avoid the limitations of any particular numeric
+datatype.
+
+### URL: `api/get_oeis_name_and_values/<OEIS_ID>`
+
+This one is potentially a bit slower than the above URL, as it may make
+an extra request to ensure that the name is correct. If you are running
+the server on your local host, a full URL would be
+`http://127.0.0.1:5000/api/get_oeis_name_and_values/A003173`, which will
+return the nine Heegner numbers and their full name as an OEIS
+sequence (basically, the name describes what a Heegner number is).
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID.
+
+#### Key: values
+
+An array of strings (of digits) giving all values of the sequence with id
+OEIS_ID known to the OEIS.
+
+### URL: `api/get_oeis_metadata/<OEIS_ID>`
+
+A potentially very slow endpoint (if the sequence is unknown to the backscope);
+may make hundreds of requests to the OEIS to generate all of the back
+references to the sequence. If you are running the server on your local
+machine, a full URL would be
+`http://127.0.0.1:5000/api/get_oeis_metadata/A028444` which will show the full
+name of the Busy Beaver sequence, the one text line of sequences it
+references, and the IDs of the ten sequences that refer to it.
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID.
+
+#### Key: xrefs
+
+A string which is the concatenation (separated by newlines) of all of the
+OEIS text "xref" records for the sequence with id OEIS_ID.
+
+#### Key: backrefs
+
+An array of strings giving all OEIS ids that mention the given OEIS_ID.
 
 ## Other information about the backscope project
 
