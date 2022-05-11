@@ -18,7 +18,8 @@ import numpy as np
 import requests
 import os
 import sys
-
+import cypari2
+from cypari2.convert import gen_to_python
 
 from flaskr import db
 from flaskr.nscope.models import *
@@ -126,6 +127,57 @@ def find_oeis_sequence(oeis_id, detail = ''):
     executor.submit(save_oeis_sequence, seq)
     return seq
 
+
+def factor_oeis_sequence(oeis_id, num_elements):
+    """ Requires the full sequence metadata to exist in the database.
+        Factors the first num_elements terms (if they aren't already)
+        and adds them to the database.
+        Returns either True if factors were added to table, or an error.
+        Note it _returns_ the Error object, rather than throwing it.
+        It will return the minimum of the number of requested factors
+        or the number of terms available from OEIS.
+        Terms too big to factor will store a factorization of 'None'.
+        The factoring format otherwise is essentially that of pari,
+        stored as a string (since flask doesn't allow multidimensional
+        arrays with varying sizes).
+    """
+    # The hardcoded integer size limit below can be pushed 
+    # further at the risk of taking a long time.
+    seq = Sequence.get_seq_by_id(oeis_id)
+    if not seq:
+        return LookupError(
+                f"Sequence lookup failed: {seq}")
+    if len(seq.values) < num_elements: 
+        num_elements = len(seq.values)
+    # Load from database how much has been factored already
+    if not seq.factors:
+        factors = []
+    else:
+        factors = seq.factors[:]
+    len_factors = len(factors)
+    if len_factors >= num_elements:
+        return True
+    # Factor whatever else is requested, within reason.
+    pari = cypari2.Pari()
+    for i in range(len_factors, num_elements):
+        val = int(seq.values[i])
+        # the factorization of 1 is empty
+        if val == 1:
+            fac = []
+        elif abs(val) <= 2**200: # term size limit
+            fac = []
+            # elements are arrays [p, e] for factor p^e
+            # including [-1,1] for negative numbers
+            # and [0,1] for zero
+            fac = gen_to_python(pari(val).factor())
+        else:
+            fac = None
+        factors.append(str(fac));
+    seq.factors = factors[:]
+    db.session.commit()
+    return True
+
+
 @bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_values(oeis_id, num_elements):
     seq = find_oeis_sequence(oeis_id)
@@ -136,7 +188,6 @@ def get_oeis_values(oeis_id, num_elements):
     if wants and wants < len(raw_vals):
         raw_vals = raw_vals[0:wants]
     vals = {(i+seq.shift):raw_vals[i] for i in range(len(raw_vals))}
-
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
 @bp.route("/api/get_oeis_name_and_values/<oeis_id>", methods=["GET"])
@@ -157,4 +208,23 @@ def get_oeis_metadata(oeis_id):
         'name': seq.name,
         'xrefs': seq.raw_refs,
         'backrefs': seq.backrefs
+    })
+
+@bp.route("/api/get_oeis_factors/<oeis_id>/<num_elements>", methods=["GET"])
+def get_oeis_factors(oeis_id, num_elements):
+    seq = find_oeis_sequence(oeis_id, 'full')
+    if isinstance(seq, Exception):
+        return f"Error: {seq}"
+    wants = int(num_elements)
+    result = factor_oeis_sequence(oeis_id, wants)
+    if isinstance(result, Exception):
+        return f"Error: Factorization failed: {result}"
+    raw_fac = seq.factors
+    if wants and wants < len(raw_fac):
+        raw_fac = raw_fac[0:wants]
+    facs = {(i+seq.shift):raw_fac[i] for i in range(len(raw_fac))}
+    return jsonify({
+        'id': seq.id,
+        'name': seq.name,
+        'factors': facs
     })

@@ -39,6 +39,9 @@ class Sequence(db.Model):
     values = db.Column(db.ARRAY(db.String), unique=False, nullable=False)
     raw_refs = db.Column(db.String, unique=False, nullable=True)
     backrefs = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
+    # Sadly, multidimensional arrays can't vary in dimension
+    # so we store factorization arrays as strings
+    factors = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
 
     @classmethod
     def get_seq_by_id(self, id):

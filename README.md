@@ -222,6 +222,40 @@ OEIS text "xref" records for the sequence with id OEIS_ID.
 
 An array of strings giving all OEIS ids that mention the given OEIS_ID.
 
+### URL: `api/get_oeis_factors/<OEIS_ID>/<COUNT>`
+
+This could take a long time.  It does everything that the endpoint
+`get_oeis_metadata` does, and then once the result is stored in the database
+it will then proceed to factor the first `<COUNT>` terms, or all the terms,
+whichever is less.  If you are running the server to test it on your local 
+host, a full URL would be
+`http://127.0.0.1:5000/api/get_oeis_factors/A006862/50` which will return the
+factorizations of 1 + the product of the first n primes, for n < 50.  The 
+first 42 terms will be factored and larger terms will return `None` (since 
+they are deemed too large to factor in a reasonable time).
+
+The factorization is performed by pari:
+`https://pari.math.u-bordeaux.fr/`
+Previous factorization requests are cached in the database for efficiency.
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID,
+if already known to backscope, or a temporary name if not.
+
+#### Key: factors
+
+An array whose indices match the indices of the values of the sequence.
+The format of each entry is a string of the form `[ [p,e], [q,f], ... ]` 
+where each entry `[p,e]` represents a factor of the prime p to the power e.  
+If an integer is negative, `[-1,1]` is included.  If the integer is 1, the 
+factorization is `[]` (empty).  If the integer is 0, the factorization 
+is `[[0,1]]`.  Any successful factorization has the property that if you 
+multiply 1 times the product of `p^e` for all `[p,e]` in the array, you 
+obtain the original value. This format is essentially that supported by pari.
+If the integer exceeds 2^200, the factorization is not attempted and 
+the factorization is stored as `None`.  
+
 ## Other information about the backscope project
 
 ### Description of Directories:
