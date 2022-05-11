@@ -132,17 +132,19 @@ def factor_oeis_sequence(oeis_id, num_elements):
     """ Requires the full sequence metadata to exist in the database.
         Factors the first num_elements terms (if they aren't already)
         and adds them to the database.
-        Returns either True if factors were added to table, or an error.
+        Returns seq object if requested factors existed or were added
+        to the table; otherwise returns an error.
         Note it _returns_ the Error object, rather than throwing it.
         It will return the minimum of the number of requested factors
         or the number of terms available from OEIS.
-        Terms too big to factor will store a factorization of 'None'.
+        Terms too big to factor will store a factorization of 'no_fac'.
         The factoring format otherwise is essentially that of pari,
         stored as a string (since flask doesn't allow multidimensional
         arrays with varying sizes).
     """
     # The hardcoded integer size limit below can be pushed 
-    # further at the risk of taking a long time.
+    # further once we are doing factoring tasks on a 
+    # background queue.
     seq = Sequence.get_seq_by_id(oeis_id)
     if not seq:
         return LookupError(
@@ -153,10 +155,10 @@ def factor_oeis_sequence(oeis_id, num_elements):
     if not seq.factors:
         factors = []
     else:
-        factors = seq.factors[:]
+        factors = seq.factors.copy()
     len_factors = len(factors)
     if len_factors >= num_elements:
-        return True
+        return seq
     # Factor whatever else is requested, within reason.
     pari = cypari2.Pari()
     for i in range(len_factors, num_elements):
@@ -171,11 +173,12 @@ def factor_oeis_sequence(oeis_id, num_elements):
             # and [0,1] for zero
             fac = gen_to_python(pari(val).factor())
         else:
-            fac = None
-        factors.append(str(fac));
-    seq.factors = factors[:]
+            fac = 'no_fac'
+        factors.append(str(fac).replace(" ",""));
+    seq.factors = factors.copy()
+    print("debug",seq.factors)
     db.session.commit()
-    return True
+    return seq
 
 
 @bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
@@ -188,6 +191,7 @@ def get_oeis_values(oeis_id, num_elements):
     if wants and wants < len(raw_vals):
         raw_vals = raw_vals[0:wants]
     vals = {(i+seq.shift):raw_vals[i] for i in range(len(raw_vals))}
+
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
 @bp.route("/api/get_oeis_name_and_values/<oeis_id>", methods=["GET"])
@@ -216,8 +220,8 @@ def get_oeis_factors(oeis_id, num_elements):
     if isinstance(seq, Exception):
         return f"Error: {seq}"
     wants = int(num_elements)
-    result = factor_oeis_sequence(oeis_id, wants)
-    if isinstance(result, Exception):
+    seq = factor_oeis_sequence(oeis_id, wants)
+    if isinstance(seq, Exception):
         return f"Error: Factorization failed: {result}"
     raw_fac = seq.factors
     if wants and wants < len(raw_fac):

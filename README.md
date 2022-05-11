@@ -240,15 +240,14 @@ Previous factorization requests are cached in the database for efficiency.
 
 #### Key: name
 
-A string giving the official name of the OEIS sequence with id OEIS_ID,
-if already known to backscope, or a temporary name if not.
+A string giving the official name of the OEIS sequence with id OEIS_ID.
 
 #### Key: factors
 
 An array whose indices match the indices of the values of the sequence.
 The format of each entry is a string of the form 
 
-`[ [p,e], [q,f], ... ]` 
+`[[p,e],[q,f],...]` 
 
 where each entry `[p,e]` represents a factor of the prime p to the power e.  If
 an integer is negative, `[-1,1]` is included.  If the integer is 1, the 
