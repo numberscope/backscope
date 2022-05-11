@@ -246,9 +246,12 @@ if already known to backscope, or a temporary name if not.
 #### Key: factors
 
 An array whose indices match the indices of the values of the sequence.
-The format of each entry is a string of the form `[ [p,e], [q,f], ... ]` 
-where each entry `[p,e]` represents a factor of the prime p to the power e.  
-If an integer is negative, `[-1,1]` is included.  If the integer is 1, the 
+The format of each entry is a string of the form 
+
+`[ [p,e], [q,f], ... ]` 
+
+where each entry `[p,e]` represents a factor of the prime p to the power e.  If
+an integer is negative, `[-1,1]` is included.  If the integer is 1, the 
 factorization is `[]` (empty).  If the integer is 0, the factorization 
 is `[[0,1]]`.  Any successful factorization has the property that if you 
 multiply 1 times the product of `p^e` for all `[p,e]` in the array, you 
