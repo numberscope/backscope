@@ -18,7 +18,8 @@ import numpy as np
 import requests
 import os
 import sys
-
+import cypari2
+from cypari2.convert import gen_to_python
 
 from flaskr import db
 from flaskr.nscope.models import *
@@ -32,10 +33,13 @@ bp = Blueprint("nscope", __name__)
 def index():
     return render_template("index.html")
 
-def save_oeis_sequence(seq):
-    # When we arrive here, we have a Sequence object seq which has had its
-    # values filled in. We grab its metadata and incorporate that, and then
-    # add it to the database, and return the fleshed-out sequence.
+def save_oeis_sequence(seq, detail = ''):
+    """ The first argument is a Sequence object which has had its values
+        filled in. This function grabs its metadata and incorporates that
+        information, adds the resulting sequence to the database, and
+        returns it. Unless the optional second argument ends with 'nofactor'
+        it then initiates factoring the sequence.
+    """
     # NOTE however that nothing currently prevents two requests
     # for the same newly-encountered sequence ending up both getting to this
     # code at roughly the same time (if the second comes in before the first
@@ -53,7 +57,7 @@ def save_oeis_sequence(seq):
             for result in r['results']:
                 if result['number'] == target_number:
                     seq.name = result['name']
-                    seq.raw_refs = "\n".join(result['xref'])
+                    seq.raw_refs = "\n".join(result.get('xref', []))
                 else:
                     backrefs.append('A' + str(result['number']).zfill(6))
                 saw += 1
@@ -64,16 +68,20 @@ def save_oeis_sequence(seq):
         seq.backrefs = backrefs
     db.session.add(seq)
     db.session.commit()
+    if not detail.endswith('nofactor'):
+        executor.submit(factor_oeis_sequence, seq, len(seq.values))
     return seq
 
 def find_oeis_sequence(oeis_id, detail = ''):
     """ Returns either a Sequence object, or an Error object if ID invalid, etc.
         Note it _returns_ the Error object, rather than throwing it.
-        If the optional second argument is a string with special values:
-        'name' means to make an extra request to get the official name, and
-        'full' means to wait to get all of the sequence data from the OEIS
-        server; otherwise it only retrieves the values and leaves extraction
-        of other information to a background task.
+        The optional second argument is a string with special values:
+        'name' means to make an extra request to get the official name,
+        'full_nofactor' and 'full' mean to wait to get all of the sequence
+        data from the OEIS server; otherwise it only retrieves the values
+        and leaves extraction of other information to a background task.
+        Factoring is always left to a background task unless 'full_nofactor'
+        is specified, in which case factoring is not initiated at all.
     """
     # First check if it is in the database
     seq = Sequence.get_seq_by_id(oeis_id)
@@ -117,14 +125,73 @@ def find_oeis_sequence(oeis_id, detail = ''):
     if not name: name = f"{oeis_id} [name not yet loaded]"
 
     seq = Sequence(id=oeis_id, name=name, shift=first, values=vals)
-    if detail == 'full':
+    if detail.startswith('full'):
         # Get all of the data and make sure it's in the database synchronously
         # as requested
-        return save_oeis_sequence(seq)
+        return save_oeis_sequence(seq, detail)
     # Otherwise, schedule the database interaction so we can respond to the
     # request immediately:
-    executor.submit(save_oeis_sequence, seq)
+    executor.submit(save_oeis_sequence, seq, detail)
     return seq
+
+
+def factor_oeis_sequence(seq, num_elements):
+    """ The first argument seq must be a Sequence object already stored
+        in the database with all of its metadata.
+        The second argument num_elements gives the number of terms to factor.
+        This function factors the first num_elements terms (if they aren't
+        already) and adds them to the database.
+        Returns seq object if requested factors existed or were added
+        to the table; otherwise returns an error.
+        Note it _returns_ the Error object, rather than throwing it.
+        It will return the minimum of the number of requested factors
+        or the number of terms available from OEIS.
+        Terms too big to factor will store a factorization of 'no_fac'.
+        The factoring format otherwise is essentially that of pari,
+        stored as a string (since flask doesn't allow multidimensional
+        arrays with varying sizes).
+    """
+    # The hardcoded integer size limit below can be pushed
+    # further once we are doing factoring tasks on a background queue.
+
+    # It appears that we are obliged to re-fetch the sequence from the database
+    # for the updates to occur through Flask magic:
+    seq = Sequence.get_seq_by_id(seq.id)
+    if len(seq.values) < num_elements:
+        num_elements = len(seq.values)
+    # Load from database how much has been factored already
+    if not seq.factors:
+        factors = []
+    else:
+        # this copy appears to be required for the sequence update to work
+        factors = seq.factors.copy()
+    len_factors = len(factors)
+    if len_factors >= num_elements:
+        return seq
+    # Factor whatever else is requested, within reason.
+    pari = cypari2.Pari()
+    for i in range(len_factors, num_elements):
+        val = int(seq.values[i])
+        # the factorization of 1 is empty
+        if val == 1:
+            fac = []
+        elif abs(val) <= 2**200: # term size limit
+            fac = []
+            # elements are arrays [p, e] for factor p^e
+            # including [-1,1] for negative numbers
+            # and [0,1] for zero
+            fac = gen_to_python(pari(val).factor())
+        else:
+            fac = 'no_fac'
+        factors.append(str(fac).replace(" ",""));
+    # And further it seems that we are obliged to actually modify the identity
+    # of seq.factors in order for the database to update. It is hard to believe
+    # that both the .copy() above and this copy() are required, yet testing
+    # appeared to confirm that.
+    seq.factors = factors.copy()
+    db.session.commit()
+    return seq
+
 
 @bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_values(oeis_id, num_elements):
@@ -157,4 +224,23 @@ def get_oeis_metadata(oeis_id):
         'name': seq.name,
         'xrefs': seq.raw_refs,
         'backrefs': seq.backrefs
+    })
+
+@bp.route("/api/get_oeis_factors/<oeis_id>/<num_elements>", methods=["GET"])
+def get_oeis_factors(oeis_id, num_elements):
+    seq = find_oeis_sequence(oeis_id, 'full_nofactor') # we're about to do it...
+    if isinstance(seq, Exception):
+        return f"Error: {seq}"
+    wants = int(num_elements)
+    seq = factor_oeis_sequence(seq, wants)
+    if isinstance(seq, Exception):
+        return f"Error: Factorization failed: {result}"
+    raw_fac = seq.factors
+    if wants and wants < len(raw_fac):
+        raw_fac = raw_fac[0:wants]
+    facs = {(i+seq.shift):raw_fac[i] for i in range(len(raw_fac))}
+    return jsonify({
+        'id': seq.id,
+        'name': seq.name,
+        'factors': facs
     })
