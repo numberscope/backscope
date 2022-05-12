@@ -151,14 +151,13 @@ def factor_oeis_sequence(seq, num_elements):
         stored as a string (since flask doesn't allow multidimensional
         arrays with varying sizes).
     """
-    # The hardcoded integer size limit below can be pushed 
-    # further once we are doing factoring tasks on a 
-    # background queue.
+    # The hardcoded integer size limit below can be pushed
+    # further once we are doing factoring tasks on a background queue.
 
     # It appears that we are obliged to re-fetch the sequence from the database
     # for the updates to occur through Flask magic:
     seq = Sequence.get_seq_by_id(seq.id)
-    if len(seq.values) < num_elements: 
+    if len(seq.values) < num_elements:
         num_elements = len(seq.values)
     # Load from database how much has been factored already
     if not seq.factors:
@@ -186,7 +185,9 @@ def factor_oeis_sequence(seq, num_elements):
             fac = 'no_fac'
         factors.append(str(fac).replace(" ",""));
     # And further it seems that we are obliged to actually modify the identity
-    # of seq.factors in order for the database to update:
+    # of seq.factors in order for the database to update. It is hard to believe
+    # that both the .copy() above and this copy() are required, yet testing
+    # appeared to confirm that.
     seq.factors = factors.copy()
     db.session.commit()
     return seq
