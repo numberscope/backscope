@@ -164,7 +164,8 @@ def factor_oeis_sequence(seq, num_elements):
     if not seq.factors:
         factors = []
     else:
-        factors = seq.factors
+        # this copy appears to be required for the sequence update to work
+        factors = seq.factors.copy()
     len_factors = len(factors)
     if len_factors >= num_elements:
         return seq
