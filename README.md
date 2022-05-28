@@ -1,6 +1,10 @@
 # NumberscopeFlask
 
+Copyright 2020-2022 Regents of the University of Colorado.
 
+This project is licensed under the
+[MIT License](https://opensource.org/licenses/MIT). See the text of the MIT
+License in LICENSE.md.
 
 ## Initial Setup
 
@@ -14,7 +18,7 @@ You will need:
 
 Set up initial dependencies:
 
-1. Source / create  your python environment:
+1. Source / create your python environment:
 
    ```bash
    $ virtualenv -p python3 .venv # Create a new virtual env called .venv
@@ -83,21 +87,19 @@ Set up initial dependencies:
    $ # alembic.ini, which is safe to ignore - the default works fine
    $ python3 manage.py db migrate # migrate data models found in the project to database
    $ python3 manage.py db upgrade # Upgrade changes to database
-   
+
    $ psql -d <database_name>
-   db=# \d 
-    Schema |      Name       |   Type   | Owner 
+   db=# \d
+    Schema |      Name       |   Type   | Owner
    --------+-----------------+----------+-------
     public | alembic_version | table    | theo
     public | user            | table    | theo
     public | user_id_seq     | sequence | theo
-   
+
    db=# \q
    ```
 
    Currently there is one example user model in flaskr/nscope/models.py
-
-
 
 ### Running the application
 
@@ -224,13 +226,13 @@ An array of strings giving all OEIS ids that mention the given OEIS_ID.
 
 ### URL: `api/get_oeis_factors/<OEIS_ID>/<COUNT>`
 
-This could take a long time.  It internally does everything that the endpoint
+This could take a long time. It internally does everything that the endpoint
 `get_oeis_metadata` does, and then once the result is stored in the database
 it proceeds to factor the first `<COUNT>` terms of the sequence (or all of them
 if there are not that many). If you are running the server to test it on your
 local host, a full URL would be
 `http://127.0.0.1:5000/api/get_oeis_factors/A006862/50` which will return the
-factorizations of 1 + the product of the first n primes, for n < 50.  The
+factorizations of 1 + the product of the first n primes, for n < 50. The
 first 42 terms will be factored and larger terms will return `no_fac` (since
 they are deemed too large to factor in a reasonable time).
 
@@ -249,10 +251,10 @@ The format of each entry is a string of the form
 
 `[[p,e],[q,f],...]`
 
-where each entry `[p,e]` represents a factor of the prime p to the power e.  If
-an integer is negative, `[-1,1]` is included.  If the integer is 1, the
-factorization is `[]` (empty).  If the integer is 0, the factorization
-is `[[0,1]]`.  Any successful factorization has the property that if you
+where each entry `[p,e]` represents a factor of the prime p to the power e. If
+an integer is negative, `[-1,1]` is included. If the integer is 1, the
+factorization is `[]` (empty). If the integer is 0, the factorization
+is `[[0,1]]`. Any successful factorization has the property that if you
 multiply 1 times the product of `p^e` for all `[p,e]` in the array, you
 obtain the original value. This format is essentially that supported by pari.
 If the integer exceeds 2^200, the factorization is not attempted and
@@ -290,7 +292,7 @@ The log file for the flask application
 
 an example logging statment is shown below in python3
 
-``` python3
+```python3
  app.logger.info('%s logged in successfully', user.username)
 ```
 
@@ -298,51 +300,33 @@ Logging levels are set in flaskr/config.py
 
 Refer to https://flask.palletsprojects.com/en/1.1.x/logging/ for more information
 
-
-
 ##### flaskr
 
-Flaskr is the main application. It contains all entry points to the application. \__init\__.py contains all the application macros.
-
-
+Flaskr is the main application. It contains all entry points to the application. \_\_init\_\_.py contains all the application macros.
 
 ##### flaskr/\_\_init\_\_.py
 
 The primary file for all application macros
 
-
-
 ##### flaskr/config.py
 
 The configuration directory for all macro config options. Generally development mode is being used.
-
-
 
 ##### flaskr/nscope
 
 The nscope api python module. This contains numberscope endpoints and blueprints and models
 
-
-
 ##### flaskr/nscope/\_\_init\_\_.py
 
 The main entry point to nscope, containing the blueprint for numberscope (imported in \_\_init\_\_.py in flaskr)
-
-
 
 ##### flaskr/nscope/models.py
 
 Database models. See the example for how to define models as well as https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
 
-
-
 ##### flaskr/nscope/views.py
 
 The primary blueprint for numberscope. This is the main application. Note that currently, there is only one endpoint (vuetest). But refer to the documentation within views on how to create a new route.
-
-
-
-
 
 ### WSGI Setup
 
@@ -350,17 +334,10 @@ WSGI is setup on the production server. all wsgi instances and configurations ar
 
 Documentation is in progress.
 
-
-
 On the server, you may manage the status of the application by the systemd entry point for numberscope
-
-
 
 ```bash
 $ sudo systemctl status numberscopeFlask.service
 ```
 
-
-
 Numberscope is serving both index.html as well as the numberscope api routes declared inside flask.
-
