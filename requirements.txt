@@ -1,5 +1,5 @@
-alembic==1.4.2
-click==7.1.1
+alembic==1.8.1
+click==7.1.2
 # it appears cysignals must be installed before cypari2 install is attempted
 cysignals==1.11.2
 cypari2==2.1.2
@@ -16,7 +16,7 @@ Jinja2==2.11.1
 jsonify==0.5
 Mako==1.1.2
 MarkupSafe==1.1.1
-numpy==1.20.0
+numpy==1.23.2
 # replaced psycopg2 with psycopg2-binary to avoid compile errors
 psycopg2-binary==2.9.1
 python-dateutil==2.8.1
