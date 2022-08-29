@@ -14,7 +14,7 @@ Flask-WTF==0.15.1
 itsdangerous==1.1.0
 Jinja2==2.11.3
 jsonify==0.5
-Mako==1.1.2
+Mako==1.2.1
 MarkupSafe==1.1.1
 numpy==1.23.2
 # replaced psycopg2 with psycopg2-binary to avoid compile errors
