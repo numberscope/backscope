@@ -3,7 +3,7 @@ click==7.1.2
 # it appears cysignals must be installed before cypari2 install is attempted
 cysignals==1.11.2
 cypari2==2.1.2
-Flask==1.1.1
+Flask==1.1.4
 Flask-Cors==3.0.8
 Flask-Executor==0.10.0
 Flask-Login==0.5.0
