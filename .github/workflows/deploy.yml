@@ -7,5 +7,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: hello
-        run: echo "Hello, World! :)"
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.NS_SERVER_SSH_KEY }}
+          known_hosts: 'placeholder'
+      - name: Add Known Hosts
+          run: ssh-keyscan -H ${{ secrets.NS_SERVER_IP_ADDR }} >> ~/.ssh/known_hosts
+      - name: Update backscope
+          run: echo "Did this work?" > /home/scope/test.txt
+#         run: ssh root@numberscope.colorado.edu
+#              && cd /home/scope/repos/backscope
+#              && git pull
+#              && systemctl restart backscope
