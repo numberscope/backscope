@@ -1,7 +1,8 @@
 name: hello-world
-on: push
-  branches:
-  - 'continuous_deployment'
+on:
+  push:
+    branches:
+      - 'continuous_deployment'
 jobs:
   my-job:
     runs-on: ubuntu-latest
