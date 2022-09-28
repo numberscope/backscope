@@ -1,0 +1,11 @@
+name: Deploy backscope to CU server
+on:
+  push:
+    branches:
+      - 'continuous_deployment'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: hello
+        run: echo "Hello, World! :)"
