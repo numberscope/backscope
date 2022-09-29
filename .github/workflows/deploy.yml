@@ -15,7 +15,7 @@ jobs:
       - name: Add Known Hosts
         run: ssh-keyscan -H ${{ secrets.NS_SERVER_IP_ADDR }} >> ~/.ssh/known_hosts
       - name: Update backscope
-        run: ssh -tt root@numberscope.colorado.edu 
+        run: ssh -t -t -o root@numberscope.colorado.edu 
              && touch /home/scope/test.txt
              && echo "Did this work?" > /home/scope/test.txt
 #       - run: ssh root@numberscope.colorado.edu
