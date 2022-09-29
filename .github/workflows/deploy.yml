@@ -13,7 +13,7 @@ jobs:
           key: ${{ secrets.NS_SERVER_SSH_KEY }}
           known_hosts: 'placeholder'
       - name: Update backscope
-        run: ssh -o UserKnownHostsFile=/dev/null root@numberscope.colorado.edu 
+        run: ssh -o -tt UserKnownHostsFile=/dev/null root@numberscope.colorado.edu 
              && touch /home/scope/test.txt
              && echo "Did this work?" > /home/scope/test.txt
 #       - run: ssh root@numberscope.colorado.edu
