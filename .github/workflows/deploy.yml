@@ -7,15 +7,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
+      - name: Test adding a file
+        uses: appleboy/ssh-action@master
         with:
-          key: ${{ secrets.NS_SERVER_SSH_KEY }}
-          known_hosts: 'placeholder'
-      - name: Add host
-        run: ssh-keyscan -t rsa numberscope.colorado.edu >> ~/.ssh/known_hosts
-      - name: Update backscope
-        run: ssh root@numberscope.colorado.edu 
-             && touch /home/scope/test.txt
-             && echo "Did this work?" > /home/scope/test.txt
-             && exit
+          host: ${{ secrets.NS_SERVER_HOST }}
+          username: ${{ secrets.NS_SERVER_USERNAME }}
+          password: ${{ secrets.NS_SERVER_PASSWORD }}
+          port: ${{ secrets.NS_SERVER_PORT }}
+          script: cd && echo "Hello! :)" > hello.txt
