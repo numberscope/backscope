@@ -7,7 +7,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Test restarting backscope
+#    - name: Pull latest changes to backscope
+#      uses: appleboy/ssh-action@master
+#      with:
+#        host: ${{ secrets.NS_SERVER_HOST }}
+#        username: ${{ secrets.NS_SERVER_USERNAME }}
+#        key: ${{ secrets.NS_SERVER_SSH_KEY }}
+#        port: ${{ secrets.NS_SERVER_PORT }}
+#        script: cd /home/scope/repos/backscope && git pull && chown -R scope .
+      - name: Restart backscope
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.NS_SERVER_HOST }}
