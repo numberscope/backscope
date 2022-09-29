@@ -12,6 +12,6 @@ jobs:
         with:
           host: ${{ secrets.NS_SERVER_HOST }}
           username: ${{ secrets.NS_SERVER_USERNAME }}
-          password: ${{ secrets.NS_SERVER_PASSWORD }}
+          key: ${{ secrets.NS_SERVER_SSH_KEY }}
           port: ${{ secrets.NS_SERVER_PORT }}
-          script: echo ${{ secrets.NS_SERVER_PASSWORD }} | sudo -S systemctl restart backscope
+          script: systemctl restart backscope
