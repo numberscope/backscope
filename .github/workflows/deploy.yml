@@ -18,6 +18,7 @@ jobs:
         run: ssh -tt root@numberscope.colorado.edu 
              && touch /home/scope/test.txt
              && echo "Did this work?" > /home/scope/test.txt
+             && exit
 #       - run: ssh root@numberscope.colorado.edu
 #              && cd /home/scope/repos/backscope
 #              && git pull
