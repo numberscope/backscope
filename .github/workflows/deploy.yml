@@ -12,8 +12,6 @@ jobs:
         with:
           key: ${{ secrets.NS_SERVER_SSH_KEY }}
           known_hosts: 'placeholder'
-      - name: Remove Previously Stored Hosts (???)
-        run: ssh-keygen -R ${{ secrets.NS_SERVER_IP_ADDR }}
       - name: Add Known Hosts
         run: ssh-keyscan -H ${{ secrets.NS_SERVER_IP_ADDR }} >> ~/.ssh/known_hosts
       - name: Update backscope
