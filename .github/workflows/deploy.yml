@@ -15,7 +15,7 @@ jobs:
       - name: Add host
         run: ssh-keyscan -t rsa numberscope.colorado.edu >> ~/.ssh/known_hosts
       - name: Update backscope
-        run: ssh -tt root@numberscope.colorado.edu 
+        run: ssh root@numberscope.colorado.edu 
              && touch /home/scope/test.txt
              && echo "Did this work?" > /home/scope/test.txt
              && exit
