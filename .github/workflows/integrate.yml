@@ -1,0 +1,14 @@
+name: Integrate changes into main branch
+on:
+  push:
+    branches:
+      - 'continuous_integration'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
