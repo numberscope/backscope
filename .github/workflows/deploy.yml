@@ -7,11 +7,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Test adding a file
+      - name: Test restarting backscope
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.NS_SERVER_HOST }}
           username: ${{ secrets.NS_SERVER_USERNAME }}
           password: ${{ secrets.NS_SERVER_PASSWORD }}
           port: ${{ secrets.NS_SERVER_PORT }}
-          script: cd && echo "Hello!" > hello.txt
+          script: sudo systemctl restart backscope
