@@ -1,0 +1,27 @@
+server {
+   server_name numberscope.colorado.edu;
+ 
+   location / {
+       include proxy_params;
+       proxy_pass http://unix:/home/scope/repos/backscope/backscope.sock;
+   }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/numberscope.colorado.edu/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/numberscope.colorado.edu/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = numberscope.colorado.edu) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+   listen 80;
+   server_name numberscope.colorado.edu;
+    return 404; # managed by Certbot
+
+
+}
