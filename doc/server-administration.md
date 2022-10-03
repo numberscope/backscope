@@ -1,8 +1,8 @@
 # Server administration
 
 As of this writing, `backscope` is running on a server in CU's math
-building. The point of contact for this server is Jeff Taylor
-(Jeff.J.Taylor@colorado.edu).
+building. For info on the point of contact for the server, ask one of
+Numberscope's maintainers.
 
 ## How `backscope` is set up
 
