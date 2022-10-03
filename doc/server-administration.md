@@ -55,7 +55,7 @@ exceptions:
 1. We add a file to the `/etc/nginx/sites-available` directory called
    `backscope`. Within the `/etc/nginx/sites-available/backscope` file,
    we configure Nginx to forward requests to the WSGI we set up using
-   Gunicorn.
+   Gunicorn. There is a copy of this file in `/server/backscope/`.
 2. We remove the `default` site from the `/etc/nginx/sites-enabled`
    directory.
 
