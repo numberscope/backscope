@@ -21,7 +21,8 @@ Python libraries that implement a WSGI. We use one called Gunicorn
 In the `prod.sh` script in the root of `backscope`, we tell Gunicorn to
 run `backscope`. In `/etc/systemd/system/` there's a `backscope.service`
 file that runs the `prod.sh` script. (The `/etc/systemd/system/` is a
-directory that houses systemd (system daemon) files.)
+directory that houses systemd (system daemon) files.) There is a copy
+of this file in `backscope/server/`.
 
 ## `backscope` systemd commands
 
