@@ -193,9 +193,30 @@ def factor_oeis_sequence(seq, num_elements):
     return seq
 
 
+def get_valid_oeis_id(oeis_id):
+    ret = ''
+    if isinstance(oeis_id, str):
+        if len(oeis_id) != 7:
+            raise Exception('oeis_id not 7 characters in length')
+        else:
+            first_character = oeis_id[0]
+            if first_character.islower():
+                print('info: first character in oeis_id is lowercase')
+                print('info: making first character in oeis_id uppercase')
+                uppercase_oeis_id = first_character.upper()
+                uppercase_oeis_id += oeis_id.partition(first_character)[2]
+                ret = uppercase_oeis_id
+            else:
+                print('info: oeis_id is valid; returning it')
+                ret = oeis_id
+    else:
+        raise TypeError('oeis_id not a string')
+    return ret
+
 @bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_values(oeis_id, num_elements):
-    seq = find_oeis_sequence(oeis_id)
+    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    seq = find_oeis_sequence(valid_oeis_id)
     if isinstance(seq, Exception):
         return f"Error: {seq}"
     raw_vals = seq.values
@@ -208,7 +229,8 @@ def get_oeis_values(oeis_id, num_elements):
 
 @bp.route("/api/get_oeis_name_and_values/<oeis_id>", methods=["GET"])
 def get_oeis_name_and_values(oeis_id):
-    seq = find_oeis_sequence(oeis_id, 'name')
+    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    seq = find_oeis_sequence(valid_oeis_id, 'name')
     if isinstance(seq, Exception):
         return f"Error: {seq}"
     vals = {(i + seq.shift): seq.values[i] for i in range(len(seq.values))}
@@ -216,7 +238,8 @@ def get_oeis_name_and_values(oeis_id):
 
 @bp.route("/api/get_oeis_metadata/<oeis_id>", methods=["GET"])
 def get_oeis_metadata(oeis_id):
-    seq = find_oeis_sequence(oeis_id, 'full')
+    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    seq = find_oeis_sequence(valid_oeis_id, 'full')
     if isinstance(seq, Exception):
         return f"Error: {seq}"
     return jsonify({
@@ -228,7 +251,8 @@ def get_oeis_metadata(oeis_id):
 
 @bp.route("/api/get_oeis_factors/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_factors(oeis_id, num_elements):
-    seq = find_oeis_sequence(oeis_id, 'full_nofactor') # we're about to do it...
+    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    seq = find_oeis_sequence(valid_oeis_id, 'full_nofactor') # we're about to do it...
     if isinstance(seq, Exception):
         return f"Error: {seq}"
     wants = int(num_elements)
