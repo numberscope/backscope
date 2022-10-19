@@ -18,32 +18,36 @@ forward requests to a Python application. There are lots of different
 Python libraries that implement a WSGI. We use one called Gunicorn
 (Green Unicorn).
 
-In the `prod.sh` script in the root of `backscope`, we tell Gunicorn to
-run `backscope`. In `/etc/systemd/system/` there's a `backscope.service`
-file that runs the `prod.sh` script. (The `/etc/systemd/system/` is a
-directory that houses systemd (system daemon) files.) There is a copy
-of this file in `backscope/server/`.
+In the `production.sh` script in the `server` directory of `backscope`,
+we tell Gunicorn to run `backscope`. In `/etc/systemd/system/` there's a
+symlinked `numberscope.service` file that runs the `production.sh`
+script. (The `/etc/systemd/system/` is a directory that houses systemd
+(system daemon) files.)
 
-## `backscope` systemd commands
+## `numberscope` systemd commands
 
-Check status of `backscope`:
+Note: We named the systemd file `numberscope.service` because it is
+responsible for serving `frontscope`'s built files as well as forwarding
+`/api` requests to `backscope`.
+
+Check status of `numberscope`:
 ```sh
-sudo systemctl status backscope
+sudo systemctl status numberscope
 ```
 
-Restart `backscope`:
+Restart `numberscope`:
 ```sh
-sudo systemctl restart backscope
+sudo systemctl restart numberscope
 ```
 
-Start `backscope`:
+Start `numberscope`:
 ```sh
-sudo systemctl start backscope
+sudo systemctl start numberscope
 ```
 
-Stop `backscope`:
+Stop `numberscope`:
 ```sh
-sudo systemctl stop backscope
+sudo systemctl stop numberscope
 ```
 
 ## How Nginx is set up
@@ -52,10 +56,11 @@ As of this writing, our Nginx configuration is simple. We preserve the
 default configuration we get from Nginx upon installation with two
 exceptions:
 
-1. We add a file to the `/etc/nginx/sites-available` directory called
-   `backscope`. Within the `/etc/nginx/sites-available/backscope` file,
-   we configure Nginx to forward requests to the WSGI we set up using
-   Gunicorn. There is a copy of this file in `/server/backscope/`.
+1. We symlink a file to the `/etc/nginx/sites-available` directory
+   called `numberscope.conf`. Within the
+   `/etc/nginx/sites-available/numberscope.conf` file, we configure
+   Nginx to serve `frontscope`'s built files and to forward `/api`
+   requests to the WSGI we set up using Gunicorn.
 2. We remove the `default` site from the `/etc/nginx/sites-enabled`
    directory.
 
