@@ -6,7 +6,6 @@ import os
 from flask import Flask
 import click
 from flask.cli import with_appcontext
-from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging.handlers import RotatingFileHandler
@@ -33,9 +32,6 @@ def create_app(environment='development'):
 
     # Upload config from config.py
     app.config.from_object(config[environment])
-
-    # Need to be more cognisant of this in the future
-    CORS(app, resources={r'/*' : {'origins' : '*'}})
     
     # Logging
     file_handler = RotatingFileHandler('api.log', maxBytes=10000, backupCount=1)

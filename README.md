@@ -24,6 +24,7 @@ Set up initial dependencies:
    $ virtualenv -p python3 .venv # Create a new virtual env called .venv
    $ source .venv/bin/activate
    $ pip install -r requirements.txt
+   $ pip install --force cypari2
    ```
 
    If you use a different python package manager, install requirements through this instead
