@@ -7,3 +7,5 @@ Numberscope's server.
   then symlinked to `/etc/nginx/sites-enabled`
 * `numberscope.service` symlinked to `/etc/systemd/system`
 * `production.sh` run by `numberscope.service`
+
+See `create-symlinks.sh` for the actual symlink commands.
