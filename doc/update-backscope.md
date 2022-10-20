@@ -8,12 +8,10 @@ installs the latest dependencies.
 2. Change user: `sudo -i -u scope`
 3. Go to Git repo: `cd /home/scope/repos/backscope`
 4. Get latest changes: `git pull origin main`
-5. If you have modified the systemd `backscope.service` file or the
-   Nginx `backscope` file, you need to remove the old copies and move
-   the new copies into place. See
-   [the server admin doc](./server-administration) for where these files
-   should go on the server.
-   - If you changed the Nginx backscope file:
+5. If you did anything with the files in the server directory (e.g. you
+   renamed them) you might have to fix the symlinks. See the server's
+   [README file](../server/README.md) for more info on the symlinks.
+6. If you changed the Nginx `numberscope.conf` file:
      - Test Nginx's config: `sudo nginx -t`
      - Restart Nginx: `sudo systemctl restart nginx`
-7. Restart: `sudo systemctl restart backscope`
+7. Restart: `sudo systemctl restart numberscope`

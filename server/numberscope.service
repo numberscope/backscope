@@ -4,7 +4,7 @@
 Description=backscope systemd service unit file.
 
 [Service]
-ExecStart=/bin/bash /home/scope/repos/backscope/prod.sh
+ExecStart=/bin/bash /home/scope/repos/backscope/server/production.sh
 
 [Install]
 WantedBy=multi-user.target
