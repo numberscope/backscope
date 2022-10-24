@@ -205,7 +205,8 @@ def get_valid_oeis_id(oeis_id):
                 # https://github.com/numberscope/backscope/issues/57.
                 print('info: first character in oeis_id is lowercase')
                 print('info: making first character in oeis_id uppercase')
-                valid_id[0] = first_character.upper()
+                valid_id = first_character.upper()
+                valid_id += oeis_id.partition(first_character)[2]
     else:
         raise TypeError('oeis_id not a string')
     return valid_id
