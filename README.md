@@ -8,7 +8,7 @@ License in LICENSE.md.
 
 ## Initial Setup
 
-## `pre-commit` hook
+### `pre-commit` hook
 
 In your `.git/hooks/` directory, create a script called `pre-commit` with the
 following contents:
