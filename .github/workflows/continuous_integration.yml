@@ -12,6 +12,8 @@ jobs:
       - name: Install dependencies and test backscope
         continue-on-error: true
         run: |
+          sudo apt update
+          sudo apt install pari-gp
           python -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
