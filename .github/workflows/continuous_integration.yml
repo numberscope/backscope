@@ -15,7 +15,6 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
-          pip install cypari2 --force
       - name: Test backscope
         run: |
           source .venv/bin/activate

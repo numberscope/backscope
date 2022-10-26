@@ -3,7 +3,6 @@ attrs==22.1.0
 certifi==2022.9.14
 charset-normalizer==2.1.1
 click==7.1.2
-cypari2==2.1.2
 cysignals==1.11.2
 Cython==0.29.32
 Flask==1.1.4
