@@ -10,10 +10,11 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install dependencies
+        continue-on-error: true
         run: |
           python -m venv .venv
           source .venv/bin/activate
-          pip install cypari2 --force
           pip install -r requirements.txt
+          pip install cypari2 --force
       - name: Test backscope
         run: pytest
