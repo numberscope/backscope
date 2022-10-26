@@ -14,14 +14,10 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
-      - name: Install cypari2 (first round)
+      - name: Attempt to install cypari2
         continue-on-error: true
         run: |
-          source .venv/bin/activate
-          pip install --force cypari2
-      - name: Install cypari2 (second round)
-        continue-on-error: true
-        run: |
+          sudo apt install pari-gp
           source .venv/bin/activate
           pip install --force cypari2
       - name: Test backscope
