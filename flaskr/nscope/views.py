@@ -20,6 +20,7 @@ import os
 import sys
 import cypari2
 from cypari2.convert import gen_to_python
+from flaskr import utils
 
 from flaskr import db
 from flaskr.nscope.models import *
@@ -193,27 +194,9 @@ def factor_oeis_sequence(seq, num_elements):
     return seq
 
 
-def get_valid_oeis_id(oeis_id):
-    valid_id = oeis_id
-    if isinstance(oeis_id, str):
-        if len(oeis_id) != 7:
-            raise Exception('oeis_id not 7 characters in length')
-        else:
-            first_character = oeis_id[0]
-            if first_character.islower():
-                # TODO: This should be logged. See
-                # https://github.com/numberscope/backscope/issues/57.
-                print('info: first character in oeis_id is lowercase')
-                print('info: making first character in oeis_id uppercase')
-                valid_id = first_character.upper()
-                valid_id += oeis_id.partition(first_character)[2]
-    else:
-        raise TypeError('oeis_id not a string')
-    return valid_id
-
 @bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_values(oeis_id, num_elements):
-    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    valid_oeis_id = utils.get_valid_oeis_id(oeis_id)
     seq = find_oeis_sequence(valid_oeis_id)
     if isinstance(seq, Exception):
         return f"Error: {seq}"
@@ -227,7 +210,7 @@ def get_oeis_values(oeis_id, num_elements):
 
 @bp.route("/api/get_oeis_name_and_values/<oeis_id>", methods=["GET"])
 def get_oeis_name_and_values(oeis_id):
-    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    valid_oeis_id = utils.get_valid_oeis_id(oeis_id)
     seq = find_oeis_sequence(valid_oeis_id, 'name')
     if isinstance(seq, Exception):
         return f"Error: {seq}"
@@ -236,7 +219,7 @@ def get_oeis_name_and_values(oeis_id):
 
 @bp.route("/api/get_oeis_metadata/<oeis_id>", methods=["GET"])
 def get_oeis_metadata(oeis_id):
-    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    valid_oeis_id = utils.get_valid_oeis_id(oeis_id)
     seq = find_oeis_sequence(valid_oeis_id, 'full')
     if isinstance(seq, Exception):
         return f"Error: {seq}"
@@ -249,7 +232,7 @@ def get_oeis_metadata(oeis_id):
 
 @bp.route("/api/get_oeis_factors/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_factors(oeis_id, num_elements):
-    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    valid_oeis_id = utils.get_valid_oeis_id(oeis_id)
     seq = find_oeis_sequence(valid_oeis_id, 'full_nofactor') # we're about to do it...
     if isinstance(seq, Exception):
         return f"Error: {seq}"
