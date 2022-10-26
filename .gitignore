@@ -34,4 +34,5 @@ yarn-error.log*
 *.sw?
 *.venv
 
-
+.mypy_cache
+.pytest_cache
