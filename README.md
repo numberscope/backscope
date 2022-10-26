@@ -8,6 +8,22 @@ License in LICENSE.md.
 
 ## Initial Setup
 
+## `pre-commit` hook
+
+In your `.git/hooks/` directory, create a script called `pre-commit` with the
+following contents:
+
+```shell
+#!/bin/bash
+pytest
+```
+
+Make this script executable:
+
+```shell
+chmod +x .git/hooks/pre-commit
+```
+
 #### Python3 Setup
 
 You will need:
