@@ -18,5 +18,5 @@ def test_capitalizes_lowercase_a():
     assert (utils.get_valid_oeis_id("a000041") == "A000041")
 
 
-def test_already_capitalized_a():
+def test_retains_capitalized_a():
     assert (utils.get_valid_oeis_id("A000040") == "A000040")
