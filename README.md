@@ -1,4 +1,4 @@
-# NumberscopeFlask
+# backscope
 
 Copyright 2020-2022 Regents of the University of Colorado.
 
