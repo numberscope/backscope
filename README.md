@@ -6,15 +6,50 @@ This project is licensed under the
 [MIT License](https://opensource.org/licenses/MIT). See the text of the MIT
 License in LICENSE.md.
 
-## Initial Setup
+## Setup
 
-#### Python3 Setup
+### Python
 
-You will need:
+You need a version of Python at least equal to 3.5, but ideally one greater than
+that. (If you don't have Python, install the latest stable version.) By
+installing a version of Python greater than or equal to 3.5, you should get
+the package installer for Python (`pip`) and a working `venv` module for
+creating a virtual environment.
 
-- python3
-- python3-pip
-- virtualenv or anaconda or a virtual python package manager
+To check to see your Python version, issue the following command:
+
+```shell
+python --version
+```
+
+The output should be something like "Python 3.10.8". If you see a message about
+not being able to find Python, or you don't see any output, you need to
+troubleshoot your Python installation.
+
+Depending on how you installed Python, the executable might be named `python3`.
+In that case, issue the following command:
+
+```shell
+python3 --version
+```
+
+To check to see if you have a working `pip`, issue the following
+command (substituting `python3` if necessary):
+
+```shell
+pip --version
+```
+
+You should see something like "pip 22.2.2".
+
+To check to see if you have a working `venv` module, issue the following
+command (substituting `python3` if necessary):
+
+```shell
+python -m venv -h
+```
+
+You should see help for the `venv` module.
 
 Set up initial dependencies:
 
