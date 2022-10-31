@@ -1,10 +1,16 @@
-# backscope
+# Numberscope - backscope
 
 Copyright 2020-2022 Regents of the University of Colorado.
 
 This project is licensed under the
 [MIT License](https://opensource.org/licenses/MIT). See the text of the MIT
 License in LICENSE.md.
+
+## What is backscope?
+
+backscope is [Numberscope's](https://numberscope.colorado.edu) back end. It is
+responsible for getting sequences and other data from the [On-Line Encyclopedia
+of Integer Sequences](https://oeis.org).
 
 ## Setup
 
