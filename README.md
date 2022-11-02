@@ -141,5 +141,5 @@ This should print a series of messages. One of these
 messages should be the URL the server is running on, typically
 `http://127.0.0.1:5000/`. To test that the server is working correctly,
 try visiting `<URL>/api/get_oeis_values/A000030/50` (substitute in the server
-URL for `<URL>`. This should display the first digits of the numbers from
+URL for `<URL>`). This should display the first digits of the numbers from
 0 through 49.
