@@ -17,7 +17,7 @@ jobs:
       - name: Attempt to install cypari2
         continue-on-error: true
         run: |
-          sudo apt install sagemath
+          sudo apt install pari-gp
           source .venv/bin/activate
           pip install --force cypari2
       - name: Test backscope
