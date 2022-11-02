@@ -91,7 +91,6 @@ You should see help for the `venv` module.
    This project uses python-dotenv. In order to detect your database
    username / password, you must create a file called `.env` in the root
    of your directory containing:
-
    ```
    export APP_SETTINGS="config.DevelopmentConfig"
    export DATABASE_URI="postgresql://localhost/<database name>"
@@ -100,7 +99,6 @@ You should see help for the `venv` module.
    export POSTGRES_DB="<database name>"
    export POSTGRES_PASSWORD="<password for psql>"
    ```
-
    You can see other configuration options inside
    [the config file](./flaskr/config.py).
 
@@ -109,10 +107,10 @@ You should see help for the `venv` module.
    ```bash
    python manage.py db init # initializes tables inside database
    ```
-
-  The previous command will issue a message about editing
-  `alembic.ini`, which is safe to ignore. The default works fine.
    
+   The previous command will issue a message about editing
+   `alembic.ini`, which is safe to ignore. The default works fine.
+
    ```bash
    python manage.py db migrate # migrate data models
    python manage.py db upgrade # upgrade changes to database
