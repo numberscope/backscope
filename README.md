@@ -12,9 +12,9 @@ backscope is [Numberscope's](https://numberscope.colorado.edu) back end. It is
 responsible for getting sequences and other data from the [On-Line Encyclopedia
 of Integer Sequences](https://oeis.org).
 
-## Setup
+## Set up backscope
 
-### Python
+### Install Python
 
 You need a version of Python at least equal to 3.5, but ideally one greater than
 that. (If you don't have Python, install the latest stable version.) By
@@ -126,7 +126,7 @@ You should see help for the `venv` module.
    db=# \q
    ```
 
-## Running backscope
+## Run backscope
 
 Option 1:
 ```bash
