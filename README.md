@@ -62,7 +62,7 @@ You should see help for the `venv` module.
 1. Create your virtual environment:
 
    ```bash
-   python -m venv .venv # Create a new virtual env called .venv
+   python -m venv .venv # create a new virtual env called .venv
    source .venv/bin/activate
    pip install -r requirements.txt
    pip install --force cypari2
@@ -81,7 +81,7 @@ You should see help for the `venv` module.
 
    ```bash
    psql
-   <username>=# CREATE DATABASE <database_name>;
+   <username>=# CREATE DATABASE <database name>;
    CREATE DATABASE
    <username>=# \q
    ```
@@ -94,11 +94,11 @@ You should see help for the `venv` module.
 
    ```
    export APP_SETTINGS="config.DevelopmentConfig"
-   export DATABASE_URI="postgresql://localhost/<database_name>"
+   export DATABASE_URI="postgresql://localhost/<database name>"
    export SECRET_KEY="Uneccessary for development"
-   export POSTGRES_USER="<user name for psql>"
-   export POSTGRES_DB="<database_name>"
-   export POSTGRES_PASSWORD="<user password for psql>"
+   export POSTGRES_USER="<username for psql>"
+   export POSTGRES_DB="<database name>"
+   export POSTGRES_PASSWORD="<password for psql>"
    ```
 
    You can see other configuration options inside
@@ -116,7 +116,7 @@ You should see help for the `venv` module.
    ```bash
    python manage.py db migrate # migrate data models
    python manage.py db upgrade # upgrade changes to database
-   psql -d <database_name>
+   psql -d <database name>
    db=# \d
     Schema |      Name       |   Type   | Owner
    --------+-----------------+----------+-------
@@ -142,6 +142,6 @@ flask run
 This should print a series of messages. One of these
 messages should be the URL the server is running on, typically
 `http://127.0.0.1:5000/`. To test that the server is working correctly,
-try visiting "<URL>/api/get_oeis_values/A000030/50" (substitute in the server
-URL for "<URL>" -- this should display the first digits of the numbers from
+try visiting `<URL>/api/get_oeis_values/A000030/50` (substitute in the server
+URL for `<URL>`. This should display the first digits of the numbers from
 0 through 49.
