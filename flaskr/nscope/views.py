@@ -201,12 +201,17 @@ def get_valid_oeis_id(oeis_id):
         else:
             first_character = oeis_id[0]
             if first_character.islower():
-                # TODO: This should be logged. See
-                # https://github.com/numberscope/backscope/issues/57.
-                print('info: first character in oeis_id is lowercase')
-                print('info: making first character in oeis_id uppercase')
-                valid_id = first_character.upper()
-                valid_id += oeis_id.partition(first_character)[2]
+                """
+                If we can configure logging levels, e.g. info, warn,
+                error, debug, verbose, etc., then the following print
+                statements should be (verbose?) logs.
+                
+                TODO:
+                https://github.com/numberscope/backscope/issues/57
+                """
+                print('verbose: first character in oeis_id is lowercase')
+                print('verbose: making first character in oeis_id uppercase')
+                valid_id = first_character.upper() + valid_id[1:]
     else:
         raise TypeError('oeis_id not a string')
     return valid_id
