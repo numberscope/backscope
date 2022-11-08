@@ -68,10 +68,11 @@ You should see help for the `venv` module.
 
    Specifically, once you are set up, it should be possible to use the command
    `psql` to connect to a Postgres shell where you can create a database for
-   backscope.
+   backscope. You should be able to use the `-U` flag to specify a user who
+   has the correct permissions to access the Postgres shell and create a database.
 
    ```bash
-   psql
+   psql -U <username for psql>
    <username>=# CREATE DATABASE <database name>;
    CREATE DATABASE
    <username>=# \q
@@ -108,10 +109,10 @@ You should see help for the `venv` module.
    psql -d <database name>
    db=# \d
     Schema |      Name       |   Type   | Owner
-   --------+-----------------+----------+-------
-    public | alembic_version | table    | <username>
-    public | user            | table    | <username>
-    public | user_id_seq     | sequence | <username>
+   --------+-----------------+----------+--------------------
+    public | alembic_version | table    | <username for psql>
+    public | user            | table    | <username for psql>
+    public | user_id_seq     | sequence | <username for psql>
    db=# \q
    ```
 
