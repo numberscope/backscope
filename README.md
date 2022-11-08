@@ -135,3 +135,19 @@ messages should be the URL the server is running on, typically
 try visiting `<URL>/api/get_oeis_values/A000030/50` (substitute in the server
 URL for `<URL>`). This should display the first digits of the numbers from
 0 through 49.
+
+## More information
+
+### General
+
+- [API Endpoints](./doc/api_endpoints.md)
+- [Directory Descriptions](./doc/directory_descriptions.md)
+- [Resetting the Database](./doc/resetting-the-database.md)
+
+### Administering the production backscope instance
+
+- [Update Backscope](./doc/update-backscope.md)
+- [Server Administration](./doc/server-administration.md)
+- [Database Administration](./doc/database-administration.md)
+- [server Directory README](./server/README.md)
+
