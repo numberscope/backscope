@@ -16,11 +16,11 @@ of Integer Sequences](https://oeis.org).
 
 ### Install Python
 
-You need a version of Python at least equal to 3.5, but ideally one greater than
-that. (If you don't have Python, install the latest stable version.) By
-installing a version of Python greater than or equal to 3.5, you should get
-the package installer for Python (`pip`) and a working `venv` module for
-creating a virtual environment.
+You need a version of Python at least equal to 3.5. (If you don't have
+Python, install the latest stable version.) By installing a version of
+Python greater than or equal to 3.5, you should get the package
+installer for Python (`pip`) and a working `venv` module for creating a
+virtual environment.
 
 To check to see your Python version, issue the following command:
 
