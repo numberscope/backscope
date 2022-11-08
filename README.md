@@ -39,15 +39,6 @@ In that case, issue the following command:
 python3 --version
 ```
 
-To check to see if you have a working `pip`, issue the following
-command (substituting `python3` if necessary):
-
-```shell
-pip --version
-```
-
-You should see something like "pip 22.2.2".
-
 To check to see if you have a working `venv` module, issue the following
 command (substituting `python3` if necessary):
 
