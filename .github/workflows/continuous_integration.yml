@@ -21,7 +21,7 @@ jobs:
           source .venv/bin/activate
           pip install cysignals
           pip install Cython
-          pip install cypari2 --user
+          pip install cypari2
       - name: Test backscope
         run: |
           source .venv/bin/activate
