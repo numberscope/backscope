@@ -19,6 +19,8 @@ jobs:
         run: |
           sudo apt install pari-gp
           source .venv/bin/activate
+          pip install cysignals
+          pip install Cython
           pip install --force cypari2
       - name: Test backscope
         run: |
