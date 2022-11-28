@@ -19,6 +19,7 @@ jobs:
         run: |
           sudo apt install pari-gp
           source .venv/bin/activate
+          pip install setuptools
           pip install cysignals
           pip install Cython
           pip install cypari2
