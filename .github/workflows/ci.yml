@@ -13,6 +13,7 @@ jobs:
         run: |
           python -m venv .venv
           source .venv/bin/activate
+          pip install wheel
           pip install -r requirements.txt
       - name: Attempt to install cypari2
         continue-on-error: true
