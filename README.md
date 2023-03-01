@@ -14,6 +14,11 @@ of Integer Sequences](https://oeis.org).
 
 ## Set up backscope
 
+All of these instructions assume you have already cloned the backscope
+repository from `https://github.com/numberscope/backscope` and are in
+the top-level directory of your clone (the directory that contains this
+`README.md` file).
+
 ### Install Python
 
 You need a version of Python at least equal to 3.5. (If you don't have
@@ -39,25 +44,67 @@ In that case, issue the following command:
 python3 --version
 ```
 
+In all the remaining commands, substitute either `python` or `python3` for
+`[PYEXEC]` depending on which of the above worked.
+
 To check to see if you have a working `venv` module, issue the following
-command (substituting `python3` if necessary):
+command:
 
 ```shell
-python -m venv -h
+[PYEXEC] -m venv -h
 ```
 
 You should see help for the `venv` module.
 
+Note that since you will (likely) be compiling the cypari Python package, you
+will (likely) need a _full_ Python3 installation, including the
+"development header files." To check if these files are installed, you can
+execute the following (very long) command:
+
+```shell
+[PYEXEC] -c "from distutils import sysconfig as s; from os.path import isfile; print(isfile(s.get_config_vars()['INCLUDEPY']+'/Python.h') and 'OK')"
+```
+
+If this command displays anything other than `OK` (such as `False` or an error
+message) then your distribution is lacking these header files. You likely
+will need to install the "Python development" package for your operating
+system (the details of doing so are beyond the scope of these instructions).
+
+### Other prerequisites
+
+For a successfull installation of backscope, you will (likely) need a
+_full_ Pari/GP installation already present on your computer, including the
+documentation files. To test if the installation is present, try
+executing:
+
+```shell
+gphelp -detex factorial
+```
+
+You should see a description of Pari/GP's factorial function. If not, you
+may need to install Pari/GP and/or additional packages related to it,
+depending on your operating system.
+
 ### Create a virtual environment and install dependencies
 
-1. Create your virtual environment:
+1. Create your virtual environment and activate it:
 
    ```bash
-   python -m venv .venv # create a new virtual env called .venv
+   [PYEXEC] -m venv .venv # create a new virtual env called .venv
    source .venv/bin/activate
    pip install -r requirements.txt
    pip install --force cypari2
    ```
+
+   All remaining instructions assume that you have this virtual environment
+   activated. So if, for example, you stop and log out and come back later
+   and pick up the process, make sure to re-activate the virtual environment
+   by re-issuing the `source .venv/bin/activate` command in the top-level
+   directory of your backscope clone. Note also that once the virtual
+   environment is activated, the `python` command will invoke the proper
+   version of `python`, so you no longer need to worry about whether you
+   need to call `python3` or `python`. Hence, the remaining instructions
+   all just use `python`.
 
 2. Install and configure PostgreSQL and create an empty database:
 
@@ -84,7 +131,7 @@ You should see help for the `venv` module.
    username / password, you must create a file called `.env` in the root
    of your directory containing:
    ```
-   export APP_SETTINGS="config.DevelopmentConfig"
+   export APP_ENVIRONMENT="development"
    export DATABASE_URI="postgresql://localhost/<database name>"
    export SECRET_KEY="Uneccessary for development"
    export POSTGRES_USER="<username for psql>"
@@ -106,11 +153,12 @@ You should see help for the `venv` module.
    ```bash
    python manage.py db migrate # migrate data models
    python manage.py db upgrade # upgrade changes to database
-   psql -d <database name>
+   psql -U <username for psql> -d <database name>
    db=# \d
     Schema |      Name       |   Type   | Owner
    --------+-----------------+----------+--------------------
     public | alembic_version | table    | <username for psql>
+    public | sequences       | table    | <username for psql>
     public | user            | table    | <username for psql>
     public | user_id_seq     | sequence | <username for psql>
    db=# \q

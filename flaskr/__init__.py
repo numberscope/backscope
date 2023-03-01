@@ -7,6 +7,7 @@ from flask import Flask
 import click
 from flask.cli import with_appcontext
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 import logging
 from logging.handlers import RotatingFileHandler
 import sys
@@ -31,6 +32,7 @@ def create_app(environment='development'):
     app = Flask(__name__, instance_relative_config=True)
 
     # Upload config from config.py
+    if environment == 'development': CORS(app)
     app.config.from_object(config[environment])
     
     # Logging
