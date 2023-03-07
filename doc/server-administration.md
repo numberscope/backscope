@@ -18,6 +18,11 @@ forward requests to a Python application. There are lots of different
 Python libraries that implement a WSGI. We use one called Gunicorn
 (Green Unicorn).
 
+We also need to set up a `.env` file in the root directory of that backscope
+clone. This is done much as for a development instance of backscope, as
+described in the root-level README.md. However, the environment variable
+`APP_ENVIRONMENT` should be set to `production` rather than `development`.
+
 In the `production.sh` script in the `server` directory of `backscope`,
 we tell Gunicorn to run `backscope`. In `/etc/systemd/system/` there's a
 symlinked `numberscope.service` file that runs the `production.sh`

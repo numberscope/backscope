@@ -9,4 +9,4 @@ Numberscope's server.
 * `production.sh` run by `numberscope.service`
 
 See `create-symlinks.sh` for the actual symlink commands. To add the
-`numberscope` systemd service, run `add-numberscope-servicee.sh`.
+`numberscope` systemd service, run `add-numberscope-service.sh`.
