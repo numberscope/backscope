@@ -2,27 +2,16 @@
 Views for nscope model
 """
 
-from flask import Blueprint
-from flask import flash
-from flask import g
-from flask import redirect
-from flask import url_for
-from flask import Flask, request, jsonify, render_template, send_file
+from flask import Blueprint, jsonify, render_template
 from flask_executor import Executor
-from flask_login import LoginManager, current_user, login_user
-from flaskr import db
-
-from werkzeug.exceptions import abort
-from sqlalchemy import or_, func
-import numpy as np
-import requests
-import os
-import sys
-import cypari2
-from cypari2.convert import gen_to_python
-
 from flaskr import db
 from flaskr.nscope.models import *
+
+import cypari2
+from cypari2.convert import gen_to_python
+import re
+import requests
+
 
 executor = Executor()
 bp = Blueprint("nscope", __name__)
@@ -33,19 +22,22 @@ bp = Blueprint("nscope", __name__)
 def index():
     return render_template("index.html")
 
-def save_oeis_sequence(seq, detail = ''):
-    """ The first argument is a Sequence object which has had its values
-        filled in. This function grabs its metadata and incorporates that
-        information, adds the resulting sequence to the database, and
-        returns it. Unless the optional second argument ends with 'nofactor'
-        it then initiates factoring the sequence.
+def fetch_metadata(oeis_id):
+    """ When called with a *valid* oeis id, makes sure the metadata has been
+        obtained, and returns the corresponding Sequence object with valid
+        metadata.
+
+        Note that this also crawls all backreferences, so it can take quite
+        a long time for popular sequences (potentially hours).
     """
-    # NOTE however that nothing currently prevents two requests
-    # for the same newly-encountered sequence ending up both getting to this
-    # code at roughly the same time (if the second comes in before the first
-    # has had a chance to fill in the database). In that case, all of the
-    # lookup work will be duplicated, although Postgres should ensure that when
-    # all is said and done, the database is left in an OK state.
+    seq = find_oeis_sequence(oeis_id)
+    if seq.meta_requested:
+        if seq.raw_refs is None:
+            return LookupError(f"Metadata fetching for {oeis_id} in progress")
+        return seq
+    seq.meta_requested = True
+    db.session.commit()
+    # Now grab the data
     match_url = f"https://oeis.org/search?q={seq.id}&fmt=json"
     r = requests.get(match_url).json()
     if r['results'] != None: # Found some metadata
@@ -66,28 +58,52 @@ def save_oeis_sequence(seq, detail = ''):
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
-    db.session.add(seq)
     db.session.commit()
-    if not detail.endswith('nofactor'):
-        executor.submit(factor_oeis_sequence, seq, len(seq.values))
     return seq
 
-def find_oeis_sequence(oeis_id, detail = ''):
-    """ Returns either a Sequence object, or an Error object if ID invalid, etc.
-        Note it _returns_ the Error object, rather than throwing it.
-        The optional second argument is a string with special values:
-        'name' means to make an extra request to get the official name,
-        'full_nofactor' and 'full' mean to wait to get all of the sequence
-        data from the OEIS server; otherwise it only retrieves the values
-        and leaves extraction of other information to a background task.
-        Factoring is always left to a background task unless 'full_nofactor'
-        is specified, in which case factoring is not initiated at all.
+def find_oeis_sequence(oeis_id):
+    """ Returns a Sequence object associated with the given valid OEIS ID.
+        Only call this with a non-Exception return value of
+        get_valid_oeis_id().
+
+        If the oeis_id is not yet in the database, simply creates
+        a dummy Sequence entry and adds it to the database with no data.
+        So the returned Sequence object may not have any data.
+
+        Note further that just finding a sequence does not schedule any
+        filling in of its data. That needs to be done judiciously by the
+        requests.
     """
-    # First check if it is in the database
     seq = Sequence.get_seq_by_id(oeis_id)
     if seq: return seq
-    # Try to get it from the OEIS:
-    domain = 'https://oeis.org/'
+    # Note the sequence index might not correspond to an existing sequence
+    # but we just ignore that issue for the sake of returning quickly
+    seq = Sequence(id=oeis_id)
+    db.session.add(seq)
+    db.session.commit()
+    return seq
+
+def placeholder_name(oeis_id):
+    return f"{oeis_id} [name not yet loaded]"
+
+domain = 'https://oeis.org/'
+
+def fetch_values(oeis_id):
+    """
+        When called with a valid oeis id, fetches the b-file from the
+        OEIS (if it has not already been), and returns a Sequence object
+        with the values filled in.
+    """
+    # First check if it is in the database
+    seq = find_oeis_sequence(oeis_id)
+    # See if we already have the values:
+    if seq.values is not None: return seq
+    # See if getting them is in progress:
+    if seq.values_requested:
+        return LookupError("Value fetching for {oeis_id} in progress.")
+    seq.values_requested = True
+    db.session.commit()
+    # Now try to get it from the OEIS:
     r = requests.get(f"{domain}{oeis_id}/b{oeis_id[1:]}.txt")
     if r.status_code == 404:
         return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
@@ -114,31 +130,18 @@ def find_oeis_sequence(oeis_id, detail = ''):
         seq_vals[index] = column[1]
     if last < first:
         return IndexError(f"No terms found for ID '{oeis_id}'.")
-    vals = [seq_vals[i] for i in range(first,last+1)]
-
-    if detail == 'name':
-        r = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json").json()
-        if r['results'] != None:
-            name = r['results'][0]['name']
-
-    # If need be, fill in a placeholder until we look up the real name.
-    if not name: name = f"{oeis_id} [name not yet loaded]"
-
-    seq = Sequence(id=oeis_id, name=name, shift=first, values=vals)
-    if detail.startswith('full'):
-        # Get all of the data and make sure it's in the database synchronously
-        # as requested
-        return save_oeis_sequence(seq, detail)
-    # Otherwise, schedule the database interaction so we can respond to the
-    # request immediately:
-    executor.submit(save_oeis_sequence, seq, detail)
+    seq.values = [seq_vals[i] for i in range(first,last+1)]
+    if not seq.name:
+        seq.name = name or placeholder_name(oeis_id)
+    db.session.commit()
     return seq
 
+def fetch_factors(oeis_id, num_elements = -1):
+    """ The first argument oeis_id must be a valid OEIS id that is already
+        stored in the database **with all of its values**.
+        The second argument num_elements gives the number of terms to factor,
+        or the default -1 means to factor all known elements.
 
-def factor_oeis_sequence(seq, num_elements):
-    """ The first argument seq must be a Sequence object already stored
-        in the database with all of its metadata.
-        The second argument num_elements gives the number of terms to factor.
         This function factors the first num_elements terms (if they aren't
         already) and adds them to the database.
         Returns seq object if requested factors existed or were added
@@ -151,13 +154,9 @@ def factor_oeis_sequence(seq, num_elements):
         stored as a string (since flask doesn't allow multidimensional
         arrays with varying sizes).
     """
-    # The hardcoded integer size limit below can be pushed
-    # further once we are doing factoring tasks on a background queue.
+    seq = find_oeis_sequence(oeis_id)
 
-    # It appears that we are obliged to re-fetch the sequence from the database
-    # for the updates to occur through Flask magic:
-    seq = Sequence.get_seq_by_id(seq.id)
-    if len(seq.values) < num_elements:
+    if num_elements < 0 or len(seq.values) < num_elements:
         num_elements = len(seq.values)
     # Load from database how much has been factored already
     if not seq.factors:
@@ -175,7 +174,7 @@ def factor_oeis_sequence(seq, num_elements):
         # the factorization of 1 is empty
         if val == 1:
             fac = []
-        elif abs(val) <= 2**200: # term size limit
+        elif abs(val) <= 2**200: # Arbitrary limit; a timeout would be better
             fac = []
             # elements are arrays [p, e] for factor p^e
             # including [-1,1] for negative numbers
@@ -192,36 +191,60 @@ def factor_oeis_sequence(seq, num_elements):
     db.session.commit()
     return seq
 
+def fetch_values_and_factors(oeis_id):
+    """ Convenience sequencing function for get_oeis_metadata """
+    seq = fetch_values(oeis_id)
+    if isinstance(seq, Exception): return seq
+    return fetch_factors(oeis_id)
+
+# The following regexp encodes the format of valid OEIS IDs. NOTE: when
+# that format eventually changes, this code will have to be updated.
+oeis_validator = re.compile(r'^A\d{6}$')
+oeis_valid_format = 'Annnnnn'
 
 def get_valid_oeis_id(oeis_id):
+    """ Takes a string and returns either the associated valid OEIS id
+        or an Exception indicating the difficulty with the input id.
+        Note it does not raise the exception, just returns it.
+    """
+
+    if not isinstance(oeis_id, str):
+        return TypeError('Supplied oeis_id is not a string')
+    if len(oeis_id) != 7:
+        return SyntaxError(f"ID {oeis_id} is not 7 characters long")
     valid_id = oeis_id
-    if isinstance(oeis_id, str):
-        if len(oeis_id) != 7:
-            raise Exception('oeis_id not 7 characters in length')
-        else:
-            first_character = oeis_id[0]
-            if first_character.islower():
-                """
-                If we can configure logging levels, e.g. info, warn,
-                error, debug, verbose, etc., then the following print
-                statements should be (verbose?) logs.
-                
-                TODO:
-                https://github.com/numberscope/backscope/issues/57
-                """
-                print('verbose: first character in oeis_id is lowercase')
-                print('verbose: making first character in oeis_id uppercase')
-                valid_id = first_character.upper() + valid_id[1:]
-    else:
-        raise TypeError('oeis_id not a string')
-    return valid_id
+    first_character = oeis_id[0]
+    if first_character.islower():
+        """ If we can configure logging levels, e.g. info, warn,
+            error, debug, verbose, etc., then the following print
+            statements should be (verbose?) logs.
+
+            TODO:
+            https://github.com/numberscope/backscope/issues/57
+        """
+        print('verbose: first character in oeis_id is lowercase')
+        print('verbose: making first character in oeis_id uppercase')
+        valid_id = first_character.upper() + valid_id[1:]
+    # The normal case:
+    if oeis_validator.match(valid_id): return valid_id
+    # Report appropriate error:
+    if oeis_id == valid_id:
+        return SyntaxError(f"ID {oeis_id} not of form {oeis_valid_format}")
+    return SyntaxError(
+        f"Neither {oeis_id} nor {valid_id} of form {oeis_valid_format}")
 
 @bp.route("/api/get_oeis_values/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_values(oeis_id, num_elements):
     valid_oeis_id = get_valid_oeis_id(oeis_id)
-    seq = find_oeis_sequence(valid_oeis_id)
+    if isinstance(valid_oeis_id, Exception):
+        return f"Error: {valid_oeis_id}"
+    seq = fetch_values(valid_oeis_id)
     if isinstance(seq, Exception):
         return f"Error: {seq}"
+    # OK, got valid sequence, so schedule grabbing of metadata and factors:
+    executor.submit(fetch_metadata, valid_oeis_id)
+    executor.submit(fetch_factors, valid_oeis_id)
+    # Finally, trim return sequence as requested:
     raw_vals = seq.values
     wants = int(num_elements)
     if wants and wants < len(raw_vals):
@@ -233,18 +256,32 @@ def get_oeis_values(oeis_id, num_elements):
 @bp.route("/api/get_oeis_name_and_values/<oeis_id>", methods=["GET"])
 def get_oeis_name_and_values(oeis_id):
     valid_oeis_id = get_valid_oeis_id(oeis_id)
-    seq = find_oeis_sequence(valid_oeis_id, 'name')
+    if isinstance(valid_oeis_id, Exception):
+        return f"Error: {valid_oeis_id}"
+    seq = fetch_values(valid_oeis_id)
     if isinstance(seq, Exception):
         return f"Error: {seq}"
-    vals = {(i + seq.shift): seq.values[i] for i in range(len(seq.values))}
+    raw_vals = seq.values
+    vals = {(i + seq.shift): raw_vals[i] for i in range(len(raw_vals))}
+    # Now get the name
+    seq = find_oeis_sequence(valid_oeis_id)
+    if not seq.name or seq.name == placeholder_name(oeis_id):
+        r = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json").json()
+        if r['results'] != None:
+            seq.name = r['results'][0]['name']
+            db.session.commit()
+    executor.submit(fetch_factors, valid_oeis_id)
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
 @bp.route("/api/get_oeis_metadata/<oeis_id>", methods=["GET"])
 def get_oeis_metadata(oeis_id):
     valid_oeis_id = get_valid_oeis_id(oeis_id)
-    seq = find_oeis_sequence(valid_oeis_id, 'full')
+    if isinstance(valid_oeis_id, Exception):
+        return f"Error: {valid_oeis_id}"
+    seq = fetch_metadata(valid_oeis_id)
     if isinstance(seq, Exception):
         return f"Error: {seq}"
+    executor.submit(fetch_values_and_factors, valid_oeis_id)
     return jsonify({
         'id': seq.id,
         'name': seq.name,
@@ -255,17 +292,20 @@ def get_oeis_metadata(oeis_id):
 @bp.route("/api/get_oeis_factors/<oeis_id>/<num_elements>", methods=["GET"])
 def get_oeis_factors(oeis_id, num_elements):
     valid_oeis_id = get_valid_oeis_id(oeis_id)
-    seq = find_oeis_sequence(valid_oeis_id, 'full_nofactor') # we're about to do it...
+    if isinstance(valid_oeis_id, Exception):
+        return f"Error: {valid_oeis_id}"
+    raw_vals = fetch_values(valid_oeis_id)
+    if isinstance(raw_vals, Exception):
+        return f"Error: {raw_vals}"
+    wants = int(num_elements)
+    seq = fetch_factors(valid_oeis_id, wants)
     if isinstance(seq, Exception):
         return f"Error: {seq}"
-    wants = int(num_elements)
-    seq = factor_oeis_sequence(seq, wants)
-    if isinstance(seq, Exception):
-        return f"Error: Factorization failed: {result}"
     raw_fac = seq.factors
     if wants and wants < len(raw_fac):
         raw_fac = raw_fac[0:wants]
     facs = {(i+seq.shift):raw_fac[i] for i in range(len(raw_fac))}
+    executor.submit(fetch_metadata, valid_oeis_id)
     return jsonify({
         'id': seq.id,
         'name': seq.name,
