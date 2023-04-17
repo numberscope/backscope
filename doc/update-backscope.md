@@ -1,4 +1,4 @@
-# How to update backscope
+# How to update backscope on the colorado.edu server
 
 This assumes the latest changes have been thoroughly tested. When you
 restart `backscope`, a script activates the virtual environment and
