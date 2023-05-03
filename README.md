@@ -14,10 +14,39 @@ of Integer Sequences](https://oeis.org).
 
 ## Set up backscope
 
-All of these instructions assume you have already cloned the backscope
-repository from `https://github.com/numberscope/backscope` and are in
-the top-level directory of your clone (the directory that contains this
-`README.md` file).
+These instructions are for Ubuntu, a Linux distribution. If you are trying to
+run backscope on a different Linux distribution or on a different operating
+system, you will need to modify the commands.
+
+- Install Git.
+  - First, check if Git is installed: `which git`
+  - If you don't see any output: `sudo apt install git`
+- Clone backscope.
+  - Using HTTP: `git clone https://github.com/numberscope/backscope.git`
+  - Using SSH: `git clone git@github.com:numberscope/backscope.git` 
+- Install pari-gp, required for cypari2.
+  `sudo apt install pari-gp`
+- Install libpari-dev, which contains a `pari.desc` file needed to install
+  cypari2.
+  - Ensure the file exists by checking for `/usr/share/pari/pari.desc`.
+- Install libgmp-dev, required for cypari2.
+  `sudo apt install libgmp-dev`
+- Install essential build tools, required for cypari2.
+  - `sudo apt install build-essential`
+- Install Python 3.
+  - First, check if Python 3 is installed: `which python3`
+  - If you don't see any output: `sudo apt install python3`
+- Install python3-dev, required for cypari2.
+  - `sudo apt install python3-dev`
+- Install the package that makes it so you can create a virtual environment.
+  - `sudo apt install python3.xy-venv` where `xy` is a version number, e.g.
+    `python3.10-venv`.
+- Create the virtual environment.
+  - `python3 -m venv .venv`
+- Activate the virtual environment.
+  - If you are using Bash: `source .venv/bin/activate`
+- Install dependencies.
+  - `pip install -r requirements.txt`
 
 ### Install Python
 
