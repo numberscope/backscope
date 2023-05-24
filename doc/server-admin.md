@@ -1,10 +1,12 @@
-# Server administration
+Server administration
+=====================
 
 As of this writing, `backscope` is running on a server in CU's math
 building. For info on the point of contact for the server, ask one of
 Numberscope's maintainers.
 
-## How `backscope` is set up
+How `backscope` is set up
+-------------------------
 
 In the `/home` directory, there's a directory `scope` for the user
 `scope`. Within the `scope` directory, there's a `repos` directory.
@@ -29,7 +31,8 @@ symlinked `numberscope.service` file that runs the `production.sh`
 script. (The `/etc/systemd/system/` is a directory that houses systemd
 (system daemon) files.)
 
-## `numberscope` systemd commands
+`numberscope` systemd commands
+------------------------------
 
 Note: We named the systemd file `numberscope.service` because it is
 responsible for serving `frontscope`'s built files as well as forwarding
@@ -55,7 +58,8 @@ Stop `numberscope`:
 sudo systemctl stop numberscope
 ```
 
-## How Nginx is set up
+How Nginx is set up
+-------------------
 
 As of this writing, our Nginx configuration is simple. We preserve the
 default configuration we get from Nginx upon installation with two
@@ -69,7 +73,8 @@ exceptions:
 2. We remove the `default` site from the `/etc/nginx/sites-enabled`
    directory.
 
-## Note on HTTPS
+Note on HTTPS
+-------------
 
 We used Certbot to create SSL certificates so that we can access
 numberscope.colorado.edu using HTTPS. In doing so, some of the Nginx
@@ -77,7 +82,8 @@ configuration files were modified. Certbot seems to insert a comment
 when it modifies your configuration files, so it should be obvious what
 the Certbot modifications are.
 
-## Steps for using Certbot
+Steps for using Certbot
+-----------------------
 
 These are the steps followed to create SSL certificates. They can be
 found

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Format the code.
+black .
+
+# Lint the code.
+ruff check .
+
+# Test the code.
+pytest

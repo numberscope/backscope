@@ -1,4 +1,5 @@
-# Numberscope Server Configuration
+Numberscope Server Configuration
+================================
 
 The files contained in this directory are configuration files for
 Numberscope's server.

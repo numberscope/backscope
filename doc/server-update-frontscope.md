@@ -1,4 +1,5 @@
-# How to update frontscope on the colorado.edu server
+How to update frontscope on the colorado.edu server
+===================================================
 
 1. Connect to the server: `ssh you@numberscope.colorado.edu`
 2. Change user: `sudo -i -u scope`
