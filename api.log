@@ -1,0 +1,52 @@
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+MY_FOO = None
+HTTPSConnectionPool(host='oeis.orga000040', port=443): Max retries exceeded with url: /b000040.txt (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7ff91b15c730>: Failed to resolve 'oeis.orga000040' ([Errno -2] Name or service not known)"))
+HTTPSConnectionPool(host='oeis.orga000041', port=443): Max retries exceeded with url: /b000041.txt (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7ff91b15ca90>: Failed to resolve 'oeis.orga000041' ([Errno -2] Name or service not known)"))
+HTTPSConnectionPool(host='oeis.orga000041', port=443): Max retries exceeded with url: /b000041.txt (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7ff91b15d630>: Failed to resolve 'oeis.orga000041' ([Errno -2] Name or service not known)"))
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+MY_FOO = foo
+HTTPSConnectionPool(host='oeis.orga000040', port=443): Max retries exceeded with url: /b000040.txt (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7efdf0dc86a0>: Failed to resolve 'oeis.orga000040' ([Errno -2] Name or service not known)"))
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+'NoneType' object has no attribute 'append'
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+metadata fetching for A000001 in progress
+metadata fetching for A000001 in progress
+metadata fetching for A000001 in progress
+metadata fetching for A000001 in progress
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+metadata fetching for A000001 in progress
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
+attempting to connect to db
+connected to db
