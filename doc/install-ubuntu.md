@@ -10,6 +10,9 @@ steps. There are some comments on modifications you might need to make
 within the steps below. You may need to become more familiar with the details
 of the various software packages needed in order to do this.
 
+Note that you will likely need at least 4GB of memory in order to build and
+install backscope and its dependencies.
+
 ### Install Git
 
 First, check if Git is installed:
@@ -191,6 +194,12 @@ then re-execute the first command in this step to check it worked.
 [PYEXEC] -m venv .venv
 ```
 
+Note that on recent Ubuntu installations, even though the test for the
+presence of venv succeeds, this command to create a virtual environment
+may fail. If so, it should give you a command to fix the situation. (If not,
+try the installation step just above.) Execute the provided command and
+then re-try creating the virtual environment.
+
 ### Activate the virtual environment
 
 If you are using Bash:
@@ -217,13 +226,81 @@ all just use `python`.
 This installs all of backscope's dependencies listed in
 `requirements.txt`.
 
-```
+```shell
 sh tools/install-requirements.sh
 ```
 
+Expect the step that compiles `cypari2` to take a significant amount of time.
+If it fails saying that a compile command was killed, you may not have
+enough memory available; you probably need at least 4GB.
+
 ### Install and configure PostgreSQL
 
-HERE!!!
+First, install the PostgreSQL package:
 
-Now you may continue from the "Create a database" section of the
+```shell
+sudo apt install postgresql
+```
+
+Next, create a database user for the backscope system to use. You may
+use any name for the user (except `postgres`) but make a note of your
+choice; you will need that user name in subsequent steps.
+
+```shell
+sudo -u postgres createuser --interactive
+```
+
+Note that this program uses the word "role" for "user name." Do not make
+the new user ("role") a superuser, but do allow it to create databases.
+Don't allow it to create more new roles.
+
+Next we need to set the password for the new user. Again, you can use whatever
+password you like, but make a note of it as you will need it later. Fill in
+your choice where you see `<database password>` below.
+
+```shell
+sudo -u postgres psql
+psql (XX.YY [version number with more version info here])
+Type "help" for help.
+
+postgres=# ALTER USER <backscope database user> with encrypted password '<database password>';
+ALTER ROLE
+postgres=# \q
+
+```
+
+Now we must allow password authentication for the new user. For this you
+must use an editor to change one of the postgres configuration files. The
+example command below uses the `nano` editor, but you may use any editor
+of your choice. The location of the file depends on the Postgres version,
+which was displayed when you started `psql` above. Insert that major version
+number where you see `<XX>` below.
+
+```shell
+sudo nano /etc/postgresql/<XX>/main/pg_hba.conf
+```
+
+Use the editor to insert the following line into the file
+just before the line `local  all        all         peer` -- substituting
+your chosen user name, of course:
+
+```
+local  all      <backscope database user>       scram-sha-256
+```
+
+Save the file and then restart the PostgreSQL server:
+
+```shell
+sudo systemctl restart postgresql.service
+```
+
+This should allow your new user to create a database. As with the other
+choices you are making in this process, remember the database name since you
+will need it later.
+
+```shell
+createdb -U <backscope database user> -W <database name>
+```
+
+Now you may continue from the "Set up your environment" section of the
 [Postgres configuration instructions](install-postgres.md).
