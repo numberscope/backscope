@@ -51,8 +51,18 @@ You can see other configuration options inside
 
 ### Configure the database
 
+Note that in the following guide, commands that you would be
+entering/executing are preceded by a `>` character (representing a generic
+"shell prompt") whereas output that the commands would generate (which may
+or may not be shown in detail, depending on context) is shown on lines
+without a `>` character.
+
+Also, if you are copying/typing these commands by hand, note that the `#`
+character indicates a "shell comment." You don't need to enter this
+character or anything that follows it on a line.
+
 ```
-python manage.py db init # initializes tables inside database
+> python manage.py db init  # initializes tables inside database
 ```
 
 The previous command might issue a message about editing
@@ -60,10 +70,10 @@ The previous command might issue a message about editing
 with:
 
 ```
-python manage.py db migrate # migrate data models
-python manage.py db upgrade # upgrade changes to database
-psql -U <backscope database user> -d <database name>
-db=# \d
+> python manage.py db migrate  # migrate data models
+> python manage.py db upgrade  # upgrade changes to database
+> psql -U <backscope database user> -d <database name>  # invokes data browser
+db> \d
             List of relations
  Schema |      Name       | Type     | Owner 
 --------+-----------------+----------+-------
@@ -71,7 +81,7 @@ db=# \d
  public | sequences       | table    | <username for psql>
  public | user            | table    | <username for psql>
  public | user_id_seq     | sequence | <username for psql>
-db=# \q
+db> \q  # exits psql
 ```
 
 Note that if you made the backscope database user name the same as the

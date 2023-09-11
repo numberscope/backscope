@@ -2,7 +2,7 @@
 
 These step-by-step instructions are for (a fresh installation of the latest)
 Ubuntu, a Linux distribution. They assume no prior knowledge concerning
-the software used here.
+any of the software packages or tools that backscope depends on.
 
 If you are trying to run backscope on a different Linux distribution or on a
 different operating system, you will need to modify some of the commands and/or
@@ -118,7 +118,7 @@ Python greater than or equal to 3.5, you should get the package
 installer for Python (`pip`) and a working `venv` module for creating a
 virtual environment.
 
-To check to see your Python version, issue the following command:
+To check your current Python version, issue the following command:
 
 ```shell
 python --version
@@ -129,8 +129,10 @@ different numbers after the "3.". If you see a message about
 not being able to find Python, or if you don't see any output, you need to
 troubleshoot your Python installation.
 
-Depending on how you installed Python, the executable might be named `python3`.
-In that case, issue the following command:
+Depending on how you installed Python, the executable might be named
+`python3`. It's also possible that `python --version` reports a version
+number that starts with "2" -- that won't be usable by backscope. So in
+either case, try the following command:
 
 ```shell
 python3 --version
@@ -142,16 +144,19 @@ In all the remaining commands, substitute either `python` or `python3` for
 
 ### Install python3-dev, required for cypari2
 
-This is the Python development package. We need it to compile cypari2:
+This is the Python development package. We need it to compile cypari2.
+On ubuntu, you can install this package via the following command
+(regardless of whether you are invoking Python via `python` or `python3`).
 
 ```
 sudo apt install python3-dev
 ```
 
-Note that since you will (likely) be compiling the cypari2 Python
-package, you will (likely) need a _full_ Python 3 installation, including
-the "development header files." They should have been installed via the
-command just above. To make certain these files are installed,
+Note that since you will (likely) be compiling the cypari2 Python package,
+you will (likely) need a _full_ Python 3 installation, including the
+"development header files." On Ubuntu, they should have been installed via
+the command just above. On other systems, you may have to investigate the
+proper way to obtain these files. To make certain these files are installed,
 you can execute the following (very long) command:
 
 ```shell
@@ -211,8 +216,8 @@ source .venv/bin/activate
 (If you are using a shell other than Bash, there might be an activate
 script in the `.venv/bin/` directory for your shell.)
 
-All remaining instructions assume that you have this virtual environment
-activated. So if, for example, you stop and log out and come back later
+All remaining instructions **assume that you have this virtual environment
+activated**. So if, for example, you stop and log out and come back later
 and pick up the process, make sure to re-activate the virtual environment
 by re-issuing the `source .venv/bin/activate` command in the top-level
 directory of your backscope clone. Note also that once the virtual
