@@ -160,8 +160,16 @@ proper way to obtain these files. To make certain these files are installed,
 you can execute the following (very long) command:
 
 ```shell
+python3 -c "import sysconfig as s; from os.path import isfile; print(
+isfile(s.get_config_vars()['INCLUDEPY']+'/Python.h') and 'OK')"
+```
+
+(Note that for versions of python3 earlier than 3.10, you may need to use
+
+```shell
 [PYEXEC] -c "from distutils import sysconfig as s; from os.path import isfile; print(isfile(s.get_config_vars()['INCLUDEPY']+'/Python.h') and 'OK')"
 ```
+instead.)
 
 If this command displays anything other than `OK` (such as `False` or an error
 message) then your distribution is lacking these header files. This sort of
@@ -193,7 +201,7 @@ sudo apt install python3.[XX]-venv
 to install the proper package for creating virtual environments. You can
 then re-execute the first command in this step to check it worked.
 
-### Create the virtual environment.
+### Create the virtual environment
 
 ```
 [PYEXEC] -m venv .venv
