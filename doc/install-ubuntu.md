@@ -279,7 +279,6 @@ Type "help" for help.
 postgres=# ALTER USER <backscope database user> with encrypted password '<database password>';
 ALTER ROLE
 postgres=# \q
-
 ```
 
 Now we must allow password authentication for the new user. For this you
