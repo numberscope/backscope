@@ -1,0 +1,10 @@
+# This should be in /etc/systemd/system.
+
+[Unit]
+Description=backscope systemd service unit file.
+
+[Service]
+ExecStart=/bin/bash /home/scope/repos/backscope/server/production.sh
+
+[Install]
+WantedBy=multi-user.target

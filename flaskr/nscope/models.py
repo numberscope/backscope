@@ -36,9 +36,11 @@ class Sequence(db.Model):
     # The following is called the "offset" in the OEIS, but that is a
     # Postgres reserved word, so we use a different name.
     shift = db.Column(db.Integer, unique=False, nullable=False, default=0)
-    values = db.Column(db.ARRAY(db.String), unique=False, nullable=False)
+    values = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
+    values_requested = db.Column(db.Boolean, nullable=False, default=False)
     raw_refs = db.Column(db.String, unique=False, nullable=True)
     backrefs = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
+    meta_requested = db.Column(db.Boolean, nullable=False, default=False)
     # Sadly, multidimensional arrays can't vary in dimension
     # so we store factorization arrays as strings
     factors = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
