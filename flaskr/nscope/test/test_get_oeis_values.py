@@ -46,14 +46,6 @@ class TestGetOEISValues(unittest.TestCase):
         self.assertDictEqual(response.json, expected_json)
         
         # TO DO: test `save_oeis_sequence` background work
-    
-    ## to make sure that shutting down the executor doesn't cause later tests to
-    ## fail
-    def test_dummy(self):
-      with self.app.test_client() as client:
-        print("\n  Testing response")
-        endpoint = "http://127.0.0.1:5000/api/get_oeis_values/A000001/10"
-        response = client.get(endpoint)
 
 
 if __name__ == "__main__":
