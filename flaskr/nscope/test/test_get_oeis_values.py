@@ -2,7 +2,9 @@ import unittest
 from flaskr import create_app
 import flaskr.nscope.views as views
 
-
+# this test currently fails, which i think is accuarate! it looks like
+# `fetch_values` never sets the `shift` attribute of the Sequence it returns, so
+# we end up indexing from zero even if the shift should be nonzero
 class TestGetOEISValues(unittest.TestCase):
     def setUp(self):
       self.app = create_app()
@@ -12,8 +14,11 @@ class TestGetOEISValues(unittest.TestCase):
       views.executor.shutdown()
       print("  Background work done")
     
-    # we choose A321580 because it currently has small values and few
-    # references, which speeds up the `save_oeis_sequence` background work
+    # we choose A321580 because:
+    # - it has a nonzero shift, so we can make sure the default value is getting
+    #   changed to the actual value
+    # - it currently has small values and few references, which speeds up the
+    #   background work triggered by the request
     def test_get_oeis_values(self):
       # using test client is recommended in Flask testing how-to
       #   https://flask.palletsprojects.com/en/2.3.x/testing/
@@ -45,7 +50,7 @@ class TestGetOEISValues(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json, expected_json)
         
-        # TO DO: test `save_oeis_sequence` background work
+        # TO DO: test background work
 
 
 if __name__ == "__main__":
