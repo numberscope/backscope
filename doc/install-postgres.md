@@ -41,6 +41,7 @@ directory of your backscope installation, containing:
 POSTGRES_USER="<backscope database user>"
 POSTGRES_PASSWORD="<database password for that user>"
 POSTGRES_DB="<database name>"
+POSTGRES_TEST_DB="<test database name>"
 DATABASE_URI="postgresql://localhost/<database name>"
 APP_ENVIRONMENT="development"
 SECRET_KEY="Uneccessary for development"

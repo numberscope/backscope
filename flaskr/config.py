@@ -18,7 +18,7 @@ POSTGRES = {
 TEST_POSTGRES = {
     'user': os.getenv('POSTGRES_USER', 'postgres'),
     'pw': os.getenv('POSTGRES_PASSWORD', 'root'),
-    'db': os.getenv('POSTGRES_DB', 'postgres'),
+    'db': os.getenv('POSTGRES_TEST_DB', 'postgres'),
     'host': os.getenv('POSTGRES_HOST', 'localhost'),
     'port': os.getenv('POSTGRES_PORT', 5432),
 }

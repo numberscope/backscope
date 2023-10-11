@@ -22,16 +22,21 @@ load_dotenv()
 # Create a new sql alchemy database object
 db = SQLAlchemy()
 
-# default environment is development, otherwie specified by .env
-def create_app(environment='development'):
-    
-    # Get app type from .env
-    environment = os.environ.get('APP_ENVIRONMENT', environment)
+# To choose the environment, we look for settings in the following order:
+#  (1) Function parameter
+#  (2) .env
+#  (3) Default to 'development'
+def create_app(environment=None):
+    if environment is None:
+      # Get app type from .env if provided. Otherwise, use 'development'
+      environment = os.environ.get('APP_ENVIRONMENT', 'development')
 
     # Initial app and configuration
     app = Flask(__name__, instance_relative_config=True)
 
     # Upload config from config.py
+    ##print('Testing:', config[environment].TESTING)
+    ##print('URI:', config[environment].SQLALCHEMY_DATABASE_URI)
     if environment == 'development': CORS(app)
     app.config.from_object(config[environment])
     

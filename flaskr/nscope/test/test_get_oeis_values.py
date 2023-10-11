@@ -1,18 +1,36 @@
 import unittest
-from flaskr import create_app
+from flaskr import create_app, db
 import flaskr.nscope.views as views
+from flaskr.config import TestConfig
+
+
+# guidance on test database handling:
+#   https://stackoverflow.com/a/17818795/1644283
+#   https://flask-testing.readthedocs.io/en/v0.4/
 
 # this test currently fails, which i think is accuarate! it looks like
 # `fetch_values` never sets the `shift` attribute of the Sequence it returns, so
 # we end up indexing from zero even if the shift should be nonzero
 class TestGetOEISValues(unittest.TestCase):
     def setUp(self):
-      self.app = create_app()
+      self.app = create_app('testing')
+      self.ctx = self.app.app_context()
+      with self.ctx:
+        db.create_all()
+      
+      # put mid-test messages on a new line
+      print()
     
     def tearDown(self):
+      # wait for background work to finish
       print("  Waiting for background work")
       views.executor.shutdown()
       print("  Background work done")
+      
+      # clear database
+      db.session.remove()
+      with self.ctx:
+        db.drop_all()
     
     # we choose A321580 because:
     # - it has a nonzero shift, so we can make sure the default value is getting
@@ -26,7 +44,7 @@ class TestGetOEISValues(unittest.TestCase):
       # live server." the `with` block runs teardown
       #   https://github.com/pallets/flask/issues/2949
       with self.app.test_client() as client:
-        print("\n  Testing response")
+        print("  Testing response")
         endpoint = "http://127.0.0.1:5000/api/get_oeis_values/A321580/12"
         response = client.get(endpoint)
         expected_json = {
