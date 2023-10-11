@@ -51,6 +51,7 @@ If you plan on developing backscope, you might find some of these useful:
 - [Understanding our requirements files](doc/requirements.md)
 - [API endpoints](doc/api_endpoints.md)
 - [Directory descriptions](doc/directory_descriptions.md)
+- [Writing and running tests](doc/tests.md)
 
 If you are a maintainer, you might find some of these useful:
 
