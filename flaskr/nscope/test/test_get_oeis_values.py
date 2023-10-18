@@ -1,6 +1,7 @@
 import unittest
 import flaskr.nscope.test.abstract_endpoint_test as abstract_endpoint_test
 
+
 class TestGetOEISValuesWithoutShift(abstract_endpoint_test.AbstractEndpointTest):
   endpoint = "http://127.0.0.1:5000/api/get_oeis_values/A153080/12"
   
@@ -57,6 +58,7 @@ class TestGetOEISValues(abstract_endpoint_test.AbstractEndpointTest):
       '12': '32'
     }
   }
+
 
 if __name__ == "__main__":
     unittest.main()
