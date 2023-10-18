@@ -1,4 +1,5 @@
 import unittest
+import sys
 from flaskr import create_app, db
 import flaskr.nscope.views as views
 from flaskr.config import TestConfig
@@ -9,6 +10,7 @@ from flaskr.config import TestConfig
 
 class AbstractEndpointTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
+      self.verbose = ('-v' in sys.argv) or ('--verbose' in sys.argv)
       assert(hasattr(self, 'endpoint'))
       assert(hasattr(self, 'expected_response_json'))
       super().__init__(*args, *kwargs)
@@ -20,13 +22,16 @@ class AbstractEndpointTest(unittest.TestCase):
         db.create_all()
       
       # put mid-test messages on a new line
-      print()
+      if self.verbose:
+        print()
     
     def tearDown(self):
       # wait for background work to finish
-      print("  Waiting for background work")
+      if self.verbose:
+        print("  Waiting for background work")
       views.executor.shutdown()
-      print("  Background work done")
+      if self.verbose:
+        print("  Background work done")
       
       # clear database
       db.session.remove()
@@ -40,7 +45,8 @@ class AbstractEndpointTest(unittest.TestCase):
       # live server." the `with` block runs teardown
       #   https://github.com/pallets/flask/issues/2949
       with self.app.test_client() as client:
-        print("  Testing response")
+        if self.verbose:
+          print("  Testing response")
         response = client.get(self.endpoint)
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json, self.expected_response_json)
