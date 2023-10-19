@@ -15,14 +15,18 @@ POSTGRES = {
     'port': os.getenv('POSTGRES_PORT', 5432),
 }
 
+# the key 'POSTGRES_TEST_DB' is missing by default because tests can and will
+# clear whatever database it names!
 TEST_POSTGRES = {
     'user': os.getenv('POSTGRES_USER', 'postgres'),
     'pw': os.getenv('POSTGRES_PASSWORD', 'root'),
-    'db': os.getenv('POSTGRES_TEST_DB', 'postgres'),
     'host': os.getenv('POSTGRES_HOST', 'localhost'),
     'port': os.getenv('POSTGRES_PORT', 5432),
 }
-
+if 'POSTGRES_TEST_DB' in os.environ:
+  _postgres_test_db = os.getenv('POSTGRES_TEST_DB')
+  if not f'{_postgres_test_db}' == '':
+    TEST_POSTGRES['db'] = _postgres_test_db
 
 class Config:
     ERROR_404_HELP = False
@@ -41,7 +45,10 @@ class DevConfig(Config):
 
 
 class TestConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}'.format(**TEST_POSTGRES)
+    if 'db' in TEST_POSTGRES and not '{db}'.format(**TEST_POSTGRES) == '':
+      SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}'.format(**TEST_POSTGRES)
+    else:
+      SQLALCHEMY_DATABASE_URI = None
     TESTING = True
     DEBUG = True
 
