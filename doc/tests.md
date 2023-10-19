@@ -1,6 +1,18 @@
 # Write and run tests
 
+## Write tests
+
+### Basics
+
 Backscope uses the [`unittest`](https://docs.python.org/3/library/unittest.html) framework for testing.
+
+Tests are kept in the [`flaskr/nscope/test`](../flaskr/nscope/test) directory. The test routine opens at all the files with names matching `test*.py`, pulls out all the classes that descend from `unittest.TestCase`, and runs the all tests those classes describe. You can use the `@unittest.skip()` decorator to skip tests.
+
+### Examples
+
+The file [`trivial_test.py`](../flaskr/nscope/test/trivial_test.py) contains a minimal example of a test: the test that always passes. This test isn't worth running, so we gave it a file name that the test routine will ignore.
+
+The file [`abstract_endpoint_test.py`](../flaskr/nscope/test/abstract_endpoint_test.py) contains an abstract test&mdash;a class that describes a whole family of tests. The concrete tests in [`test_get_oeis_values.py`](../flaskr/nscope/test/test_get_oeis_values.py) descend from it. The abstract test can't be run, so we gave it a file name that the test routine will ignore.
 
 ## Set up for testing
 
@@ -28,12 +40,16 @@ For guidance, consult the basic instructions on how to [set up your environment]
 
 ## Run tests
 
+### Call the test routine
+
 1. Go into the top-level directory of the Backscope repository.
 2. Activate the Backscope virtual environment.
    + If you're using [`venv`](https://docs.python.org/3/library/venv.html) to manage virtual environments, and you've put Backscope's virtual environment in a directory called `.venv`, use the command `source .venv/bin/activate` to activate.
 3. Call `python -m unittest`.
    + In quiet mode, you'll see a string of characters representing passed (`.`), failed (`F`), and skipped (`s`) tests.
    + To see the tests' names as well as their outcomes, call `python -m unittest -v` or `python -m unittest --verbose`.
+
+### Look at the test output
 
 Here are some examples of what test results can look like.
 
