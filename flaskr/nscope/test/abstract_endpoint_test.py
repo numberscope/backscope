@@ -2,11 +2,10 @@ import unittest
 import sys
 from flaskr import create_app, db
 import flaskr.nscope.views as views
-from flaskr.config import TestConfig
 
 
 # guidance on test database handling:
-#   https://stackoverflow.com/a/17818795/1644283
+#   https://stackoverflow.com/a/17818795
 #   https://flask-testing.readthedocs.io/en/v0.4/
 
 class AbstractEndpointTest(unittest.TestCase):
@@ -20,10 +19,10 @@ class AbstractEndpointTest(unittest.TestCase):
     
     # check whether unittest is running in verbose mode
     # hat tip StackOverflow users Dimitris Fasarakis Hilliard and EquipDev...
-    #   https://stackoverflow.com/a/43002355/1644283
+    #   https://stackoverflow.com/a/43002355
     #   https://stackoverflow.com/questions/43001768/how-can-a-test-in-python-unittest-get-access-to-the-verbosity-level#comment73163492_43002355
     # ... who provided this code under the MIT license
-    #   https://meta.stackexchange.com/q/271080/293264
+    #   https://meta.stackexchange.com/q/271080
     self.verbose = ('-v' in sys.argv) or ('--verbose' in sys.argv)
     
     super().__init__(*args, *kwargs)
