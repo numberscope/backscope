@@ -15,18 +15,18 @@ POSTGRES = {
     'port': os.getenv('POSTGRES_PORT', 5432),
 }
 
-# the key 'POSTGRES_TEST_DB' is missing by default because tests can and will
-# clear whatever database it names!
+# the key 'POSTGRES_DISPOSABLE_DB' is missing by default because tests and other
+# actions can and will clear whatever database it names!
 TEST_POSTGRES = {
     'user': os.getenv('POSTGRES_USER', 'postgres'),
     'pw': os.getenv('POSTGRES_PASSWORD', 'root'),
     'host': os.getenv('POSTGRES_HOST', 'localhost'),
     'port': os.getenv('POSTGRES_PORT', 5432),
 }
-if 'POSTGRES_TEST_DB' in os.environ:
-  _postgres_test_db = os.getenv('POSTGRES_TEST_DB')
-  if not f'{_postgres_test_db}' == '':
-    TEST_POSTGRES['db'] = _postgres_test_db
+if 'POSTGRES_DISPOSABLE_DB' in os.environ:
+  _postgres_disposable_db = os.getenv('POSTGRES_DISPOSABLE_DB')
+  if not f'{_postgres_disposable_db}' == '':
+    TEST_POSTGRES['db'] = _postgres_disposable_db
 
 class Config:
     ERROR_404_HELP = False
@@ -38,6 +38,9 @@ class Config:
 
     DOC_USERNAME = 'api'
     DOC_PASSWORD = 'password'
+    
+    TESTING = False
+    DEBUG = False
 
 
 class DevConfig(Config):
@@ -54,7 +57,7 @@ class TestConfig(Config):
 
 
 class ProdConfig(Config):
-    DEBUG = False
+    pass
 
 
 config = {

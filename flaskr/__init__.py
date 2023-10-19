@@ -48,9 +48,10 @@ def create_app(environment=None):
       ## test database to be unspecified in other circumstances. we should clean
       ## this up somehow
       raise EnvironmentException(
-        'To create the Backscope app in testing mode, the POSTGRES_TEST_DB '
-        'environment variable must be set to a non-empty string. Beware: '
-        'running tests will clear the database POSTGRES_TEST_DB.'
+        'To create the Backscope app in testing mode, the '
+        'POSTGRES_DISPOSABLE_DB environment variable must be set to a non-empty '
+        'string. Beware: running tests will clear the database '
+        'POSTGRES_DISPOSABLE_DB. Other actions may also clear this database.'
       )
     app.config.from_object(config[environment])
     

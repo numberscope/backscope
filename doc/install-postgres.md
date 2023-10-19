@@ -41,11 +41,18 @@ directory of your backscope installation, containing:
 POSTGRES_USER="<backscope database user>"
 POSTGRES_PASSWORD="<database password for that user>"
 POSTGRES_DB="<database name>"
-POSTGRES_TEST_DB="<test database name>"
 DATABASE_URI="postgresql://localhost/<database name>"
 APP_ENVIRONMENT="development"
 SECRET_KEY="Uneccessary for development"
 ```
+
+To run tests, the `.env` file must also include:
+
+```
+POSTGRES_DISPOSABLE_DB="<disposable database name>"
+```
+
+**Beware:** running tests will clear the database `POSTGRES_DISPOSABLE_DB`. Other actions may also clear this database.
 
 You can see other configuration options inside
 [the config file](./flaskr/config.py).
