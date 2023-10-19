@@ -36,6 +36,7 @@ configured properly, you can proceed to the next step.
 This project uses python-dotenv. In order to detect your database
 username / password, you must create a file called `.env` in the root
 directory of your backscope installation, containing:
+
 ```
 POSTGRES_USER="<backscope database user>"
 POSTGRES_PASSWORD="<database password for that user>"
@@ -46,9 +47,11 @@ SECRET_KEY="Uneccessary for development"
 ```
 
 To run tests, the `.env` file must also include:
+
 ```
 POSTGRES_DISPOSABLE_DB="<disposable database name>"
 ```
+
 :warning: **Beware:** running tests will clear the database `POSTGRES_DISPOSABLE_DB`. Other actions may also clear this database.
 
 You can see other configuration options inside

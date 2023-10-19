@@ -6,17 +6,25 @@ Backscope uses the [`unittest`](https://docs.python.org/3/library/unittest.html)
 
 ### Create a disposable database
 
-Before you can run tests, you need to create a disposable database and give `<backscope database user>` all permissions on it. We'll use `<disposable database name>` to stand for whatever you name it. For guidance, consult the generic instructions on how to [create a database](install-postgres.md#create-a-database), or the Ubuntu-specific instructions on how to create a database when you [install and configure PostgreSQL](install-ubuntu.md#install-and-configure-postgresql) under Ubuntu.
+Before you can run tests, you need to create a disposable database and give `<backscope database user>` all permissions on it. We'll use `<disposable database name>` to stand for whatever you name it.
+
+For guidance, consult the generic instructions on how to [create a database](install-postgres.md#create-a-database), or the Ubuntu-specific instructions on how to create a database when you [install and configure PostgreSQL](install-ubuntu.md#install-and-configure-postgresql) under Ubuntu.
+
+Unlike the main database, the disposable database doesn't need to be configured.
 
 ### Specify the disposable database in your environment
 
 Add the line
+
 ```
 POSTGRES_DISPOSABLE_DB="<disposable database name>"
 ```
-to your `.env` file. For guidance, consult the basic instructions on how to [set up your environment](install-postgres.md#set-up-your-environment). If you're indecisive, put the line that specifies the disposable database just after the one that specifies the main database.
+
+to your `.env` file.
 
 :warning: **Beware:** running tests will clear the database `POSTGRES_DISPOSABLE_DB`. Other actions may also clear this database.
+
+For guidance, consult the basic instructions on how to [set up your environment](install-postgres.md#set-up-your-environment). If you're indecisive, put the line that specifies the disposable database just after the one that specifies the main database.
 
 ## Run tests
 
@@ -30,8 +38,9 @@ to your `.env` file. For guidance, consult the basic instructions on how to [set
 Here are some examples of what test results can look like.
 
 :arrow_down: The `..` below tells us that both tests passed.
+
 ```
-$ python -m unittest
+> python -m unittest
 ..
 ----------------------------------------------------------------------
 Ran 2 tests in 1.650s
@@ -40,8 +49,9 @@ OK
 ```
 
 :arrow_down: The `F.` below tells us that one test failed and the other passed. A report from the failed test follows.
+
 ```
-$ python -m unittest
+> python -m unittest
 F.
 ======================================================================
 FAIL: test_endpoint (flaskr.nscope.test.test_get_oeis_values.TestGetOEISValues)
@@ -59,8 +69,9 @@ FAILED (failures=1)
 ```
 
 :arrow_down: Testing in verbose mode, like below, shows the tests' names as well as their outcomes.
+
 ```
-$ python -m unittest -v
+> python -m unittest -v
 test_endpoint (flaskr.nscope.test.test_get_oeis_values.TestGetOEISValues) ... 
   Testing response
   Waiting for background work
