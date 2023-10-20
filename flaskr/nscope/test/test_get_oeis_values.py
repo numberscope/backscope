@@ -28,9 +28,12 @@ class TestGetOEISValuesWithoutShift(abstract_endpoint_test.AbstractEndpointTest)
     }
   }
 
-# this test currently fails, which i think is accuarate! it looks like
-# `fetch_values` never sets the `shift` attribute of the Sequence it returns, so
-# we end up indexing from zero even if the shift should be nonzero
+# this test is skipped because it's sensitive to issue #77. the skip decorator
+# should be removed when the issue is fixed.
+#   https://github.com/numberscope/backscope/issues/77
+# the issue is that `fetch_values` never sets the `shift` attribute of the
+# Sequence it returns, so we end up indexing from zero even if the shift should
+# be nonzero
 @unittest.skip("Shift attribute isn't being set yet")
 class TestGetOEISValues(abstract_endpoint_test.AbstractEndpointTest):
   endpoint = "http://127.0.0.1:5000/api/get_oeis_values/A321580/12"

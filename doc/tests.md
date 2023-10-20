@@ -6,7 +6,7 @@
 
 Backscope uses the [`unittest`](https://docs.python.org/3/library/unittest.html) framework for testing.
 
-Tests are kept in the [`flaskr/nscope/test`](../flaskr/nscope/test) directory. The test routine opens at all the files with names matching `test*.py`, pulls out all the classes that descend from `unittest.TestCase`, and runs the all tests those classes describe. You can use the `@unittest.skip()` decorator to skip tests.
+Tests are kept in the [`flaskr/nscope/test`](../flaskr/nscope/test) directory. The test routine opens all the files with names matching `test*.py`, pulls out all the classes that descend from `unittest.TestCase`, and runs all the tests those classes describe. You can use the `@unittest.skip()` decorator to skip tests.
 
 ### Examples
 
@@ -62,6 +62,17 @@ Here are some examples of what test results can look like.
 Ran 2 tests in 1.650s
 
 OK
+```
+
+:arrow_down: The `s.` below tells us that one test was skipped and the other passed. Running in verbose mode may print an explanation of why we're skipping the test. This message is passed to the `@unittest.skip()` decorator.
+
+```
+python -m unittest
+s.
+----------------------------------------------------------------------
+Ran 2 tests in 0.934s
+
+OK (skipped=1)
 ```
 
 :arrow_down: The `F.` below tells us that one test failed and the other passed. A report from the failed test follows.
