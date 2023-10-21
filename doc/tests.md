@@ -45,9 +45,10 @@ For guidance, consult the basic instructions on how to [set up your environment]
 1. Go into the top-level directory of the Backscope repository.
 2. Activate the Backscope virtual environment.
    + If you're using [`venv`](https://docs.python.org/3/library/venv.html) to manage virtual environments, and you've put Backscope's virtual environment in a directory called `.venv`, use the command `source .venv/bin/activate` to activate.
-3. Call `python -m unittest`.
+3. Call `python manage.py test`.
    + In quiet mode, you'll see a string of characters representing passed (`.`), failed (`F`), and skipped (`s`) tests.
-   + To see the tests' names as well as their outcomes, call `python -m unittest -v` or `python -m unittest --verbose`.
+   + To see the tests' names as well as their outcomes, call `python manage.py test -v` or `python manage.py test --verbose`.
+   + This command is a wrapper for `python -m unittest [-v]` and `python -m unitpytest discover [-v] [-s START] [-p PATTERN] [-t TOP]`. For more options, call `unittest` or `unittest discover` directly.
 
 ### Look at the test output
 
@@ -56,7 +57,7 @@ Here are some examples of what test results can look like.
 :arrow_down: The `..` below tells us that both tests passed.
 
 ```
-> python -m unittest
+> python manage.py test
 ..
 ----------------------------------------------------------------------
 Ran 2 tests in 1.650s
@@ -67,7 +68,7 @@ OK
 :arrow_down: The `s.` below tells us that one test was skipped and the other passed. Running in verbose mode may print an explanation of why we're skipping the test. This message is passed to the `@unittest.skip()` decorator.
 
 ```
-python -m unittest
+> python manage.py test
 s.
 ----------------------------------------------------------------------
 Ran 2 tests in 0.934s
@@ -78,7 +79,7 @@ OK (skipped=1)
 :arrow_down: The `F.` below tells us that one test failed and the other passed. A report from the failed test follows.
 
 ```
-> python -m unittest
+> python manage.py test
 F.
 ======================================================================
 FAIL: test_endpoint (flaskr.nscope.test.test_get_oeis_values.TestGetOEISValues)
@@ -98,7 +99,7 @@ FAILED (failures=1)
 :arrow_down: Testing in verbose mode, like below, shows the tests' names as well as their outcomes.
 
 ```
-> python -m unittest -v
+> python manage.py test -v
 test_endpoint (flaskr.nscope.test.test_get_oeis_values.TestGetOEISValues) ... 
   Testing response
   Waiting for background work
