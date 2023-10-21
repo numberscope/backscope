@@ -1,21 +1,23 @@
-# a mimimal Flask app
-#   https://flask.palletsprojects.com/en/2.3.x/quickstart/
+from flask import Flask, Blueprint
 
-from flask import Flask
+# application factory guide
+#   https://flask.palletsprojects.com/en/2.3.x/patterns/appfactories/
 
-app = Flask(__name__)
+api = Blueprint('api', __name__, url_prefix='/api')
 
-_content = '''
-<html>
-  <head>
-    <title>The Mock On-Line Encyclopedia of Integer Sequences&#x1F61D; (MOEIS&#x1F61D;)</title>
-  </head>
-  <body>
-    <p>Last modified October 21 lunchtime 2023. Contains 0 sequences. (Running on moeis0.)</p>
-  </body>
-</html>
-'''
+@api.route('/ready')
+def ready():
+  return 'ready'
 
-@app.route("/")
-def hello():
-  return _content
+@api.route('/test')
+def test():
+  return {
+    'salutation': 'hello',
+    'addressee': 'world'
+  }
+
+def create_app():
+  app = Flask(__name__)
+  ##app.config.from_object()
+  app.register_blueprint(api)
+  return app
