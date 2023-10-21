@@ -16,23 +16,43 @@ from dotenv import load_dotenv
 
 from .config import config
 
-# This statement loads all environment variables from .env
+
+"""Exception for when environment variables are bad or missing."""
+class EnvironmentException(Exception):
+  pass
+
+
+# Load all environment variables from .env
 load_dotenv()
 
 # Create a new sql alchemy database object
 db = SQLAlchemy()
 
-# default environment is development, otherwie specified by .env
-def create_app(environment='development'):
-    
-    # Get app type from .env
-    environment = os.environ.get('APP_ENVIRONMENT', environment)
+# To choose the environment, we look for settings in the following order:
+#  (1) Function parameter
+#  (2) .env
+#  (3) Default to 'development'
+def create_app(environment=None):
+    if environment is None:
+      # Get app type from .env if provided. Otherwise, use 'development'
+      environment = os.environ.get('APP_ENVIRONMENT', 'development')
 
     # Initial app and configuration
     app = Flask(__name__, instance_relative_config=True)
 
     # Upload config from config.py
     if environment == 'development': CORS(app)
+    if config[environment].TESTING and config[environment].SQLALCHEMY_DATABASE_URI is None:
+      ## this is a really convoluted way of throwing an exception when you try
+      ## to run tests without specifying the test database, but allowing the
+      ## test database to be unspecified in other circumstances. we should clean
+      ## this up somehow
+      raise EnvironmentException(
+        'To create the Backscope app in testing mode, the '
+        'POSTGRES_DISPOSABLE_DB environment variable must be set to a non-empty '
+        'string. Beware: running tests will clear the database '
+        'POSTGRES_DISPOSABLE_DB. Other actions may also clear this database.'
+      )
     app.config.from_object(config[environment])
     
     # Logging

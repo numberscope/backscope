@@ -15,14 +15,18 @@ POSTGRES = {
     'port': os.getenv('POSTGRES_PORT', 5432),
 }
 
+# the key 'POSTGRES_DISPOSABLE_DB' is missing by default because tests and other
+# actions can and will clear whatever database it names!
 TEST_POSTGRES = {
     'user': os.getenv('POSTGRES_USER', 'postgres'),
     'pw': os.getenv('POSTGRES_PASSWORD', 'root'),
-    'db': os.getenv('POSTGRES_DB', 'postgres'),
     'host': os.getenv('POSTGRES_HOST', 'localhost'),
     'port': os.getenv('POSTGRES_PORT', 5432),
 }
-
+if 'POSTGRES_DISPOSABLE_DB' in os.environ:
+  _postgres_disposable_db = os.getenv('POSTGRES_DISPOSABLE_DB')
+  if not f'{_postgres_disposable_db}' == '':
+    TEST_POSTGRES['db'] = _postgres_disposable_db
 
 class Config:
     ERROR_404_HELP = False
@@ -34,6 +38,9 @@ class Config:
 
     DOC_USERNAME = 'api'
     DOC_PASSWORD = 'password'
+    
+    TESTING = False
+    DEBUG = False
 
 
 class DevConfig(Config):
@@ -41,13 +48,16 @@ class DevConfig(Config):
 
 
 class TestConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}'.format(**TEST_POSTGRES)
+    if 'db' in TEST_POSTGRES and not '{db}'.format(**TEST_POSTGRES) == '':
+      SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}'.format(**TEST_POSTGRES)
+    else:
+      SQLALCHEMY_DATABASE_URI = None
     TESTING = True
     DEBUG = True
 
 
 class ProdConfig(Config):
-    DEBUG = False
+    pass
 
 
 config = {

@@ -31,7 +31,7 @@ of commands that will configure PostgreSQL properly.
 Once the database and user are created and authentication and permissions are
 configured properly, you can proceed to the next step.
 
-### Set up your environment
+## Set up your environment
 
 This project uses python-dotenv. In order to detect your database
 username / password, you must create a file called `.env` in the root
@@ -46,10 +46,18 @@ APP_ENVIRONMENT="development"
 SECRET_KEY="Uneccessary for development"
 ```
 
+To run tests, the `.env` file must also include:
+
+```
+POSTGRES_DISPOSABLE_DB="<disposable database name>"
+```
+
+:warning: **Beware:** running tests will clear the database `POSTGRES_DISPOSABLE_DB`. Other actions may also clear this database.
+
 You can see other configuration options inside
 [the config file](./flaskr/config.py).
 
-### Configure the database
+## Configure the database
 
 Note that in the following guide, commands that you would be
 entering/executing are preceded by a `>` character (representing a generic
