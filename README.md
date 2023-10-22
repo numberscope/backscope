@@ -33,7 +33,7 @@ disruptive and wastefully repetitive if performed in each visitor's browser.
    perhaps as well be tailored to other Linux distributions or other
    operating systems.
 3. Create a virtual environment, e.g., `python -m venv .venv`.
-4. Activate the virtual environment, e.g., `source venv/bin/activate`.
+4. Activate the virtual environment, e.g., `source .venv/bin/activate`.
 5. Install Python dependencies: `sh tools/install-requirements.sh`.
 6. Install and configure PostgreSQL, create an empty database, and create
    a dotenv (`.env`) file with the database credentials.
