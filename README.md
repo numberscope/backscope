@@ -18,6 +18,10 @@ disruptive and wastefully repetitive if performed in each visitor's browser.
 
 ## Quick start
 
+(Note there are also much more detailed, step-by-step instructions for
+[installing backscope on Ubuntu](doc/install-ubuntu.md), which can perhaps
+also be tailored to other Linux distributions or other operating systems.)
+
 1. Install Git if need be and clone this repo from
    `github.com/numberscope/backscope`. Switch to the top-level directory
    of the clone.
@@ -28,10 +32,7 @@ disruptive and wastefully repetitive if performed in each visitor's browser.
      need to install a package like "libpari-dev" on Ubuntu)
    + The GNU multi-precision arithmetic dev package
    + A C compiler and C build tools.
-   See also detailed instructions for
-   [installing backscope on Ubuntu](doc/install-ubuntu.md), which can
-   perhaps as well be tailored to other Linux distributions or other
-   operating systems.
+   See also the detailed Ubuntu instructions linked above.
 3. Create a virtual environment, e.g., `python -m venv .venv`.
 4. Activate the virtual environment, e.g., `source .venv/bin/activate`.
 5. Install Python dependencies: `sh tools/install-requirements.sh`.
