@@ -45,7 +45,7 @@ For guidance, consult the basic instructions on how to [set up your environment]
 1. Go into the top-level directory of the Backscope repository.
 2. Activate the Backscope virtual environment.
    + If you're using [`venv`](https://docs.python.org/3/library/venv.html) to manage virtual environments, and you've put Backscope's virtual environment in a directory called `.venv`, use the command `source .venv/bin/activate` to activate.
-3. Execut the command `flask test`.
+3. Execute the command `flask test`.
    + In quiet mode, you'll see a string of characters representing passed (`.`), failed (`F`), and skipped (`s`) tests.
    + To see the tests' names as well as their outcomes, execute `flask test -v` or `flask test --verbose`.
    + This command is a wrapper for `python -m unittest [-v]` and `python -m unitpytest discover [-v] [-s START] [-p PATTERN] [-t TOP]`. For more options, call `unittest` or `unittest discover` directly.
