@@ -39,7 +39,7 @@ disruptive and wastefully repetitive if performed in each visitor's browser.
    a dotenv (`.env`) file with the database credentials.
    + Some details necessary for this step are found in
      [configuring PostgreSQL](doc/install-postgres.md).
-7. Run backscope: `python manage.py runserver`
+7. Run backscope: `flask run`
    + See also detailed instructions for
      [running backscope](doc/running-backscope.md).
 
