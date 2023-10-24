@@ -26,7 +26,8 @@ also be tailored to other Linux distributions or other operating systems.)
    `github.com/numberscope/backscope`. Switch to the top-level directory
    of the clone.
 2. Install prerequisites:
-   + Python 3 (>= version 3.5) and the Python 3 dev package
+   + Python 3 (>= version 3.8, although older versions may work)
+   + The Python 3 dev package
    + A Python 3 package for creating virtual environments
    + A full installation of pari-gp (including all metadata files — you might
      need to install a package like "libpari-dev" on Ubuntu)
