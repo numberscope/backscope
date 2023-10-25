@@ -55,6 +55,21 @@ A string giving the official name of the OEIS sequence with id OEIS_ID.
 An array of strings (of digits) giving all values of the sequence with id
 OEIS_ID known to the OEIS.
 
+### URL: `api/get_hash`
+
+Returns the most recent git hash of the currently running version of
+backscope.  If you are running the server on your local
+machine, a full URL would be
+`http://127.0.0.1:5000/api/get_hash`
+
+#### Key: git_hash
+
+A string showing the short hash resulting from calling 
+
+```
+git rev-parse --short HEAD
+```
+
 ### URL: `api/get_oeis_metadata/<OEIS_ID>`
 
 A potentially very slow endpoint (if the sequence is unknown to the backscope);

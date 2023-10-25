@@ -320,10 +320,10 @@ def get_git_hash():
     """ Returns the short git hash for the current build of backscope
         as provided by the command
         git rev-parse --short HEAD
+        thanks to: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script/
     """
     short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
     short_hash = str(short_hash, "utf-8").strip()
-    print(short_hash)
     return jsonify({
         'git_hash': short_hash
     })
