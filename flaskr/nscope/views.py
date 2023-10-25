@@ -62,7 +62,6 @@ def fetch_metadata(oeis_id):
     db.session.commit()
     return seq
 
-
 def find_oeis_sequence(oeis_id):
     """ Returns a Sequence object associated with the given valid OEIS ID.
         Only call this with a non-Exception return value of
