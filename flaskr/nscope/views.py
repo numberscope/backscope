@@ -11,6 +11,7 @@ import cypari2
 from cypari2.convert import gen_to_python
 import re
 import requests
+import subprocess # for calling git
 
 
 executor = Executor()
@@ -60,6 +61,7 @@ def fetch_metadata(oeis_id):
         seq.backrefs = backrefs
     db.session.commit()
     return seq
+
 
 def find_oeis_sequence(oeis_id):
     """ Returns a Sequence object associated with the given valid OEIS ID.
@@ -311,3 +313,19 @@ def get_oeis_factors(oeis_id, num_elements):
         'name': seq.name,
         'factors': facs
     })
+
+
+@bp.route("/api/get_hash", methods=["GET"])
+def get_git_hash():
+    """ Returns the short git hash for the current build of backscope
+        as provided by the command
+        git rev-parse --short HEAD
+    """
+    short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+    short_hash = str(short_hash, "utf-8").strip()
+    print(short_hash)
+    return jsonify({
+        'git_hash': short_hash
+    })
+
+
