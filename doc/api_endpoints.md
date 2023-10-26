@@ -1,7 +1,5 @@
 # API endpoints
 
-As of 2023-10-25, this document might be outdated.
-
 This documents all of the endpoints provided by the backscope server.
 All of them return JSON data with the specified keys and values. Also, every
 endpoint includes the key 'id' with value the OEIS id for the sake of verifying
