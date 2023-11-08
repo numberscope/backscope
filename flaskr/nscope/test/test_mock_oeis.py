@@ -56,7 +56,10 @@ class TestMockOEIS(unittest.TestCase):
     self.oeis_server.start()
   
   def tearDown(self):
+    # send termination signal to server thread
     self.oeis_server.terminate()
+    
+    # wait for server thread to terminate
     self.oeis_server.join()
   
   def test_endpoint(self):
