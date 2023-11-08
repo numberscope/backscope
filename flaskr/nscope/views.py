@@ -41,10 +41,11 @@ def fetch_metadata(oeis_id):
     # Now grab the data
     match_url = f"https://oeis.org/search?q={seq.id}&fmt=json"
     ##r = requests.get(match_url).json()  ## LOGBAD - commented out
-    response = requests.get(match_url)    ## LOGBAD
+    response = requests.get(match_url, timeout=4)    ## LOGBAD
     r = response.json()                   ## LOGBAD
     if not (response.status_code == 200): ## LOGBAD
         logging.warning(response.text)    ## LOGBAD
+        print(f'Bad response for {oeis_id}') ## LOGBAD
     else:                                 ## LOGBAD
         logging.info(oeis_id)             ## LOGBAD
     if r['results'] != None: # Found some metadata
@@ -62,10 +63,11 @@ def fetch_metadata(oeis_id):
                 saw += 1
             if saw < matches:
                 ##r = requests.get(match_url + f"&start={saw}").json() ## LOGBAD - commented out
-                response = requests.get(match_url + f"&start={saw}") ## LOGBAD
+                response = requests.get(match_url + f"&start={saw}", timeout=4) ## LOGBAD
                 r = response.json()                   ## LOGBAD
                 if not (response.status_code == 200): ## LOGBAD
                     logging.warning(response.text)    ## LOGBAD
+                    print(f'Bad response for {oeis_id}') ## LOGBAD
                 else:                                 ## LOGBAD
                     logging.info(oeis_id)             ## LOGBAD
                 if r['results'] == None:
@@ -117,11 +119,12 @@ def fetch_values(oeis_id):
     seq.values_requested = True
     db.session.commit()
     # Now try to get it from the OEIS:
-    r = requests.get(f"{domain}{oeis_id}/b{oeis_id[1:]}.txt")
+    r = requests.get(f"{domain}{oeis_id}/b{oeis_id[1:]}.txt", timeout=4)
     if r.status_code == 404:
         return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
     if not (r.status_code == 200): ## LOGBAD
         logging.warning(r.text)    ## LOGBAD
+        print(f'Bad response for {oeis_id}') ## LOGBAD
     else:                          ## LOGBAD
         logging.info(oeis_id)      ## LOGBAD
     # Parse the b-file:
@@ -284,16 +287,13 @@ def get_oeis_name_and_values(oeis_id):
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
         ## r = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json").json() ## LOGBAD - commented out
-        response = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json") ## LOGBAD
+        response = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json", timeout=4) ## LOGBAD
         r = response.json()                   ## LOGBAD
         if not (response.status_code == 200): ## LOGBAD
             logging.warning(response.text)    ## LOGBAD
+            print(f'Bad response for {oeis_id}') ## LOGBAD
         else:                                 ## LOGBAD
             logging.info(oeis_id)             ## LOGBAD
-        if not (r.status_code == 200): ## LOGBAD
-            logging.warning(r.text)    ## LOGBAD
-        else:                          ## LOGBAD
-            logging.info(oeis_id)      ## LOGBAD
         if r['results'] != None:
             seq.name = r['results'][0]['name']
             db.session.commit()
