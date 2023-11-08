@@ -6,8 +6,9 @@ import os
 from flask import Flask
 import click
 from flask.cli import with_appcontext
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging.handlers import RotatingFileHandler
 import sys
@@ -68,7 +69,8 @@ def create_app(environment=None):
 
     # Initialize the application
     db.init_app(app)
-    
+    Migrate(app, db)
+
     # Add a command line interface to the application
     app.cli.add_command(init_db_command)
 

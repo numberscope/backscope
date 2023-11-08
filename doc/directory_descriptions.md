@@ -6,22 +6,6 @@ As of 2022-11-01, this document might be outdated.
 
 Auto generated
 
-##### manage.py
-
-The main entry point into the application
-
-The main usage from this file is:
-
-```bash
-$ python3 manage.py db init
-$ python3 manage.py db migrate
-$ python3 manage.py db upgrade
-
-$ python3 manage.py runserver
-```
-
-Any other target may be considered for future development
-
 ##### api.log
 
 The log file for the flask application
@@ -35,6 +19,9 @@ an example logging statment is shown below in python3
 Logging levels are set in flaskr/config.py
 
 Refer to https://flask.palletsprojects.com/en/1.1.x/logging/ for more information
+
+Note that this file should not be checked into git for versioning; it's now
+in the .gitignore file, which should hopefully prevent that happening.
 
 ##### flaskr
 

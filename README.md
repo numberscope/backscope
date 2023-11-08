@@ -18,28 +18,30 @@ disruptive and wastefully repetitive if performed in each visitor's browser.
 
 ## Quick start
 
+(Note there are also much more detailed, step-by-step instructions for
+[installing backscope on Ubuntu](doc/install-ubuntu.md), which can perhaps
+also be tailored to other Linux distributions or other operating systems.)
+
 1. Install Git if need be and clone this repo from
    `github.com/numberscope/backscope`. Switch to the top-level directory
    of the clone.
 2. Install prerequisites:
-   + Python 3 (>= version 3.5) and the Python 3 dev package
+   + Python 3 (>= version 3.8, although older versions may work)
+   + The Python 3 dev package
    + A Python 3 package for creating virtual environments
    + A full installation of pari-gp (including all metadata files — you might
      need to install a package like "libpari-dev" on Ubuntu)
    + The GNU multi-precision arithmetic dev package
    + A C compiler and C build tools.
-   See also detailed instructions for
-   [installing backscope on Ubuntu](doc/install-ubuntu.md), which can
-   perhaps as well be tailored to other Linux distributions or other
-   operating systems.
+   See also the detailed Ubuntu instructions linked above.
 3. Create a virtual environment, e.g., `python -m venv .venv`.
-4. Activate the virtual environment, e.g., `source venv/bin/activate`.
+4. Activate the virtual environment, e.g., `source .venv/bin/activate`.
 5. Install Python dependencies: `sh tools/install-requirements.sh`.
 6. Install and configure PostgreSQL, create an empty database, and create
    a dotenv (`.env`) file with the database credentials.
    + Some details necessary for this step are found in
      [configuring PostgreSQL](doc/install-postgres.md).
-7. Run backscope: `python manage.py runserver`
+7. Run backscope: `flask run`
    + See also detailed instructions for
      [running backscope](doc/running-backscope.md).
 

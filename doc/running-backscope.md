@@ -4,17 +4,8 @@ Running backscope
 To run the development server:
 
 ```
-python manage.py runserver
-```
-
-(You should also be able to do this via
-
-```bash
-export FLASK_APP=flaskr
 flask run
 ```
-
-if you prefer.)
 
 By enabling debug mode, the server will automatically reload if code
 changes, and will show an interactive debugger in the browser if an
@@ -22,7 +13,7 @@ error occurs during a request. To run the development server in "debug"
 mode:
 
 ```
-python manage.py runserver --debug
+flask run --debug
 ```
 
 In either of these modes, the command should print a serries of messages.

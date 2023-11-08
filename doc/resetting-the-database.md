@@ -11,7 +11,7 @@ commands that you have activated the virtual environment
 dropdb <database_name>
 createdb <database_name>
 rm -rf migrations
-python manage.py db init
-python manage.py db migrate
-python manage.py db upgrade
+flask db init
+flask db migrate
+flask db upgrade
 ```

@@ -70,7 +70,7 @@ character indicates a "shell comment." You don't need to enter this
 character or anything that follows it on a line.
 
 ```
-> python manage.py db init  # initializes tables inside database
+> flask db init  # initializes tables inside database
 ```
 
 The previous command might issue a message about editing
@@ -78,8 +78,8 @@ The previous command might issue a message about editing
 with:
 
 ```
-> python manage.py db migrate  # migrate data models
-> python manage.py db upgrade  # upgrade changes to database
+> flask db migrate  # migrate data models
+> flask db upgrade  # upgrade changes to database
 > psql -U <backscope database user> -d <database name>  # invokes data browser
 db> \d
             List of relations
