@@ -11,6 +11,7 @@ import cypari2
 from cypari2.convert import gen_to_python
 import re
 import requests
+import logging ## LOGBAD
 
 
 executor = Executor()
@@ -40,6 +41,10 @@ def fetch_metadata(oeis_id):
     # Now grab the data
     match_url = f"https://oeis.org/search?q={seq.id}&fmt=json"
     r = requests.get(match_url).json()
+    if not (r.status_code == 200): ## LOGBAD
+        logging.warning(r.text)    ## LOGBAD
+    else:                          ## LOGBAD
+        logging.info(oeis_id)      ## LOGBAD
     if r['results'] != None: # Found some metadata
         backrefs = []
         target_number = int(seq.id[1:])
@@ -55,6 +60,10 @@ def fetch_metadata(oeis_id):
                 saw += 1
             if saw < matches:
                 r = requests.get(match_url + f"&start={saw}").json()
+                if not (r.status_code == 200): ## LOGBAD
+                    logging.warning(r.text)    ## LOGBAD
+                else:                          ## LOGBAD
+                    logging.info(oeis_id)      ## LOGBAD
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
@@ -107,6 +116,10 @@ def fetch_values(oeis_id):
     r = requests.get(f"{domain}{oeis_id}/b{oeis_id[1:]}.txt")
     if r.status_code == 404:
         return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
+    if not (r.status_code == 200): ## LOGBAD
+        logging.warning(r.text)    ## LOGBAD
+    else:                          ## LOGBAD
+        logging.info(oeis_id)      ## LOGBAD
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')
@@ -267,6 +280,10 @@ def get_oeis_name_and_values(oeis_id):
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
         r = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json").json()
+        if not (r.status_code == 200): ## LOGBAD
+            logging.warning(r.text)    ## LOGBAD
+        else:                          ## LOGBAD
+            logging.info(oeis_id)      ## LOGBAD
         if r['results'] != None:
             seq.name = r['results'][0]['name']
             db.session.commit()

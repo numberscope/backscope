@@ -28,6 +28,9 @@ load_dotenv()
 # Create a new sql alchemy database object
 db = SQLAlchemy()
 
+## LOGBAD - start logging
+logging.basicConfig(filename='response.log', level='INFO') ## LOGBAD
+
 # To choose the environment, we look for settings in the following order:
 #  (1) Function parameter
 #  (2) .env
