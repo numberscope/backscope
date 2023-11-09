@@ -45,7 +45,7 @@ def search():
     return f"Mock OEIS can only return search results in 'json' format; '{result_format}' format was requested", 400
   
   search_query = request.args['q']
-  if search_query[:3] == 'id:':
+  if search_query.startswith('id:'):
     filename = f'search-id-{search_query[3:]}.json'
   else:
     filename = f'search-{search_query}.json'

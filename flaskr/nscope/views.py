@@ -32,7 +32,7 @@ def oeis_url(path='', query=''):
     path,
     '', # path parameters
     query,
-    ''
+    ''  # fragment
   ])
 
 def fetch_metadata(oeis_id):
