@@ -31,6 +31,7 @@ class AbstractEndpointTest(unittest.TestCase):
     self.app = create_app('testing')
     self.ctx = self.app.app_context()
     with self.ctx:
+      db.drop_all()
       db.create_all()
     
     # put mid-test messages on a new line
