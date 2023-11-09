@@ -4,7 +4,7 @@ import requests.exceptions
 import sys
 import time
 import mock_oeis
-from multiprocessing import Process
+from subprocess import Popen
 
 
 # for starting and stopping the server, hat tip StackOverflow user moe asal...
@@ -15,8 +15,8 @@ from multiprocessing import Process
 class TestMockOEIS(unittest.TestCase):
   host = 'http://127.0.0.1'
   port = '5001'
-  ready = f'{host}:{port}/api/ready'
-  endpoint = f'{host}:{port}/api/test'
+  ready = f'{host}:{port}/ready'
+  endpoint = f'{host}:{port}/test'
   expected_response_json = {
     'salutation': 'hello',
     'addressee': 'world'
@@ -51,16 +51,14 @@ class TestMockOEIS(unittest.TestCase):
       print()
     
     # start serving mock OEIS
-    self.oeis_app = mock_oeis.create_app()
-    self.oeis_server = Process(target=self.oeis_app.run, kwargs={'port': 5001})
-    self.oeis_server.start()
+    self.oeis_server = Popen(['flask', '--app', 'mock_oeis', 'run', '--port', '5001'])
   
   def tearDown(self):
     # send termination signal to server thread
     self.oeis_server.terminate()
     
-    # wait for server thread to terminate
-    self.oeis_server.join()
+    # wait for server subprocess to terminate
+    self.oeis_server.wait()
   
   def test_endpoint(self):
     self.waitUntilReady()
