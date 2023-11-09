@@ -2,7 +2,9 @@
 Views for nscope model
 """
 
-from flask import Blueprint, jsonify, render_template
+from urllib.parse import urlunparse
+
+from flask import Blueprint, jsonify, current_app, render_template
 from flask_executor import Executor
 from flaskr import db
 from flaskr.nscope.models import *
@@ -23,6 +25,16 @@ bp = Blueprint("nscope", __name__)
 def index():
     return render_template("index.html")
 
+def oeis_url(path='', query=''):
+  return urlunparse([
+    current_app.config['oeis_scheme'],
+    current_app.config['oeis_hostport'],
+    path,
+    '', # path parameters
+    query,
+    ''
+  ])
+
 def fetch_metadata(oeis_id):
     """ When called with a *valid* oeis id, makes sure the metadata has been
         obtained, and returns the corresponding Sequence object with valid
@@ -39,7 +51,7 @@ def fetch_metadata(oeis_id):
     seq.meta_requested = True
     db.session.commit()
     # Now grab the data
-    match_url = f"https://oeis.org/search?q={seq.id}&fmt=json"
+    match_url = oeis_url('/search', f'q={seq.id}&fmt=json')
     ##r = requests.get(match_url).json()  ## LOGBAD - commented out
     response = requests.get(match_url, timeout=4)    ## LOGBAD
     r = response.json()                   ## LOGBAD
@@ -101,8 +113,6 @@ def find_oeis_sequence(oeis_id):
 def placeholder_name(oeis_id):
     return f"{oeis_id} [name not yet loaded]"
 
-domain = 'https://oeis.org/'
-
 def fetch_values(oeis_id):
     """
         When called with a valid oeis id, fetches the b-file from the
@@ -119,7 +129,7 @@ def fetch_values(oeis_id):
     seq.values_requested = True
     db.session.commit()
     # Now try to get it from the OEIS:
-    r = requests.get(f"{domain}{oeis_id}/b{oeis_id[1:]}.txt", timeout=4)
+    r = requests.get(oeis_url(f'/{oeis_id}/b{oeis_id[1:]}.txt'), timeout=4)
     if r.status_code == 404:
         return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
     if not (r.status_code == 200): ## LOGBAD
@@ -286,8 +296,8 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        ## r = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json").json() ## LOGBAD - commented out
-        response = requests.get(f"{domain}search?q=id:{oeis_id}&fmt=json", timeout=4) ## LOGBAD
+        ## r = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4).json() ## LOGBAD - commented out
+        response = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4) ## LOGBAD
         r = response.json()                   ## LOGBAD
         if not (response.status_code == 200): ## LOGBAD
             logging.warning(response.text)    ## LOGBAD
