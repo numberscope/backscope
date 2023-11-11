@@ -314,8 +314,8 @@ def get_oeis_factors(oeis_id, num_elements):
     })
 
 
-@bp.route("/api/get_hash", methods=["GET"])
-def get_git_hash():
+@bp.route("/api/get_commit", methods=["GET"])
+def get_git_commit():
     """ Returns the short git hash for the current build of backscope
         as provided by the command
         git rev-parse --short HEAD
@@ -324,7 +324,7 @@ def get_git_hash():
     short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
     short_hash = str(short_hash, "utf-8").strip()
     return jsonify({
-        'git_hash': short_hash
+        'short_commit_hash': short_hash
     })
 
 
