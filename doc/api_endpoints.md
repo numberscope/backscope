@@ -117,7 +117,7 @@ the factorization is stored as `no_fac`.
 Returns the most recent git hash of the currently running version of
 backscope.  If you are running the server on your local
 machine, a full URL would be
-`http://127.0.0.1:5000/api/get_hash`
+`http://127.0.0.1:5000/api/get_commit`
 
 #### Key: short_commit_hash
 
