@@ -112,14 +112,14 @@ obtain the original value. This format is essentially that supported by pari.
 If the integer exceeds 2^200, the factorization is not attempted and
 the factorization is stored as `no_fac`.
 
-### URL: `api/get_hash`
+### URL: `api/get_commit`
 
 Returns the most recent git hash of the currently running version of
 backscope.  If you are running the server on your local
 machine, a full URL would be
 `http://127.0.0.1:5000/api/get_hash`
 
-#### Key: git_hash
+#### Key: short_commit_hash
 
 A string showing the short hash resulting from calling 
 
