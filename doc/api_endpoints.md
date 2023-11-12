@@ -1,7 +1,5 @@
 # API endpoints
 
-As of 2022-11-01, this document might be outdated.
-
 This documents all of the endpoints provided by the backscope server.
 All of them return JSON data with the specified keys and values. Also, every
 endpoint includes the key 'id' with value the OEIS id for the sake of verifying
@@ -113,3 +111,19 @@ multiply 1 times the product of `p^e` for all `[p,e]` in the array, you
 obtain the original value. This format is essentially that supported by pari.
 If the integer exceeds 2^200, the factorization is not attempted and
 the factorization is stored as `no_fac`.
+
+### URL: `api/get_commit`
+
+Returns the most recent git hash of the currently running version of
+backscope.  If you are running the server on your local
+machine, a full URL would be
+`http://127.0.0.1:5000/api/get_commit`
+
+#### Key: short_commit_hash
+
+A string showing the short hash resulting from calling 
+
+```
+git rev-parse --short HEAD
+```
+
