@@ -69,7 +69,7 @@ def create_app(environment=None):
     Migrate(app, db)
 
     # Add a command line interface to the application
-    app.cli.add_command(init_db_command)
+    app.cli.add_command(clear_database_command)
 
     # The nscope endpoint application
     from flaskr import nscope
@@ -82,13 +82,12 @@ def create_app(environment=None):
     return app
 
 
-def init_db():
+def clear_database():
     db.drop_all()
     db.create_all()
 
-@click.command("init-db")
+@click.command("clear-database")
 @with_appcontext
-def init_db_command():
-    init_db()
-    click.echo("Initialized Database")
-
+def clear_database_command():
+    clear_database()
+    click.echo("Database cleared")
