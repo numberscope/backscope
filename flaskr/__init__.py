@@ -3,7 +3,7 @@ Init file (creates app and database)
 """
 
 import os
-from flask import Flask
+from flask import Flask, current_app
 import click
 from flask.cli import with_appcontext
 from flask_cors import CORS
@@ -89,5 +89,14 @@ def clear_database():
 @click.command("clear-database")
 @with_appcontext
 def clear_database_command():
+    if current_app.config['PRODUCTION']:
+      confirm = input(
+        'Backscope is running in production mode. Are you sure you want to '
+        'clear the production database? Enter "yes" to confirm, or any other '
+        'string to abort: '
+      )
+      if not (confirm == 'yes'):
+        click.echo("No action taken")
+        return
     clear_database()
     click.echo("Database cleared")
