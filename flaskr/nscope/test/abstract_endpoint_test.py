@@ -1,6 +1,6 @@
 import unittest
 import sys
-from flaskr import create_app, db
+from flaskr import create_app, db, clear_database
 import flaskr.nscope.views as views
 
 
@@ -31,7 +31,7 @@ class AbstractEndpointTest(unittest.TestCase):
     self.app = create_app('testing')
     self.ctx = self.app.app_context()
     with self.ctx:
-      db.create_all()
+      clear_database()
     
     # put mid-test messages on a new line
     if self.verbose:
