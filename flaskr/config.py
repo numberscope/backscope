@@ -39,8 +39,9 @@ class Config:
     DOC_USERNAME = 'api'
     DOC_PASSWORD = 'password'
     
-    TESTING = False
     DEBUG = False
+    TESTING = False
+    PRODUCTION = False
 
 
 class DevConfig(Config):
@@ -57,7 +58,7 @@ class TestConfig(Config):
 
 
 class ProdConfig(Config):
-    pass
+    PRODUCTION = True
 
 
 config = {

@@ -13,6 +13,7 @@ import cypari2
 from cypari2.convert import gen_to_python
 import re
 import requests
+import subprocess # for calling git
 import logging ## LOGBAD
 
 
@@ -348,3 +349,18 @@ def get_oeis_factors(oeis_id, num_elements):
         'name': seq.name,
         'factors': facs
     })
+
+
+@bp.route("/api/get_commit", methods=["GET"])
+def get_git_commit():
+    """ Returns the short git hash for the current build of backscope
+        as provided by the command
+        git rev-parse --short HEAD
+        thanks to: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script/
+    """
+    short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], encoding='utf8')
+    return jsonify({
+        'short_commit_hash': short_hash.strip()
+    })
+
+
