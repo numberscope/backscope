@@ -31,6 +31,7 @@ In a situation like this, it's often easiest to wipe out the whole database stru
    ```
    Typically, `<database name>` should match the `POSTGRES_DB` variable in the `.env` file.
 3. Forget local information about past migrations by removing or renaming the `migrations` folder in the top level of the Backscope repository.
+   + For example, put `migrations` in the trash by calling `gio trash migrations` on Ubuntu 18.04 or newer.
 4. Create a new database and furnish it with the Backscope database structure by calling:
    ```bash
    createdb <database name>
