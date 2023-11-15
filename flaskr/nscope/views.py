@@ -14,7 +14,6 @@ from cypari2.convert import gen_to_python
 import re
 import requests
 import subprocess # for calling git
-import logging ## LOGBAD
 
 
 executor = Executor()
@@ -53,14 +52,7 @@ def fetch_metadata(oeis_id):
     db.session.commit()
     # Now grab the data
     match_url = oeis_url('/search', f'q={seq.id}&fmt=json')
-    ##r = requests.get(match_url).json()  ## LOGBAD - commented out
-    response = requests.get(match_url, timeout=4)    ## LOGBAD
-    r = response.json()                   ## LOGBAD
-    if not (response.status_code == 200): ## LOGBAD
-        logging.warning(response.text)    ## LOGBAD
-        print(f'Bad response for {oeis_id}') ## LOGBAD
-    else:                                 ## LOGBAD
-        logging.info(oeis_id)             ## LOGBAD
+    r = requests.get(match_url).json()
     if r['results'] != None: # Found some metadata
         backrefs = []
         target_number = int(seq.id[1:])
@@ -75,14 +67,7 @@ def fetch_metadata(oeis_id):
                     backrefs.append('A' + str(result['number']).zfill(6))
                 saw += 1
             if saw < matches:
-                ##r = requests.get(match_url + f"&start={saw}").json() ## LOGBAD - commented out
-                response = requests.get(match_url + f"&start={saw}", timeout=4) ## LOGBAD
-                r = response.json()                   ## LOGBAD
-                if not (response.status_code == 200): ## LOGBAD
-                    logging.warning(response.text)    ## LOGBAD
-                    print(f'Bad response for {oeis_id}') ## LOGBAD
-                else:                                 ## LOGBAD
-                    logging.info(oeis_id)             ## LOGBAD
+                r = requests.get(match_url + f"&start={saw}").json()
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
@@ -133,11 +118,6 @@ def fetch_values(oeis_id):
     r = requests.get(oeis_url(f'/{oeis_id}/b{oeis_id[1:]}.txt'), timeout=4)
     if r.status_code == 404:
         return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
-    if not (r.status_code == 200): ## LOGBAD
-        logging.warning(r.text)    ## LOGBAD
-        print(f'Bad response for {oeis_id}') ## LOGBAD
-    else:                          ## LOGBAD
-        logging.info(oeis_id)      ## LOGBAD
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')
@@ -297,14 +277,7 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        ## r = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4).json() ## LOGBAD - commented out
-        response = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4) ## LOGBAD
-        r = response.json()                   ## LOGBAD
-        if not (response.status_code == 200): ## LOGBAD
-            logging.warning(response.text)    ## LOGBAD
-            print(f'Bad response for {oeis_id}') ## LOGBAD
-        else:                                 ## LOGBAD
-            logging.info(oeis_id)             ## LOGBAD
+        r = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4).json()
         if r['results'] != None:
             seq.name = r['results'][0]['name']
             db.session.commit()
