@@ -10,12 +10,15 @@ import flaskr.nscope.views as views
 
 class AbstractEndpointTest(unittest.TestCase):
   def assert_endpoint_test_attr(self, name):
-    assert hasattr(self, name), f"Can't construct endpoint test without '{name}' attribute"
+    assert hasattr(self, name), (
+      f"Can't construct a '{type(self).__name__}' "
+      f"endpoint test without '{name}' attribute"
+    )
   
   def __init__(self, *args, **kwargs):
     # make sure required attributes are present
     self.assert_endpoint_test_attr('endpoint')
-    self.assert_endpoint_test_attr('expected_response_json')
+    self.assert_endpoint_test_attr('expected_response')
     
     # check whether unittest is running in verbose mode
     # hat tip StackOverflow users Dimitris Fasarakis Hilliard and EquipDev...
@@ -59,8 +62,22 @@ class AbstractEndpointTest(unittest.TestCase):
     with self.app.test_client() as client:
       if self.verbose:
         print("  Testing response")
+      
+      # check status
       response = client.get(self.endpoint)
       self.assertEqual(response.status_code, 200)
-      self.assertDictEqual(response.json, self.expected_response_json)
+      
+      # check response
+      response_type = type(self.expected_response)
+      if issubclass(response_type, dict):
+        self.assertDictEqual(response.json, self.expected_response)
+      elif issubclass(response_type, str):
+        self.assertEqual(response.text, self.expected_response)
+      else:
+        raise TypeError(
+          f"In a '{type(self).__name__}' endpoint test, the expected response "
+          "must be a dictionary or a string, not an object of type "
+          f"'{response_type.__name__}'"
+        )
       
       # TO DO: test background work
