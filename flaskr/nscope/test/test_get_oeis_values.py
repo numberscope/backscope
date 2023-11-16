@@ -9,7 +9,7 @@ class TestGetOEISValuesWithoutShift(abstract_endpoint_test.AbstractEndpointTest)
   # - it has zero shift, so the test can pass even if the shift defaults to zero
   # - it currently has small values and few references, which speeds up the
   #   background work triggered by the request
-  expected_response_json = {
+  expected_response = {
     'id': 'A153080',
     'name': 'A153080 [name not yet loaded]',
     'values': {
@@ -43,7 +43,7 @@ class TestGetOEISValues(abstract_endpoint_test.AbstractEndpointTest):
   #   changed to the actual value
   # - it currently has small values and few references, which speeds up the
   #   background work triggered by the request
-  expected_response_json = {
+  expected_response = {
     'id': 'A321580',
     'name': 'A321580 [name not yet loaded]',
     'values': {
