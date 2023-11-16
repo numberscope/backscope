@@ -19,9 +19,14 @@ Python libraries that implement a WSGI. We use one called Gunicorn
 (Green Unicorn).
 
 We also need to set up a `.env` file in the root directory of that backscope
-clone. This is done much as for a development instance of backscope, as
-described in the root-level README.md. However, the environment variable
-`APP_ENVIRONMENT` should be set to `production` rather than `development`.
+clone. This is done as for a development instance of backscope, as
+described in the [postgres documentation](./install-postgres.md).
+However, the environment variable `APP_ENVIRONMENT` should be set to
+`production` rather than `development`. Also, as of 2023 Nov 16, there was an
+additional environment variable `APP_SETTINGS` set to
+`config.DevelopmentConfig`, but it is not apparent whether or how that
+difference actually has any effect. It may likely be that `APP_SETTINGS` is
+unnecessary.
 
 In the `production.sh` script in the `server` directory of `backscope`,
 we tell Gunicorn to run `backscope`. In `/etc/systemd/system/` there's a

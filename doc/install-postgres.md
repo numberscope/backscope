@@ -43,7 +43,6 @@ POSTGRES_PASSWORD="<database password for that user>"
 POSTGRES_DB="<database name>"
 DATABASE_URI="postgresql://localhost/<database name>"
 APP_ENVIRONMENT="development"
-SECRET_KEY="Uneccessary for development"
 ```
 
 To run tests, the `.env` file must also include:
