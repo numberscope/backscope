@@ -8,11 +8,15 @@ Backscope uses the [`unittest`](https://docs.python.org/3/library/unittest.html)
 
 Tests are kept in the [`flaskr/nscope/test`](../flaskr/nscope/test) directory. The test routine opens all the files with names matching `test*.py`, pulls out all the classes that descend from `unittest.TestCase`, and runs all the tests those classes describe. You can use the `@unittest.skip()` decorator to skip tests.
 
+Using the [mock OEIS](mock-oeis.md), you can test Backscope's response to OEIS behavior that we can't or shouldn't replicate at will using real OEIS API calls.
+
 ### Examples
 
 The file [`trivial_test.py`](../flaskr/nscope/test/trivial_test.py) contains a minimal example of a test: the test that always passes. This test isn't worth running, so we gave it a file name that the test routine will ignore.
 
 The file [`abstract_endpoint_test.py`](../flaskr/nscope/test/abstract_endpoint_test.py) contains an abstract test&mdash;a class that describes a whole family of tests. The concrete tests in [`test_get_oeis_values.py`](../flaskr/nscope/test/test_get_oeis_values.py) descend from it. The abstract test can't be run, so we gave it a file name that the test routine will ignore.
+
+The file [`test_mock_oeis.py`](../flaskr/nscope/test/test_mock_oeis.py) contains a basic example of a test that uses the mock OEIS. See the [mock OEIS documentation](mock-oeis.md) for more details.
 
 ## Set up for testing
 
