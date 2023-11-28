@@ -21,10 +21,6 @@ class TestMockOEIS(unittest.TestCase):
   mock_hostport = f'{mock_host}:{mock_port}'
   
   endpoint = 'http://localhost:5000/api/get_oeis_values/A153080/12'
-  expected_test_response_json = {
-    'salutation': 'hello',
-    'addressee': 'world'
-  }
   initial_expected_response_json = {
     'id': 'A153080',
     'name': 'A153080 [name not yet loaded]',
