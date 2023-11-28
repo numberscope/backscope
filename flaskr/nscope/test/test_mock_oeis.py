@@ -114,16 +114,12 @@ class TestMockOEIS(unittest.TestCase):
     self.oeis_server.wait()
   
   def test_endpoint(self):
-    self.waitUntilReady()
-    response = requests.get(self.mock_oeis_url('/test'))
-    self.assertEqual(response.status_code, 200)
-    self.assertDictEqual(response.json(), self.expected_test_response_json)
-    
     # using test client is recommended in Flask testing how-to
     #   https://flask.palletsprojects.com/en/2.3.x/testing/
     # "The test client makes requests to the application without running a live
     # server." the `with` block runs teardown
     #   https://github.com/pallets/flask/issues/2949
+    self.waitUntilReady()
     with self.app.test_client() as client:
       if self.verbose:
         print("  Testing response")

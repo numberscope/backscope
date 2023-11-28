@@ -14,14 +14,7 @@ api = Blueprint('api', __name__)
 
 @api.route('/ready')
 def ready():
-  return 'ready'
-
-@api.route('/test')
-def test():
-  return {
-    'salutation': 'hello',
-    'addressee': 'world'
-  }
+  return Response('ready', mimetype='text/plain')
 
 @api.route('/<oeis_id>/<filename>')
 def get_data(oeis_id, filename):
