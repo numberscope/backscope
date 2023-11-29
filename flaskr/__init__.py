@@ -33,7 +33,7 @@ db = SQLAlchemy()
 #  (1) Function parameter
 #  (2) .env
 #  (3) Default to 'development'
-def create_app(environment=None):
+def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     if environment is None:
       # Get app type from .env if provided. Otherwise, use 'development'
       environment = os.environ.get('APP_ENVIRONMENT', 'development')
@@ -55,6 +55,8 @@ def create_app(environment=None):
         'POSTGRES_DISPOSABLE_DB. Other actions may also clear this database.'
       )
     app.config.from_object(config[environment])
+    app.config['oeis_scheme'] = oeis_scheme
+    app.config['oeis_hostport'] = oeis_hostport
     
     # Logging
     file_handler = RotatingFileHandler('api.log', maxBytes=10000, backupCount=1)

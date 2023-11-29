@@ -3,7 +3,7 @@ import flaskr.nscope.test.abstract_endpoint_test as abstract_endpoint_test
 
 
 class TestGetOEISValuesWithoutShift(abstract_endpoint_test.AbstractEndpointTest):
-  endpoint = "http://127.0.0.1:5000/api/get_oeis_values/A153080/12"
+  endpoint = 'http://localhost:5000/api/get_oeis_values/A153080/12'
   
   # we choose A153080 because:
   # - it has zero shift, so the test can pass even if the shift defaults to zero
@@ -36,7 +36,7 @@ class TestGetOEISValuesWithoutShift(abstract_endpoint_test.AbstractEndpointTest)
 # be nonzero
 @unittest.skip("Shift attribute isn't being set yet")
 class TestGetOEISValues(abstract_endpoint_test.AbstractEndpointTest):
-  endpoint = "http://127.0.0.1:5000/api/get_oeis_values/A321580/12"
+  endpoint = 'http://localhost:5000/api/get_oeis_values/A321580/12'
   
   # we choose A321580 because:
   # - it has a nonzero shift, so we can make sure the default value is getting
