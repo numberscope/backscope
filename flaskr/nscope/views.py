@@ -331,7 +331,16 @@ def get_git_commit():
         git rev-parse --short HEAD
         thanks to: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script/
     """
-    short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], encoding='utf8')
+    try:
+        short_hash = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'],
+            stderr=subprocess.STDOUT,
+            encoding='utf8')
+    except CalledProcessError as cpe:
+        return jsonify({
+            'CalledProcessError': True,
+            'returncode': cpe.returncode,
+            'output': cpe.output})
     return jsonify({
         'short_commit_hash': short_hash.strip()
     })
