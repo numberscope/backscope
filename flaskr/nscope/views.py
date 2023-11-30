@@ -336,4 +336,10 @@ def get_git_commit():
         'short_commit_hash': short_hash.strip()
     })
 
-
+# For production testing only
+@bp.route("/api/pwd", methods=["GET"])
+def get_pwd():
+    """ Returns the current working directory of the backscope process
+    """
+    cwd = subprocess.check_output(['pwd'], encoding='utf8')
+    return jsonify({'cwd': cwd.strip()})
