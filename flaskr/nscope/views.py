@@ -336,7 +336,7 @@ def get_git_commit():
             ['git', 'rev-parse', '--short', 'HEAD'],
             stderr=subprocess.STDOUT,
             encoding='utf8')
-    except CalledProcessError as cpe:
+    except subprocess.CalledProcessError as cpe:
         return jsonify({
             'CalledProcessError': True,
             'returncode': cpe.returncode,
