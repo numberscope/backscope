@@ -49,3 +49,20 @@ the dependencies must be installed in the proper order by the
 `tools/install-requirements.sh` script. When there is a need to update any
 of the packages explicitly listed in `tools/install-requirements.sh`, the
 version number of that package must be updated in that script as well.
+
+## Understanding dependencies
+
+To help understand the dependency graph, you can call
+```
+sh tools/explain-requirements.sh
+```
+after activating the virtual environment. This script goes through the packages in `requirements-freeze.txt` and tells you what role each one plays in the current environment. For each package `FROZEN` in `requirements-freeze.txt`, you'll get one of the following outputs:
+- `FROZEN [required by] PARENT_1, PARENT_2, PARENT_3...`
+   
+   The package is required by the packages `PARENT_1`, `PARENT_2`, `PARENT_3`… in the current environment. That might means it's a lower-level requirement. However, it could be a top-level requirement: the top level should include all of the packages Backscope imports, even if they currently happen to require each other.
+- `FROZEN [not required]`
+   
+   The package isn't required by any other package in the current environment. That probably means it's a top-level requirement: see if it's listed in `requirements.txt`.
+- `FROZEN [not used]`
+   
+   The package isn't even installed in the current environment. You might see this if you've created a fresh virtual environment by manually installing the packages in `requirements.txt`, but you haven't updated `requirements-freeze.txt` yet. If Backscope works in this environment, it should be safe to remove `FROZEN` from `requirements-freeze.txt`.
