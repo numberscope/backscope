@@ -3,15 +3,16 @@ Init file (creates app and database)
 """
 
 import os
-from flask import Flask, current_app
 import click
+import logging
+from logging import StreamHandler
+from logging.handlers import RotatingFileHandler
+import structlog
+from flask import Flask, current_app
 from flask.cli import with_appcontext
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-import logging
-from logging.handlers import RotatingFileHandler
-import sys
 
 from dotenv import load_dotenv
 
@@ -29,6 +30,41 @@ load_dotenv()
 # Create a new sql alchemy database object
 db = SQLAlchemy()
 
+def create_file_handler():
+  # create a file handler, which writes to rotating files api.log, api.log.1, ..., api.log.5
+  handler = RotatingFileHandler('api.log', maxBytes=10**7, backupCount=5)
+  
+  # add a JSON formatter
+  formatter = structlog.stdlib.ProcessorFormatter(
+    processors = [
+      structlog.processors.JSONRenderer()
+    ]
+  )
+  handler.setFormatter(formatter)
+  
+  # we definitely want the log file to include bad request warnings, so the log
+  # level has to be at least that low
+  handler.setLevel(logging.WARNING)
+  
+  return handler
+
+def create_console_handler(debug=False):
+  # create a stream handler that writes to stderr
+  handler = StreamHandler()
+  
+  # add a console formatter
+  formatter = structlog.stdlib.ProcessorFormatter(
+    processors = [
+      structlog.dev.ConsoleRenderer()
+    ]
+  )
+  handler.setFormatter(formatter)
+  
+  # print everything, or almost everything, in the console
+  handler.setLevel(logging.DEBUG if debug else logging.INFO)
+  
+  return handler
+
 # To choose the environment, we look for settings in the following order:
 #  (1) Function parameter
 #  (2) .env
@@ -38,11 +74,38 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
       # Get app type from .env if provided. Otherwise, use 'development'
       environment = os.environ.get('APP_ENVIRONMENT', 'development')
 
-    # Initial app and configuration
+    # Set up logging
+    #
+    # To access `app.logger` before `app` is created, we take advantage of
+    # knowing that `app` will use the `__name__` logger. we set `app.logger` to
+    # the most verbose level so that each handler can do its own filtering
+    #
+    # "When you want to configure logging for your project, you should do it as
+    # soon as possible when the program starts. If app.logger is accessed before
+    # logging is configured, it will add a default handler. If possible,
+    # configure logging before creating the application object"
+    #
+    #   https://flask.palletsprojects.com/en/2.3.x/logging/
+    #
+    app_logger = logging.getLogger(__name__)
+    app_logger.setLevel(logging.DEBUG)
+    app_logger.addHandler(create_file_handler())
+    if config[environment].DEVELOPMENT:
+      # in development, also log to the console, with higher verbosity
+      app_logger.addHandler(create_console_handler(config[environment].DEBUG))
+
+    # Create app
     app = Flask(__name__, instance_relative_config=True)
 
+    # Check logging
+    app.logger.info('Backscope is up and running')
+    app.logger.warning({
+      'foo': 92,
+      'bar': [2, 8, 1]
+    })
+
     # Upload config from config.py
-    if environment == 'development': CORS(app)
+    if config[environment].DEVELOPMENT: CORS(app)
     if config[environment].TESTING and config[environment].SQLALCHEMY_DATABASE_URI is None:
       ## this is a really convoluted way of throwing an exception when you try
       ## to run tests without specifying the test database, but allowing the
@@ -57,14 +120,6 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     app.config.from_object(config[environment])
     app.config['oeis_scheme'] = oeis_scheme
     app.config['oeis_hostport'] = oeis_hostport
-    
-    # Logging
-    file_handler = RotatingFileHandler('api.log', maxBytes=10000, backupCount=1)
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
-    stdout = logging.StreamHandler(sys.stdout)
-    stdout.setLevel(logging.DEBUG)
-    app.logger.addHandler(stdout)
 
     # Initialize the application
     db.init_app(app)
