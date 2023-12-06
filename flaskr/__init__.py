@@ -7,7 +7,9 @@ import click
 import logging
 from logging import StreamHandler
 from logging.handlers import RotatingFileHandler
-import structlog
+from structlog.processors import JSONRenderer, TimeStamper
+from structlog.stdlib import ProcessorFormatter
+from structlog.dev import ConsoleRenderer
 from flask import Flask, current_app
 from flask.cli import with_appcontext
 from flask_cors import CORS
@@ -35,9 +37,11 @@ def create_file_handler():
   handler = RotatingFileHandler('api.log', maxBytes=10**7, backupCount=5)
   
   # add a JSON formatter
-  formatter = structlog.stdlib.ProcessorFormatter(
+  formatter = ProcessorFormatter(
     processors = [
-      structlog.processors.JSONRenderer()
+      ProcessorFormatter.remove_processors_meta,
+      TimeStamper(fmt="%Y-%b-%d %H:%M:%S", utc=False),
+      JSONRenderer()
     ]
   )
   handler.setFormatter(formatter)
@@ -53,9 +57,10 @@ def create_console_handler(debug=False):
   handler = StreamHandler()
   
   # add a console formatter
-  formatter = structlog.stdlib.ProcessorFormatter(
+  formatter = ProcessorFormatter(
     processors = [
-      structlog.dev.ConsoleRenderer()
+      ProcessorFormatter.remove_processors_meta,
+      ConsoleRenderer()
     ]
   )
   handler.setFormatter(formatter)
