@@ -34,7 +34,7 @@ symlinked `numberscope.service` file that runs the `production.sh`
 script. (The `/etc/systemd/system/` is a directory that houses systemd
 (system daemon) files.)
 
-## `numberscope` systemd commands
+### `numberscope` systemd commands
 
 Note: We named the systemd file `numberscope.service` because it is
 responsible for serving `frontscope`'s built files as well as forwarding
@@ -59,6 +59,33 @@ Stop `numberscope`:
 ```sh
 sudo systemctl stop numberscope
 ```
+
+## Updating the server to a new version of backscope
+
+There are two main cases. If the change in version of backscope does not
+involve any changes to database schema or changes to the data that should
+be stored for any previously-downloaded sequences, then updating the server
+should consist of three simple steps:
+
+1. Log into the server and `cd ~scope/repos/backscope`.
+
+2. `sudo -u scope git pull`
+
+3. `sudo systemctl restart numberscope`
+
+You can then try `sudo systemctl status numberscope` to see if the service
+thinks it is running correctly, and you can point your browser for example at
+`https://numberscope.colorado.edu/api/get_commit` (Warning: not working as of
+commit 4ebfc9c) or
+`https://numberscope.colorado.edu/api/get_oeis_values/A000040/128` for
+a list of the first 2^7 primes.
+
+On the other hand, if there are changes that affect the structure or contents
+of the database, then a slightly more involved procedure is necessary to first
+remove the prior contents of the database and/or update its structure. While
+that procedure can probably be cobbled together from the instructions here and
+the database resetting documentation, the explicit steps should be listed here.
+Please whoever next does this procedure, record here what works.
 
 ## How Nginx is set up
 
