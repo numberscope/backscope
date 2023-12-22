@@ -5,6 +5,7 @@ Init file (creates app and database)
 import os
 import click
 import logging
+import structlog
 from logging import StreamHandler
 from logging.handlers import RotatingFileHandler
 from structlog.processors import JSONRenderer, TimeStamper
@@ -32,43 +33,75 @@ load_dotenv()
 # Create a new sql alchemy database object
 db = SQLAlchemy()
 
+# --- Log setup utilities ---
+
+# We definitely want the log file to include bad request warnings, so the log
+# level has to be at least that low
+file_log_level = logging.WARNING
+
+# If we're in development, the console log level is either DEBUG or INFO,
+# depending on whether debugging is turned on. If we're not in development,
+# there's no console log, so the console log level is effectively infinite
+def console_log_level(environment):
+  return (
+    (
+      logging.DEBUG if config[environment].DEBUG else
+      logging.INFO
+    ) if config[environment].DEVELOPMENT else
+    float('inf')
+  )
+
 def create_file_handler():
-  # create a file handler, which writes to rotating files api.log, api.log.1, ..., api.log.5
+  # Create a file handler, which writes to rotating files api.log, api.log.1, ..., api.log.5
   handler = RotatingFileHandler('api.log', maxBytes=10**7, backupCount=5)
   
-  # add a JSON formatter
+  # Add a JSON formatter
   formatter = ProcessorFormatter(
     processors = [
       ProcessorFormatter.remove_processors_meta,
-      TimeStamper(fmt="%Y-%b-%d %H:%M:%S", utc=False),
-      JSONRenderer()
+      TimeStamper(fmt='iso', utc=False),
+      JSONRenderer(sort_keys=True)
     ]
   )
   handler.setFormatter(formatter)
   
-  # we definitely want the log file to include bad request warnings, so the log
-  # level has to be at least that low
-  handler.setLevel(logging.WARNING)
+  # Set log level
+  handler.setLevel(file_log_level)
   
   return handler
 
-def create_console_handler(debug=False):
-  # create a stream handler that writes to stderr
+def create_console_handler(environment):
+  # Create a stream handler that writes to stderr
   handler = StreamHandler()
   
-  # add a console formatter
+  # Add a console formatter
   formatter = ProcessorFormatter(
     processors = [
       ProcessorFormatter.remove_processors_meta,
+      TimeStamper(fmt='iso', utc=False),
       ConsoleRenderer()
     ]
   )
   handler.setFormatter(formatter)
   
-  # print everything, or almost everything, in the console
-  handler.setLevel(logging.DEBUG if debug else logging.INFO)
+  # Print everything, or almost everything, in the console
+  handler.setLevel(console_log_level(environment))
   
   return handler
+
+# This factory calls up the logger that will be stored in current_app.logger
+##class BackscopeLoggerFactory(structlog.stdlib.LoggerFactory):
+##  def __init__(self, default_name, **kwargs):
+##    super().__init__(**kwargs)
+##    self.default_name = default_name
+##  
+##  def __call__(self, name=None, *args) -> logging.Logger:
+##    if name is None:
+##      name = self.default_name
+##    print('factory made: ', super().__call__(name, *args))
+##    return super().__call__(name, *args)
+
+# --- App creation ---
 
 # To choose the environment, we look for settings in the following order:
 #  (1) Function parameter
@@ -78,8 +111,8 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     if environment is None:
       # Get app type from .env if provided. Otherwise, use 'development'
       environment = os.environ.get('APP_ENVIRONMENT', 'development')
-
-    # Set up logging
+    
+    # --- Set up logging ---
     #
     # To access `app.logger` before `app` is created, we take advantage of
     # knowing that `app` will use the `__name__` logger. we set `app.logger` to
@@ -91,24 +124,50 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     # configure logging before creating the application object"
     #
     #   https://flask.palletsprojects.com/en/2.3.x/logging/
-    #
-    app_logger = logging.getLogger(__name__)
-    app_logger.setLevel(logging.DEBUG)
-    app_logger.addHandler(create_file_handler())
+    
+    # For explicit logging, we'll use a structured logger that feeds into the
+    # basic logger. The structured logger will be current_app.structlogger, and
+    # the basic logger will be current_app.logger
+    structlog.configure(
+      processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+      ],
+      ##logger_factory=BackscopeLoggerFactory(__name__)
+      logger_factory=structlog.stdlib.LoggerFactory()
+    )
+    ##structlogger = structlog.get_logger(__name__)
+    
+    # Create file handler
+    file_handler = create_file_handler()
+    
+    # Set up the basic logger
+    min_level = min(file_log_level, console_log_level(environment))
+    ##logging.basicConfig(
+      ##level=min_level
+      ##level=min(file_log_level, console_log_level(environment))
+    ##)
+    basic_logger = logging.getLogger(__name__)
+    basic_logger.setLevel(min_level)
+    basic_logger.addHandler(file_handler)
     if config[environment].DEVELOPMENT:
       # in development, also log to the console, with higher verbosity
-      app_logger.addHandler(create_console_handler(config[environment].DEBUG))
-
+      basic_logger.addHandler(create_console_handler(environment))
+    
     # Create app
     app = Flask(__name__, instance_relative_config=True)
-
+    
+    # Add structured logger
+    ##app.structlogger = structlog.make_filtering_bound_logger(min_level)
+    app.structlogger = structlog.get_logger(__name__)
+    ##app.structlogger = structlogger
+    ##print('struct logger: ', type(structlogger))
+    
     # Check logging
-    app.logger.info('Backscope is up and running')
-    app.logger.warning({
-      'foo': 92,
-      'bar': [2, 8, 1]
-    })
-
+    app.logger.info('App logger running')
+    app.structlogger.info('Structured log running')
+    app.structlogger.error('Error test')
+    
     # Upload config from config.py
     if config[environment].DEVELOPMENT: CORS(app)
     if config[environment].TESTING and config[environment].SQLALCHEMY_DATABASE_URI is None:
@@ -125,21 +184,21 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     app.config.from_object(config[environment])
     app.config['oeis_scheme'] = oeis_scheme
     app.config['oeis_hostport'] = oeis_hostport
-
+    
     # Initialize the application
     db.init_app(app)
     Migrate(app, db)
-
+    
     # Add a command line interface to the application
     app.cli.add_command(clear_database_command)
-
+    
     # The nscope endpoint application
     from flaskr import nscope
-
+    
     # The executor and blueprint are specified via nscope
     nscope.executor.init_app(app)
     app.register_blueprint(nscope.bp)
-
+    
     # The primary application
     return app
 

@@ -2,8 +2,6 @@
 Views for nscope model
 """
 
-from urllib.parse import urlunparse
-
 from flask import Blueprint, jsonify, current_app, render_template
 from flask_executor import Executor
 from flaskr import db
@@ -13,7 +11,10 @@ import cypari2
 from cypari2.convert import gen_to_python
 import re
 import requests
+from urllib.parse import urlunparse
+from requests_toolbelt.utils import dump
 import subprocess # for calling git
+import structlog
 
 
 executor = Executor()
@@ -25,15 +26,59 @@ bp = Blueprint("nscope", __name__)
 def index():
     return render_template("index.html")
 
-def oeis_url(path='', query=''):
+def write_request_log(log, response, error=False):
+  log.bind(response=dump.dump_all(response))
+  if error:
+    log.error('request issue')
+  else:
+    log.warning('request issue')
+
+def oeis_url(path=''):
   return urlunparse([
     current_app.config['oeis_scheme'],
     current_app.config['oeis_hostport'],
     path,
     '', # path parameters
-    query,
+    '', # query
     ''  # fragment
   ])
+
+def oeis_get(path='', params=None, timeout=4):
+  # start keping track of what's going on
+  print('current structured logger type: ', type(current_app.structlogger))
+  log = current_app.structlogger.bind(tags=[])
+  tags = structlog.get_context(log)['tags']
+  
+  # try request
+  try:
+    response = requests.get(oeis_url(path), params, timeout=timeout)
+    if response.history:
+      tags.append('history')
+    response.raise_for_status() # raise an exception on 4xx and 5xx status codes
+  except requests.HTTPError as ex:
+    tags.append('http error')
+    write_request_log(log, response, error=True)
+    return ex
+    ##raise ex
+  except requests.RequestException as ex:
+    tags.append('exception')
+    write_request_log(log, response, error=True)
+    return ex
+    ##raise ex
+  
+  #-----------------------------------------------------------------------------
+  # if we've gotten this far, it's going well enough to return the response
+  #-----------------------------------------------------------------------------
+  
+  # log any status code other than 200 OK
+  ##if not response.status_code == 200:
+    ##tags.append('not ok')
+  
+  # if the log has content, write it
+  ##if log.tags:
+    ##write_request_log(log, response)
+  
+  return response
 
 def fetch_metadata(oeis_id):
     """ When called with a *valid* oeis id, makes sure the metadata has been
@@ -51,8 +96,10 @@ def fetch_metadata(oeis_id):
     seq.meta_requested = True
     db.session.commit()
     # Now grab the data
-    match_url = oeis_url('/search', f'q={seq.id}&fmt=json')
-    r = requests.get(match_url).json()
+    ##match_url = oeis_url('/search', f'q={seq.id}&fmt=json')
+    ##r = requests.get(match_url).json()
+    search_params = {'q': seq.id, 'fmt': 'json'}
+    r = oeis_get('/search', search_params)
     if r['results'] != None: # Found some metadata
         backrefs = []
         target_number = int(seq.id[1:])
@@ -67,7 +114,9 @@ def fetch_metadata(oeis_id):
                     backrefs.append('A' + str(result['number']).zfill(6))
                 saw += 1
             if saw < matches:
-                r = requests.get(match_url + f"&start={saw}").json()
+                search_params['start'] = saw
+                r = oeis_get('\search', search_params).json()
+                ##r = requests.get(match_url + f"&start={saw}").json()
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
@@ -115,7 +164,8 @@ def fetch_values(oeis_id):
     seq.values_requested = True
     db.session.commit()
     # Now try to get it from the OEIS:
-    r = requests.get(oeis_url(f'/{oeis_id}/b{oeis_id[1:]}.txt'), timeout=4)
+    r = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt')
+    ##r = requests.get(oeis_url(f'/{oeis_id}/b{oeis_id[1:]}.txt'), timeout=4)
     if r.status_code == 404:
         return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
     # Parse the b-file:
@@ -277,7 +327,8 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        r = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4).json()
+        r = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'}).json()
+        ##r = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4).json()
         if r['results'] != None:
             seq.name = r['results'][0]['name']
             db.session.commit()
