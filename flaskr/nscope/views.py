@@ -166,8 +166,10 @@ def fetch_values(oeis_id):
     # Now try to get it from the OEIS:
     r = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt')
     ##r = requests.get(oeis_url(f'/{oeis_id}/b{oeis_id[1:]}.txt'), timeout=4)
-    if r.status_code == 404:
-        return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
+    # Test for 404 error. Hat tip StackOverflow user Lukasa
+    #   https://stackoverflow.com/a/19343099
+    if isinstance(r, requests.HTTPError) and r.response.status_code == 404:
+      return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')

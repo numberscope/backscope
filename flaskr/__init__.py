@@ -158,15 +158,7 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     app = Flask(__name__, instance_relative_config=True)
     
     # Add structured logger
-    ##app.structlogger = structlog.make_filtering_bound_logger(min_level)
     app.structlogger = structlog.get_logger(__name__)
-    ##app.structlogger = structlogger
-    ##print('struct logger: ', type(structlogger))
-    
-    # Check logging
-    app.logger.info('App logger running')
-    app.structlogger.info('Structured log running')
-    app.structlogger.error('Error test')
     
     # Upload config from config.py
     if config[environment].DEVELOPMENT: CORS(app)
