@@ -4,7 +4,7 @@ from structlog.testing import capture_logs
 
 
 class LoggingTest(unittest.TestCase):
-  expected_capture = [{'event': 'Error message', 'log_level': 'error'}]
+  expected_log_output = [{'log_level': 'error', 'event': 'Error message'}]
   
   def setUp(self):
     self.app = create_app('testing')
@@ -19,9 +19,9 @@ class LoggingTest(unittest.TestCase):
       db.drop_all()
   
   def test_logging(self):
-    with capture_logs() as capture:
+    with capture_logs() as log_output:
       self.app.structlogger.error('Error message')
-      self.assertEqual(capture, self.expected_capture)
+      self.assertEqual(log_output, self.expected_log_output)
 
 
 if __name__ == "__main__":
