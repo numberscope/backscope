@@ -1,4 +1,5 @@
 import unittest
+from structlog.testing import capture_logs
 import sys
 from flaskr import create_app, db, clear_database
 import flaskr.nscope.views as views
@@ -59,7 +60,7 @@ class AbstractEndpointTest(unittest.TestCase):
     # "The test client makes requests to the application without running a live
     # server." the `with` block runs teardown
     #   https://github.com/pallets/flask/issues/2949
-    with self.app.test_client() as client:
+    with self.app.test_client() as client, capture_logs() as log_output:
       if self.verbose:
         print("  Testing response")
       
@@ -79,5 +80,9 @@ class AbstractEndpointTest(unittest.TestCase):
           "must be a dictionary or a string, not an object of type "
           f"'{response_type.__name__}'"
         )
+      
+      # check logs
+      if hasattr(self, 'expected_log_output'):
+        self.assertEqual(log_output, self.expected_log_output)
       
       # TO DO: test background work

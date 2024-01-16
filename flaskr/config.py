@@ -40,12 +40,14 @@ class Config:
     DOC_PASSWORD = 'password'
     
     DEBUG = False
+    DEVELOPMENT = False
     TESTING = False
     PRODUCTION = False
 
 
 class DevConfig(Config):
     DEBUG = True
+    DEVELOPMENT = True
 
 
 class TestConfig(Config):
