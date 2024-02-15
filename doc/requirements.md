@@ -54,18 +54,13 @@ version number of that package must be updated in that script as well.
 
 To help understand the dependency graph, you can call
 ```
-sh tools/explain-requirements.sh
+bash tools/explain-requirements
 ```
-after activating the virtual environment. This script goes through the packages in `requirements-freeze.txt` and tells you what role each one plays in the current environment. For each package `FROZEN` in `requirements-freeze.txt`, you'll get one of the following outputs:
-- `FROZEN [explicitly required]`
-   
-   The package is in `requirements.txt`.
-- `FROZEN [required by] PARENT_1, PARENT_2, PARENT_3...`
-   
-   The package isn't in `requirements.txt`, but it's required by the packages `PARENT_1`, `PARENT_2`, `PARENT_3`… in the current environment.
-- `FROZEN [not required]`
-   
-   The package is neither listed in `requirements.txt` nor required by any package in the current environment.
-- `FROZEN [not installed]`
-   
-   The package isn't installed in the current environment. You might see this if you've created a fresh virtual environment by installing the packages in `requirements.txt`, but you haven't updated `requirements-freeze.txt` yet. If Backscope works in this environment, it should be safe to remove `FROZEN` from `requirements-freeze.txt`.
+after activating the virtual environment. This script classifies the packages in `requirements-freeze.txt` by the roles they play in the current environment.
+
+| Role | Meaning |
+| --- | --- |
+| Not installed | Not installed in the current environment. You might see packages in this category if you've created a fresh virtual environment by installing the packages in `requirements.txt`, but you haven't updated `requirements-freeze.txt` yet. If Backscope works in this environment, it should be safe to remove these packages from `requirements-freeze.txt`. |
+| Not required | Neither required by a package in the current environment nor listed in `requirements.txt`. |
+| Indirectly required | Required by a package in the current environment, but not listed in `requirements.txt`. Each package shown in this category is followed by the names of the packages that require it |
+| Directly required | Listed in `requirements.txt`. |
