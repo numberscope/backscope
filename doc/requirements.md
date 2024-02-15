@@ -66,6 +66,6 @@ after activating the virtual environment. This script goes through the packages 
 - `FROZEN [not required]`
    
    The package is neither listed in `requirements.txt` nor required by any package in the current environment.
-- `FROZEN [not used]`
+- `FROZEN [not installed]`
    
-   The package isn't even installed in the current environment. You might see this if you've created a fresh virtual environment by manually installing the packages in `requirements.txt`, but you haven't updated `requirements-freeze.txt` yet. If Backscope works in this environment, it should be safe to remove `FROZEN` from `requirements-freeze.txt`.
+   The package isn't installed in the current environment. You might see this if you've created a fresh virtual environment by installing the packages in `requirements.txt`, but you haven't updated `requirements-freeze.txt` yet. If Backscope works in this environment, it should be safe to remove `FROZEN` from `requirements-freeze.txt`.
