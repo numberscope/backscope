@@ -14,7 +14,7 @@ for dep in $(cat requirements-freeze.txt); do
     not_installed+=( $pkg )
   else
     # hat tip Anton Korneychuk (https://stackoverflow.com/a/69022922)
-    if grep -q "$pkg\s*\(#\|$\)" requirements.txt; then
+    if grep -q "^$pkg\s*\(#\|$\)" requirements.txt; then
       # explicitly required
       directly_required+=( $pkg )
     else
