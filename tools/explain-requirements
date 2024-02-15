@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# --- classify requirements ---
+
+not_installed=()
+not_required=()
+indirectly_required=()
+directly_required=()
+
+for dep in $(cat requirements-freeze.txt); do
+  pkg=${dep%==*}
+  details=$(pip show $pkg 2> /dev/null)
+  if [ -z "$details" ]; then
+    not_installed+=( $pkg )
+  else
+    # hat tip Anton Korneychuk (https://stackoverflow.com/a/69022922)
+    if grep -q "$pkg\s*\(#\|$\)" requirements.txt; then
+      # explicitly required
+      directly_required+=( $pkg )
+    else
+      # not explicitly required
+      parents_line=$(echo "$details" | grep Required-by)
+      parents=${parents_line#"Required-by: "}
+      if [ "$parents" ]; then
+        # required by another package
+        indirectly_required+=( "$pkg ← $parents" )
+      else
+        # not required by another package
+        not_required+=( $pkg )
+      fi
+    fi
+  fi
+done
+
+# --- list requirements ---
+
+echo "Not installed:"
+if [[ -z "${not_installed[@]}" ]]; then
+  echo "  [none]"
+else
+  for pkg in "${not_installed[@]}"; do
+    echo "  $pkg"
+  done
+fi
+
+echo "Not required:"
+if [[ -z "${not_required[@]}" ]]; then
+  echo "  [none]"
+else
+  for pkg in "${not_required[@]}"; do
+    echo "  $pkg"
+  done
+fi
+
+echo "Indirectly required:"
+if [[ -z "${indirectly_required[@]}" ]]; then
+  echo "  [none]"
+else
+  for pkg in "${indirectly_required[@]}"; do
+    echo "  $pkg"
+  done
+fi
+
+echo "Directly required:"
+if [[ -z "${directly_required[@]}" ]]; then
+  echo "  [none]"
+else
+  for pkg in "${directly_required[@]}"; do
+    echo "  $pkg"
+  done
+fi
