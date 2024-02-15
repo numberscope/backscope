@@ -61,6 +61,6 @@ after activating the virtual environment. This script classifies the packages in
 | Role | Meaning |
 | --- | --- |
 | Not installed | Not installed in the current environment. You might see packages in this category if you've created a fresh virtual environment by installing the packages in `requirements.txt`, but you haven't updated `requirements-freeze.txt` yet. If Backscope works in this environment, it should be safe to remove these packages from `requirements-freeze.txt`. |
-| Not required | Neither required by a package in the current environment nor listed in `requirements.txt`. |
-| Indirectly required | Required by a package in the current environment, but not listed in `requirements.txt`. Each package shown in this category is followed by the names of the packages that require it |
-| Directly required | Listed in `requirements.txt`. |
+| Not required | Installed, but neither required by a package in the current environment nor listed in `requirements.txt`. |
+| Indirectly required | Installed, and required by a package in the current environment, but not listed in `requirements.txt`. Each package shown in this category is followed by the names of the packages that require it. |
+| Directly required | Installed, and listed in `requirements.txt`. |
