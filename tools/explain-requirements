@@ -34,38 +34,33 @@ done
 
 # --- list requirements ---
 
-echo "Not installed:"
-if [[ -z "${not_installed[@]}" ]]; then
-  echo "  [none]"
-else
-  for pkg in "${not_installed[@]}"; do
-    echo "  $pkg"
-  done
-fi
+tput setaf 1; echo -n ╭──; tput bold; echo " Not installed ────────"
+for pkg in "${not_installed[@]}"; do
+  echo -n │
+  tput sgr0; echo " $pkg"; tput setaf 1
+done
+echo ╰─────────────────────────
 
-echo "Not required:"
-if [[ -z "${not_required[@]}" ]]; then
-  echo "  [none]"
-else
-  for pkg in "${not_required[@]}"; do
-    echo "  $pkg"
-  done
-fi
+tput setaf 3; echo -n ╭──; tput bold; echo " Not required ─────────"
+for pkg in "${not_required[@]}"; do
+  echo -n │
+  tput sgr0; echo " $pkg"; tput setaf 3
+done
+echo ╰─────────────────────────
 
-echo "Indirectly required:"
-if [[ -z "${indirectly_required[@]}" ]]; then
-  echo "  [none]"
-else
-  for pkg in "${indirectly_required[@]}"; do
-    echo "  $pkg"
-  done
-fi
+tput setaf 2; echo -n ╭──; tput bold; echo " Indirectly required ──"
+for pkg in "${indirectly_required[@]}"; do
+  echo -n │
+  tput sgr0; echo " $pkg"; tput setaf 2
+done
+echo ╰─────────────────────────
 
-echo "Directly required:"
-if [[ -z "${directly_required[@]}" ]]; then
-  echo "  [none]"
-else
-  for pkg in "${directly_required[@]}"; do
-    echo "  $pkg"
-  done
-fi
+tput setaf 4; echo -n ╭──; tput bold; echo " Directly required ────"
+for pkg in "${directly_required[@]}"; do
+  echo -n │
+  tput sgr0; echo " $pkg"; tput setaf 4
+done
+echo ╰─────────────────────────
+
+# reset terminal style to default
+tput sgr0
