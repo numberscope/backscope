@@ -56,7 +56,8 @@ To help understand the dependency graph, you can call
 ```
 bash tools/explain-requirements
 ```
-after activating the virtual environment. This script classifies the packages in `requirements-freeze.txt` by the roles they play in the current environment.
+after activating the virtual environment. This script classifies the packages in
+`requirements-freeze.txt` by the roles they play in the current environment.
 
 | Role | Meaning |
 | --- | --- |
