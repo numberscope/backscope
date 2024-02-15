@@ -1,18 +1,22 @@
 # Requirements
 
-The `requirements.txt` file should only contain "top-level" requirements
+The `requirements.txt` file should only contain the "top-level" requirements
 for backscope. That is, if we explicitly want a requirement, we list it
-in `requirements.txt`. If a requirement has dependencies, those are
-listed in `requirements-freeze.txt`. To generate
-`requirements-freeze.txt`, you can enter the following command if you
-have the virtual environment activated in a Posix shell:
+in `requirements.txt`. Once you've activated the virtual environment, you can
+install the top-level requirements by calling
+```
+pip install -r requirements.txt
+```
 
+The full list of requirements, including both the top-level requirements and
+their dependencies, is kept in `requirements-freeze.txt`. Once you've installed
+the top-level requirements in the virtual environment, you can generate
+`requirements-freeze.txt` by running the following command in a Posix shell:
 ```
 pip freeze --all > requirements-freeze.txt
 ```
-
-This file should be regenerated and updated every time a "top-level"
-dependency is installed or updated.
+You should regenerate and update this file every time you install or update a
+top-level requirement.
 
 The `requirements.txt` file is analogous to frontscope's `package.json`,
 and the `requirements-freeze.txt` is analogous to frontscope's
