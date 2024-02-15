@@ -7,7 +7,12 @@ for dep in $(cat requirements-freeze.txt); do
     parents_line=$(echo "$details" | grep Required-by)
     parents=${parents_line#"Required-by: "}
     if [ -z "$parents" ]; then
-      echo "$pkg [not required]"
+      # hat tip Anton Korneychuk (https://stackoverflow.com/a/69022922)
+      if grep -q -x -F "$pkg\s*\(#\|$\)" requirements.txt; then
+        echo "$pkg [not required]"
+      else
+        echo "$pkg [explicitly required]"
+      fi
     else
       echo "$pkg [required by] $parents"
     fi
