@@ -59,10 +59,10 @@ sh tools/explain-requirements.sh
 after activating the virtual environment. This script goes through the packages in `requirements-freeze.txt` and tells you what role each one plays in the current environment. For each package `FROZEN` in `requirements-freeze.txt`, you'll get one of the following outputs:
 - `FROZEN [explicitly required]`
    
-   The package is listed in `requirements.txt`.
+   The package is in `requirements.txt`.
 - `FROZEN [required by] PARENT_1, PARENT_2, PARENT_3...`
    
-   The package is required by the packages `PARENT_1`, `PARENT_2`, `PARENT_3`… in the current environment. That might means it's a lower-level requirement. However, it could be a top-level requirement: the top level should include all of the packages Backscope imports, even if they currently happen to require each other.
+   The package isn't in `requirements.txt`, but it's required by the packages `PARENT_1`, `PARENT_2`, `PARENT_3`… in the current environment.
 - `FROZEN [not required]`
    
    The package is neither listed in `requirements.txt` nor required by any package in the current environment.

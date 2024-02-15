@@ -4,17 +4,21 @@ for dep in $(cat requirements-freeze.txt); do
   if [ -z "$details" ]; then
     echo "$pkg [not used]"
   else
-    parents_line=$(echo "$details" | grep Required-by)
-    parents=${parents_line#"Required-by: "}
-    if [ -z "$parents" ]; then
-      # hat tip Anton Korneychuk (https://stackoverflow.com/a/69022922)
-      if grep -q -x -F "$pkg\s*\(#\|$\)" requirements.txt; then
-        echo "$pkg [not required]"
-      else
-        echo "$pkg [explicitly required]"
-      fi
+    # hat tip Anton Korneychuk (https://stackoverflow.com/a/69022922)
+    if grep -q "$pkg\s*\(#\|$\)" requirements.txt; then
+      # explicitly required
+      echo "$pkg [explicitly required]"
     else
-      echo "$pkg [required by] $parents"
+      # not explicitly required
+      parents_line=$(echo "$details" | grep Required-by)
+      parents=${parents_line#"Required-by: "}
+      if [ "$parents" ]; then
+        # required by another package
+        echo "$pkg [required by] $parents"
+      else
+        # not required by another package
+        echo "$pkg [not required]"
+      fi
     fi
   fi
 done
