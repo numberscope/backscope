@@ -3,6 +3,7 @@ Init file (creates app and database)
 """
 
 import os
+import sys
 import click
 import logging
 import structlog
@@ -16,6 +17,7 @@ from flask.cli import with_appcontext
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+import subprocess # for calling git
 
 from dotenv import load_dotenv
 
@@ -176,6 +178,24 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     app.config.from_object(config[environment])
     app.config['oeis_scheme'] = oeis_scheme
     app.config['oeis_hostport'] = oeis_hostport
+    
+    # Logging
+    file_handler = RotatingFileHandler('api.log', maxBytes=10000, backupCount=1)
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    stdout = logging.StreamHandler(sys.stdout)
+    stdout.setLevel(logging.DEBUG)
+    app.logger.addHandler(stdout)
+    
+    # Remember the git hash of the code we are running:
+    if 'GIT_REVISION_HASH' in os.environ:
+      app.config['git_revision_hash'] = os.getenv('GIT_REVISION_HASH')
+    else:
+      # hash can be provided by the command
+      #    git rev-parse --short HEAD
+      # thanks to: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script/
+      app.config['git_revision_hash'] = subprocess.check_output(
+        ['git', 'rev-parse', '--short', 'HEAD'], encoding='utf8').strip()
     
     # Initialize the application
     db.init_app(app)

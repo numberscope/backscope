@@ -1,5 +1,7 @@
 cypari2 # library for factoring
 Flask[async] # web framework with the async extra
+Flask-Cors # Flask extension for cross-origin resource sharing
+Flask-Executor # Flask extension for launching concurrent tasks
 Flask-SQLAlchemy # Flask library for a popular SQL ORM
 Flask-Migrate # library for migrating database models
 psycopg2-binary # library for interacting with Postgres
