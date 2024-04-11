@@ -15,6 +15,7 @@ from urllib.parse import urlunparse
 from requests_toolbelt.utils import dump
 import subprocess # for calling git
 import structlog
+import base64 # for encoding response dumps
 
 
 executor = Executor()
@@ -27,7 +28,8 @@ def index():
     return render_template("index.html")
 
 def write_request_log(log, response, error=False):
-  log.bind(response=dump.dump_all(response))
+  response_b64 = base64.b64encode(dump.dump_all(response)).decode('ascii')
+  log = log.bind(response=response_b64)
   if error:
     log.error('request issue')
   else:
