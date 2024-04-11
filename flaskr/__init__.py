@@ -3,7 +3,6 @@ Init file (creates app and database)
 """
 
 import os
-import sys
 import click
 import logging
 import structlog
@@ -178,14 +177,6 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     app.config.from_object(config[environment])
     app.config['oeis_scheme'] = oeis_scheme
     app.config['oeis_hostport'] = oeis_hostport
-    
-    # Logging
-    file_handler = RotatingFileHandler('api.log', maxBytes=10000, backupCount=1)
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
-    stdout = logging.StreamHandler(sys.stdout)
-    stdout.setLevel(logging.DEBUG)
-    app.logger.addHandler(stdout)
     
     # Remember the git hash of the code we are running:
     if 'GIT_REVISION_HASH' in os.environ:
