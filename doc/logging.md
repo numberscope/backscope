@@ -108,6 +108,8 @@ current_app.structlogger.bind(tags=[])
 ```
 returns a draft of a log entry, with no content except an empty list of tags.
 
+As this example shows, the app keeps its structured logger in the custom `structlogger` attribute. The default `logger` attribute still points to the basic logger that Flask is presumably designed to use internally. The basic logger feeds its output into the structured logger. Backscope should always write logs to `current_app.structlogger`, bypassing the basic logger.
+
 #### Updating a draft log entry
 
 If `log` is a log entry, the method call
