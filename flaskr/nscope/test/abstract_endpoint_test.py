@@ -5,6 +5,29 @@ from flaskr import create_app, db, clear_database
 import flaskr.nscope.views as views
 
 
+# required attributes:
+#
+#  --- endpoint ---
+#  the endpoint we're requesting
+#
+#  --- expected_response ---
+#  the dictionary or string we expect to get back
+#
+# optional attributes:
+#
+#  --- expected_log_output ---
+#  the list of log entries we expect the request to produce. each entry is a
+#  dictionary, which would be written in JSON format in the log
+#
+# optional methods:
+#
+#  --- process_log_entry ---
+#  this method is called on each recorded log entry before comparison with the
+#  expected log output. it can be used to modify each log entry in place. this
+#  is useful for removing time-dependent parts of log entries, like the date
+#  line in an HTTP response
+#
+
 # guidance on test database handling:
 #   https://stackoverflow.com/a/17818795
 #   https://flask-testing.readthedocs.io/en/v0.4/
