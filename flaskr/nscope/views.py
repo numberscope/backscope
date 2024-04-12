@@ -7,15 +7,15 @@ from flask_executor import Executor
 from flaskr import db
 from flaskr.nscope.models import *
 
+import base64 # for encoding response dumps
 import cypari2
 from cypari2.convert import gen_to_python
 import re
 import requests
-from urllib.parse import urlunparse
 from requests_toolbelt.utils import dump
-import subprocess # for calling git
 import structlog
-import base64 # for encoding response dumps
+import subprocess # for calling git
+from urllib.parse import urlunparse
 
 
 executor = Executor()
@@ -49,7 +49,7 @@ def oeis_get(path='', params=None, timeout=4):
   # start keeping track of what's going on
   log = current_app.structlogger.bind(tags=[])
   tags = structlog.get_context(log)['tags']
-  
+
   # try request
   try:
     response = requests.get(oeis_url(path), params, timeout=timeout)
@@ -64,11 +64,11 @@ def oeis_get(path='', params=None, timeout=4):
     tags.append('exception')
     write_request_log(log, response, error=True)
     return ex
-  
+
   #-----------------------------------------------------------------------------
   # if we've gotten this far, it's going well enough to return the response
   #-----------------------------------------------------------------------------
-  
+
   return response
 
 def fetch_metadata(oeis_id):

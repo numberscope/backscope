@@ -1,4 +1,5 @@
 import unittest
+
 import flaskr.nscope.test.abstract_endpoint_test as abstract_endpoint_test
 
 
@@ -25,7 +26,7 @@ class TestNonexistentSequence(abstract_endpoint_test.AbstractEndpointTest):
       'tags': ['http error']
     }
   ]
-  
+
   def process_log_entry(self, entry):
     # an HTTP response includes a time-dependent 'Date' parameter. in addition,
     # the OEIS 404 page ends with a frequently updated paragraph that shows the
