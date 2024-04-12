@@ -1,0 +1,11 @@
+# almost everything in this directory should be a log file, and therefore
+# shouldn't be tracked. the one exception is this `.gitignore` file, as
+# explained below
+*
+
+# tracking this file ensures that the `logs` directory will always be present,
+# so the logging system can write to it. hat tip to Jamie Flournoy for this idea
+#
+#  https://stackoverflow.com/a/932982
+#
+!.gitignore

@@ -51,6 +51,5 @@ def search():
 
 def create_app():
   app = Flask(__name__)
-  ##app.config.from_object()
   app.register_blueprint(api)
   return app
