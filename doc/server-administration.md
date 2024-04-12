@@ -60,6 +60,13 @@ Stop `numberscope`:
 sudo systemctl stop numberscope
 ```
 
+### Accessing `numberscope` logs
+
+You can see the standard error output of the backscope process via
+`sudo journalctl -u backscope`. However, most diagnostic output is directed to
+backscope's own rotating log files, in the `~scope/repos/backscope/logs`
+directory.
+
 ## Updating the server to a new version of backscope
 
 There are two main cases. If the change in version of backscope does not
