@@ -83,6 +83,14 @@ class AbstractEndpointTest(unittest.TestCase):
       
       # check logs
       if hasattr(self, 'expected_log_output'):
-        self.assertEqual(log_output, self.expected_log_output)
+        # sort the keys in each log entry
+        sorted_log_output = [dict(sorted(entry.items())) for entry in log_output]
+        
+        # process log entries
+        if hasattr(self, 'process_log_entry') and callable(self.process_log_entry):
+          for entry in sorted_log_output:
+            self.process_log_entry(entry)
+        
+        self.assertEqual(sorted_log_output, self.expected_log_output)
       
       # TO DO: test background work
