@@ -53,8 +53,8 @@ def console_log_level(environment):
   )
 
 def create_file_handler():
-  # Create a file handler, which writes to rotating files api.log, api.log.1, ..., api.log.5
-  handler = RotatingFileHandler('api.log', maxBytes=10**7, backupCount=5)
+  # Create a file handler, which writes to rotating files api.log, api.log.1, api.log.2, ..., api.log.9
+  handler = RotatingFileHandler('logs/api.log', maxBytes=2*10**7, backupCount=9)
   
   # Add a JSON formatter
   formatter = ProcessorFormatter(

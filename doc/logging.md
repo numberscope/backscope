@@ -2,9 +2,17 @@
 
 ## Where to find logs
 
-Backscope writes logs to the rotating log files `api.log`, `api.log.1`, …, `api.log.5`.
+### Basics
 
-Logs are also printed to the console.
+Logs are kept in the `logs` directory, in the [rotating log files](https://docs.python.org/3/library/logging.handlers.html#logging.handlers.RotatingFileHandler) `api.log`, `api.log.1`, …, `api.log.9`. These files are created automatically as needed. The newest logs are at the end of `api.log`.
+
+When the `DEVELOPMENT` environment flag is set, logs are also printed to the console. The console logs include events that aren't important enough to store long-term in the log files.
+
+### File rotation
+
+When `api.log` fills up to its maximum size of 20&nbsp;MB, it's renamed to `api.log.1`, while the former `api.log.1` becomes `api.log.2`, …, the former `api.log.8` becomes `api.log.9`, and the former `api.log.9` is deleted.
+
+If there's a big problem that creates enough log entries and fills up all the log files, we'll start losing the logs from the beginning of the problem, which might be the most valuable ones. The logs might fill up after as few as 20,000 entries, based on the estimate that a 404 error from the OEIS generates a 5–10&nbsp;kB log entry. We could avoid this pitfall by switching from size-based to time-based rotation. That doesn't seem worth the trouble at our current small scale, though.
 
 ## How to read logs
 
@@ -25,15 +33,15 @@ When the event string starts with "Exception on...", the log entry describes an 
 
 #### Request issue
 
-A "request issue" event is always supposed to come with a dump of the associated request-response conversation, stored in the key "response" as a base64 string:
+A "request issue" event describes a problem with an HTTP request. It should always come with a dump of the associated request-response conversation, stored in the key "response" as a base64 string:
 ```
 "response": "PCBHRVQgc3R1ZmYNCjwgSFRUUC8xLjENCg=="
 ```
-Applying `base64.b64decode()` to the conversation will turn it into byte array, like this:
+Applying [`base64.b64decode`](https://docs.python.org/3/library/base64.html#base64.b64decode) to the conversation will turn it into byte array, like this:
 ```python
 b'< GET stuff\\r\\n< HTTP/1.1\\r\\n< Host: oeis.org\\r\\n< ...'
 ```
-You can turn the byte array into a string, for printing or other uses, by calling its `decode('utf-8')` method. To understand how this string is formatted, let's look at an actual example. In the conversation below, we ask the OEIS for the B-file of a non-existent sequence, and we get a 404 error in response. To distinguish the two sides of the conversation, a `<` has been added to the start of every request line, and a `>` has been added to the start of every response line. (The last line of the response breaks over several lines when it's printed out, because it contains newline characters.)
+You can turn the byte array into a string, for printing or other uses, by calling its `decode('utf-8')` method. To understand how this string is formatted, let's look at an actual example (somewhat shortened). In the conversation below, we ask the OEIS for the B-file of a non-existent sequence, and we get a 404 error in response. To distinguish the two sides of the conversation, a `<` is added to the start of every request line, and a `>` is added to the start of every response line. (The last line of the response breaks over several lines when it's printed out here, because it contains newline characters.)
 ```
 < GET /A000000/b000000.txt HTTP/1.1
 < Host: oeis.org
@@ -55,19 +63,7 @@ You can turn the byte array into a string, for printing or other uses, by callin
 <html>
   
   <head>
-  <script defer data-domain="oeis.org" src="https://plausible.io/js/script.js"></script>
-  <style>
-  tt { font-family: monospace; font-size: 100%; }
-  p.editing { font-family: monospace; margin: 10px; text-indent: -10px; word-wrap:break-word;}
-  p { word-wrap: break-word; }
-  div.motd { font-weight: bold; width: 70%; border: 1px solid black; background-color: #ffffcc; margin: 1em; }
-  td.motd {  }
-  p.Seq, div.Seq { text-indent: -1em; margin-left: 1em; margin-top: 0; margin-bottom: 0; }
-  p.Seq tt, div.Seq tt { white-space: pre-wrap; }
-  </style>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="keywords" content="OEIS,integer sequences,Sloane" />
-  
+  <!-- ... -->
   
   <title>The On-Line Encyclopedia of Integer Sequences&reg; (OEIS&reg;)</title>
   <link rel="search" type="application/opensearchdescription+xml" title="OEIS" href="/oeis.xml">
@@ -85,109 +81,13 @@ You can turn the byte array into a string, for printing or other uses, by callin
   </script>
   </head>
   <body bgcolor=#ffffff onload="redir();sf()">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-    <tr><td width="100%" align="right">
-      <font size=-1>
-      
-        <a href="/login?redirect=%2fA000000%2fb000000.txt">login</a>
-      
-      </font>
-    <tr height=5><td>
-    </table>
-
-    <center>
-<span style="font-family: sans-serif; font-size: 83%; font-style: italic">The OEIS is supported by <a href="http://oeisf.org/#DONATE">the many generous donors to the OEIS Foundation</a>.</span>
-    <br>
-<p style="margin-top:-24px">&nbsp;</p>
-<a href="/"><img border="0" width="600" height="110" src="/banner2021.jpg" alt="Logo"></a>
-    <br>
-
-
-
-
-
-
-    <!-- no special fonts -->
-    </center>
-
-    <center>
-    <table border="0" cellspacing="0" cellpadding="0">
-      <tr><td>
-        
-    
-    <center>
-        <form name=f action="/search" method="GET">
-            <table cellspacing=0 cellpadding=0 border=0>
-            <tr><td>
-            <input maxLength=1024 size=55 name=q value="" title="Search Query">
-            
-            
-            
-            
-            <input type=submit value="Search" name=go>
-            <td width=10><td>
-            <font size=-2><a href="/hints.html">Hints</a></font>
-            <tr><td colspan=2>
-            <font size=-1>
-                (Greetings from <a href="/welcome">The On-Line Encyclopedia of Integer Sequences</a>!)
-            </font>
-            </table>
-        </form>
-    </center>
-
-    <b>Sorry, the page you requested was not found.
-    Try the search box at the top of this page.</b>
-
-      </td></tr>
-    </table>
-    </center>
-
-    <p>
-
-    <center>
-      <a href="/">Lookup</a> |
-      <a href="/wiki/Welcome"><font color="red">Welcome</font></a> |
-      <a href="/wiki/Main_Page"><font color="red">Wiki</font></a> |
-      <a href="/wiki/Special:RequestAccount">Register</a> |
-      
-      <a href="/play.html">Music</a> |
-      <a href="/plot2.html">Plot 2</a> |
-      <a href="/demo1.html">Demos</a> |
-      <a href="/wiki/Index_to_OEIS">Index</a> |
-      <a href="/Sbrowse.html">Browse</a> |
-      <a href="/more.html">More</a> |
-      <a href="/webcam">WebCam</a>
-
-      <br>
-
-      <a href="/Submit.html">Contribute new seq. or comment</a> |
-      <a href="/eishelp2.html">Format</a> |
-      <a href="/wiki/Style_Sheet">Style Sheet</a> |
-      <a href="/transforms.html">Transforms</a> |
-      <a href="/ol.html">Superseeker</a> |
-      <a href="/recent">Recents</a>
-
-      <br>
-
-      <a href="/community.html">The OEIS Community</a> |
-      Maintained by <a href="http://oeisf.org">The OEIS Foundation Inc.</a>
-    </center>
-
-    <p>
-    <center>
-   <span style="font-family: sans-serif; font-size: 83%; font-style: italic">
-    <a href="/wiki/Legal_Documents">
-    License Agreements, Terms of Use, Privacy Policy.
-    </a>.
-    </span>
-    </center>
-
-    <p>
-    <center>
-    <font size=-1>Last modified April 10 23:44 EDT 2024.  Contains 371609 sequences. (Running on oeis4.)</font>
-    </center>
-    <p>
-
+    <!-- ... -->
   </body>
 </html>
 ```
+
+## Choosing the level of detail
+
+What gets logged depends on what environment mode Backscope is running in. Each log entry is assigned a [level of importance](https://docs.python.org/3/library/logging.html#logging-levels). From highest to lowest, the possible levels are: *critical*, *error*, *warning*, *info*, *debug*.
+
+The file logs include all entries at *warning* level or higher. If the `DEVELOPMENT` environment flag is set, the console log includes all entries at *info* level or higher, and it also includes entries at *debug* level if the `DEBUG` flag is set. Without the `DEVELOPMENT` flag, the console log is silent.
