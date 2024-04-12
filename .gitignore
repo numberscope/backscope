@@ -19,10 +19,12 @@ b000027.txt
 *.env
 
 # Log files
+# the contents of the `logs` directory are ignored using a local `.gitignore`,
+# which has the desired bonus effect of ensuring that the `logs` directory is
+# always present
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-logs/*
 cysignals_crash_logs/*
 
 # Editor directories and files
