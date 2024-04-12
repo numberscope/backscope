@@ -136,3 +136,11 @@ Once you've finished drafting a log entry, you can write it to the log by callin
 log.error('connection failed')
 ```
 The string `'connection failed'` should describe the event being logged. It becomes the value of the `'event'` key.
+
+## Testing the logging system
+
+Tests that involve the logging system include:
+ - [test_logging.py](/flaskr/nscope/test/test_logging.py)
+   - `LoggingTest`
+ - [test_lookup_errors.py](/flaskr/nscope/test/test_lookup_errors.py)
+   - `TestNonexistentSequence`
