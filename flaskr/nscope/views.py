@@ -46,7 +46,7 @@ def oeis_url(path=''):
   ])
 
 def oeis_get(path='', params=None, timeout=4):
-  # start keping track of what's going on
+  # start keeping track of what's going on
   log = current_app.structlogger.bind(tags=[])
   tags = structlog.get_context(log)['tags']
   
