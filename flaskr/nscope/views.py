@@ -2,14 +2,12 @@
 Views for nscope model
 """
 
-from flask import Blueprint, jsonify, current_app, render_template
-from flask_executor import Executor
-from flaskr import db
-from flaskr.nscope.models import *
-
+# external imports
 import base64 # for encoding response dumps
 import cypari2
 from cypari2.convert import gen_to_python
+from flask import Blueprint, jsonify, current_app, render_template
+from flask_executor import Executor
 import re
 import requests
 from requests_toolbelt.utils import dump
@@ -17,6 +15,9 @@ import structlog
 import subprocess # for calling git
 from urllib.parse import urlunparse
 
+# internal imports
+from flaskr import db
+from flaskr.nscope.models import *
 
 executor = Executor()
 bp = Blueprint("nscope", __name__)

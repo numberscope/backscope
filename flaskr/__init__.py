@@ -2,24 +2,25 @@
 Init file (creates app and database)
 """
 
+# external imports
 import click
-import logging
-from logging import StreamHandler
-from logging.handlers import RotatingFileHandler
-import os
+from dotenv import load_dotenv
 from flask import Flask, current_app
 from flask.cli import with_appcontext
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+import logging
+from logging import StreamHandler
+from logging.handlers import RotatingFileHandler
+import os
 import subprocess # for calling gitcurrent_app
 import structlog
 from structlog.dev import ConsoleRenderer
 from structlog.processors import JSONRenderer, TimeStamper
 from structlog.stdlib import ProcessorFormatter
 
-from dotenv import load_dotenv
-
+# internal imports
 from .config import config
 
 
@@ -159,7 +160,7 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
     app.config.from_object(config[environment])
     app.config['oeis_scheme'] = oeis_scheme
     app.config['oeis_hostport'] = oeis_hostport
-    
+
     # Remember the git hash of the code we are running:
     if 'GIT_REVISION_HASH' in os.environ:
       app.config['git_revision_hash'] = os.getenv('GIT_REVISION_HASH')
