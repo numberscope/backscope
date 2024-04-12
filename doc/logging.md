@@ -123,7 +123,7 @@ log = log.bind(attempts=8, mood='confused')
 
 #### Adding and removing tags
 
-If `log` a log entry, the call
+If `log` is a log entry, the call
 ```python
 structlog.get_context(log)['tags']
 ```
@@ -139,8 +139,28 @@ The string `'connection failed'` should describe the event being logged. It beco
 
 ## Testing the logging system
 
-Tests that involve the logging system include:
+### Automated tests
+
+Automated tests that involve the logging system include:
  - [test_logging.py](/flaskr/nscope/test/test_logging.py)
    - `LoggingTest`
  - [test_lookup_errors.py](/flaskr/nscope/test/test_lookup_errors.py)
    - `TestNonexistentSequence`
+
+### Manual tests
+
+An easy way to manually generate a log entry is to request values from a non-existent series. For example, you could launch Backscope locally and visit the following URL in a web browser:
+```
+http://localhost:5000/api/get_oeis_values/A000000/12
+```
+Backscope should return the following message:
+
+> Error: B-file for ID 'A000000' not found in OEIS.
+
+At the same time, it should add a line to the end of `api.log`. You can use `'timestamp'` values to distinguish new log entries from old ones. Right now, when Backscope fails to retrieve information about a sequence, it gets stuck thinking it's waiting for metadata, so future requests for the same sequence will get the response:
+
+> Error: Value fetching for {oeis_id} in progress.
+
+Right now, to request the same sequence again and see the same behavior, you first have to clear the database with `flask clear-database`.
+
+:warning: **Beware:** this will clear the database named by the `POSTGRES_DB` variable in the `.env` file.
