@@ -91,3 +91,48 @@ You can turn the byte array into a string, for printing or other uses, by callin
 What gets logged depends on what environment mode Backscope is running in. Each log entry is assigned a [level of importance](https://docs.python.org/3/library/logging.html#logging-levels). From highest to lowest, the possible levels are: *critical*, *error*, *warning*, *info*, *debug*.
 
 The file logs include all entries at *warning* level or higher. If the `DEVELOPMENT` environment flag is set, the console log includes all entries at *info* level or higher, and it also includes entries at *debug* level if the `DEBUG` flag is set. Without the `DEVELOPMENT` flag, the console log is silent.
+
+## How to write logs
+
+### Package documentation
+
+We use [*structlog*](https://www.structlog.org/) package.
+
+### Basic usage
+
+#### Starting a draft log entry
+
+The function call
+```python
+current_app.structlogger.bind(tags=[])
+```
+returns a draft of a log entry, with no content except an empty list of tags.
+
+#### Updating a draft log entry
+
+If `log` is a log entry, the method call
+```python
+log.bind(attempts=8, mood='confused')
+```
+returns an updated version of `log` with (possibly new) keys `'attempts'` and `'mood'` holding the values `8` and `'confused'`, respectively. Keep in mind that all values will ultimately be converted to strings and written in a JSON file or printed to the console.
+
+The entry that `log` points to is not modified. If you want to use the updated log entry, you have to store the reference to it that `log.bind` returns! In most cases, you'll want to throw away the old version of the log entry and keep the new version in its place. In that case, you might use the pattern
+```python
+log = log.bind(attempts=8, mood='confused')
+```
+
+#### Adding and removing tags
+
+If `log` a log entry, the call
+```python
+structlog.get_context(log)['tags']
+```
+returns a reference to the entry's `tags` attribute. You can use that reference to add and remove tags.
+
+#### Writing a log entry
+
+Once you've finished drafting a log entry, you can write it to the log by calling
+```python
+log.error('connection failed')
+```
+The string `'connection failed'` should describe the event being logged. It becomes the value of the `'event'` key.

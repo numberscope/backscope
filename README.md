@@ -53,12 +53,14 @@ If you plan on developing backscope, you might find some of these useful:
 - [Understanding our requirements files](doc/requirements.md)
 - [API endpoints](doc/api_endpoints.md)
 - [Directory descriptions](doc/directory_descriptions.md)
+- [Logging events](doc/logging.md)
 - [Writing and running tests](doc/tests.md)
 
 If you are a maintainer, you might find some of these useful:
 
 - [Updating frontscope on the CU server](doc/update-frontscope.md)
 - [Updating backscope on the CU server](doc/update-backscope.md)
+- [Finding and reading logs](doc/logging.md)
 - [Administering our server](doc/server-administration.md)
 - [Administering the database](doc/database-administration.md)
 - [README file for the server](server/README.md)
