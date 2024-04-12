@@ -82,8 +82,7 @@ should consist of three simple steps:
 
 You can then try `sudo systemctl status numberscope` to see if the service
 thinks it is running correctly, and you can point your browser for example at
-`https://numberscope.colorado.edu/api/get_commit` (Warning: not working as of
-commit 4ebfc9c) or
+`https://numberscope.colorado.edu/api/get_commit` or
 `https://numberscope.colorado.edu/api/get_oeis_values/A000040/128` for
 a list of the first 2^7 primes.
 
