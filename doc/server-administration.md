@@ -60,6 +60,13 @@ Stop `numberscope`:
 sudo systemctl stop numberscope
 ```
 
+### Accessing `numberscope` logs
+
+You can see the standard error output of the backscope process via
+`sudo journalctl -u backscope`. However, most diagnostic output is directed to
+backscope's own rotating log files, in the `~scope/repos/backscope/logs`
+directory.
+
 ## Updating the server to a new version of backscope
 
 There are two main cases. If the change in version of backscope does not
@@ -75,8 +82,7 @@ should consist of three simple steps:
 
 You can then try `sudo systemctl status numberscope` to see if the service
 thinks it is running correctly, and you can point your browser for example at
-`https://numberscope.colorado.edu/api/get_commit` (Warning: not working as of
-commit 4ebfc9c) or
+`https://numberscope.colorado.edu/api/get_commit` or
 `https://numberscope.colorado.edu/api/get_oeis_values/A000040/128` for
 a list of the first 2^7 primes.
 
