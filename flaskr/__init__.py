@@ -90,18 +90,6 @@ def create_console_handler(environment):
   
   return handler
 
-# This factory calls up the logger that will be stored in current_app.logger
-##class BackscopeLoggerFactory(structlog.stdlib.LoggerFactory):
-##  def __init__(self, default_name, **kwargs):
-##    super().__init__(**kwargs)
-##    self.default_name = default_name
-##  
-##  def __call__(self, name=None, *args) -> logging.Logger:
-##    if name is None:
-##      name = self.default_name
-##    print('factory made: ', super().__call__(name, *args))
-##    return super().__call__(name, *args)
-
 # --- App creation ---
 
 # To choose the environment, we look for settings in the following order:
@@ -134,20 +122,14 @@ def create_app(environment=None, oeis_scheme='https', oeis_hostport='oeis.org'):
         structlog.stdlib.filter_by_level,
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
       ],
-      ##logger_factory=BackscopeLoggerFactory(__name__)
       logger_factory=structlog.stdlib.LoggerFactory()
     )
-    ##structlogger = structlog.get_logger(__name__)
     
     # Create file handler
     file_handler = create_file_handler()
     
     # Set up the basic logger
     min_level = min(file_log_level, console_log_level(environment))
-    ##logging.basicConfig(
-      ##level=min_level
-      ##level=min(file_log_level, console_log_level(environment))
-    ##)
     basic_logger = logging.getLogger(__name__)
     basic_logger.setLevel(min_level)
     basic_logger.addHandler(file_handler)

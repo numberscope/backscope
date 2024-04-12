@@ -47,7 +47,6 @@ def oeis_url(path=''):
 
 def oeis_get(path='', params=None, timeout=4):
   # start keping track of what's going on
-  print('current structured logger type: ', type(current_app.structlogger))
   log = current_app.structlogger.bind(tags=[])
   tags = structlog.get_context(log)['tags']
   
@@ -61,24 +60,14 @@ def oeis_get(path='', params=None, timeout=4):
     tags.append('http error')
     write_request_log(log, response, error=True)
     return ex
-    ##raise ex
   except requests.RequestException as ex:
     tags.append('exception')
     write_request_log(log, response, error=True)
     return ex
-    ##raise ex
   
   #-----------------------------------------------------------------------------
   # if we've gotten this far, it's going well enough to return the response
   #-----------------------------------------------------------------------------
-  
-  # log any status code other than 200 OK
-  ##if not response.status_code == 200:
-    ##tags.append('not ok')
-  
-  # if the log has content, write it
-  ##if log.tags:
-    ##write_request_log(log, response)
   
   return response
 
@@ -98,8 +87,6 @@ def fetch_metadata(oeis_id):
     seq.meta_requested = True
     db.session.commit()
     # Now grab the data
-    ##match_url = oeis_url('/search', f'q={seq.id}&fmt=json')
-    ##r = requests.get(match_url).json()
     search_params = {'q': seq.id, 'fmt': 'json'}
     r = oeis_get('/search', search_params)
     if r['results'] != None: # Found some metadata
@@ -118,7 +105,6 @@ def fetch_metadata(oeis_id):
             if saw < matches:
                 search_params['start'] = saw
                 r = oeis_get('\search', search_params).json()
-                ##r = requests.get(match_url + f"&start={saw}").json()
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
@@ -167,7 +153,6 @@ def fetch_values(oeis_id):
     db.session.commit()
     # Now try to get it from the OEIS:
     r = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt')
-    ##r = requests.get(oeis_url(f'/{oeis_id}/b{oeis_id[1:]}.txt'), timeout=4)
     # Test for 404 error. Hat tip StackOverflow user Lukasa
     #   https://stackoverflow.com/a/19343099
     if isinstance(r, requests.HTTPError) and r.response.status_code == 404:
@@ -332,7 +317,6 @@ def get_oeis_name_and_values(oeis_id):
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
         r = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'}).json()
-        ##r = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4).json()
         if r['results'] != None:
             seq.name = r['results'][0]['name']
             db.session.commit()
