@@ -27,4 +27,6 @@ def test(verbosity, start_dir, pattern, top_level_dir):
     pattern=pattern,
     top_level_dir=top_level_dir
   )
+  if verbosity > 0:
+    unittest.TestCase.maxDiff = None
   unittest.TextTestRunner(verbosity=verbosity+1).run(test_suite)
