@@ -2,19 +2,22 @@
 Views for nscope model
 """
 
-from urllib.parse import urlunparse
-
-from flask import Blueprint, jsonify, current_app, render_template
-from flask_executor import Executor
-from flaskr import db
-from flaskr.nscope.models import *
-
+# external imports
+import base64 # for encoding response dumps
 import cypari2
 from cypari2.convert import gen_to_python
+from flask import Blueprint, jsonify, current_app, render_template
+from flask_executor import Executor
 import re
 import requests
+from requests_toolbelt.utils import dump
+import structlog
 import subprocess # for calling git
+from urllib.parse import urlunparse
 
+# internal imports
+from flaskr import db
+from flaskr.nscope.models import *
 
 executor = Executor()
 bp = Blueprint("nscope", __name__)
@@ -25,15 +28,49 @@ bp = Blueprint("nscope", __name__)
 def index():
     return render_template("index.html")
 
-def oeis_url(path='', query=''):
+def write_request_log(log, response, error=False):
+  response_b64 = base64.b64encode(dump.dump_all(response)).decode('ascii')
+  log = log.bind(response=response_b64)
+  if error:
+    log.error('request issue')
+  else:
+    log.warning('request issue')
+
+def oeis_url(path=''):
   return urlunparse([
     current_app.config['oeis_scheme'],
     current_app.config['oeis_hostport'],
     path,
     '', # path parameters
-    query,
+    '', # query
     ''  # fragment
   ])
+
+def oeis_get(path='', params=None, timeout=4):
+  # start keeping track of what's going on
+  log = current_app.structlogger.bind(tags=[])
+  tags = structlog.get_context(log)['tags']
+
+  # try request
+  try:
+    response = requests.get(oeis_url(path), params, timeout=timeout)
+    if response.history:
+      tags.append('history')
+    response.raise_for_status() # raise an exception on 4xx and 5xx status codes
+  except requests.HTTPError as ex:
+    tags.append('http error')
+    write_request_log(log, response, error=True)
+    return ex
+  except requests.RequestException as ex:
+    tags.append('exception')
+    write_request_log(log, response, error=True)
+    return ex
+
+  #-----------------------------------------------------------------------------
+  # if we've gotten this far, it's going well enough to return the response
+  #-----------------------------------------------------------------------------
+
+  return response
 
 def fetch_metadata(oeis_id):
     """ When called with a *valid* oeis id, makes sure the metadata has been
@@ -51,8 +88,8 @@ def fetch_metadata(oeis_id):
     seq.meta_requested = True
     db.session.commit()
     # Now grab the data
-    match_url = oeis_url('/search', f'q={seq.id}&fmt=json')
-    r = requests.get(match_url).json()
+    search_params = {'q': seq.id, 'fmt': 'json'}
+    r = oeis_get('/search', search_params)
     if r['results'] != None: # Found some metadata
         backrefs = []
         target_number = int(seq.id[1:])
@@ -67,7 +104,8 @@ def fetch_metadata(oeis_id):
                     backrefs.append('A' + str(result['number']).zfill(6))
                 saw += 1
             if saw < matches:
-                r = requests.get(match_url + f"&start={saw}").json()
+                search_params['start'] = saw
+                r = oeis_get('\search', search_params).json()
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
@@ -115,9 +153,11 @@ def fetch_values(oeis_id):
     seq.values_requested = True
     db.session.commit()
     # Now try to get it from the OEIS:
-    r = requests.get(oeis_url(f'/{oeis_id}/b{oeis_id[1:]}.txt'), timeout=4)
-    if r.status_code == 404:
-        return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
+    r = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt')
+    # Test for 404 error. Hat tip StackOverflow user Lukasa
+    #   https://stackoverflow.com/a/19343099
+    if isinstance(r, requests.HTTPError) and r.response.status_code == 404:
+      return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')
@@ -277,7 +317,7 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        r = requests.get(oeis_url('/search', f'q=id:{oeis_id}&fmt=json'), timeout=4).json()
+        r = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'}).json()
         if r['results'] != None:
             seq.name = r['results'][0]['name']
             db.session.commit()
@@ -327,13 +367,8 @@ def get_oeis_factors(oeis_id, num_elements):
 @bp.route("/api/get_commit", methods=["GET"])
 def get_git_commit():
     """ Returns the short git hash for the current build of backscope
-        as provided by the command
-        git rev-parse --short HEAD
-        thanks to: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script/
+        (as determined at startup in flaskr/__init__.py)
     """
-    short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], encoding='utf8')
     return jsonify({
-        'short_commit_hash': short_hash.strip()
+        'short_commit_hash': current_app.config['git_revision_hash']
     })
-
-

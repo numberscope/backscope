@@ -7,3 +7,5 @@ Flask-Migrate # Flask extension for migrating database models
 psycopg2-binary # library for interacting with PostgreSQL
 python-dotenv # library for .env files
 requests # library for making HTTP requests
+requests-toolbelt # we use this for logging HTTP requests
+structlog # package for structured logging
