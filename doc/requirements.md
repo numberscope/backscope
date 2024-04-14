@@ -58,7 +58,7 @@ version number of that package must be updated in that script as well.
 
 To help understand the dependency graph, you can call
 ```
-bash tools/explain-requirements
+bash tools/explain-requirements.sh
 ```
 after activating the virtual environment. This script classifies the packages in
 `requirements-freeze.txt` by the roles they play in the current environment.
