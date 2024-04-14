@@ -1,10 +1,11 @@
 cypari2 # library for factoring
-Flask[async] # web framework with the async extra
-Flask-SQLAlchemy # Flask library for a popular SQL ORM
-Flask-Migrate # library for migrating database models
-psycopg2-binary # library for interacting with Postgres
+Flask # web framework
+Flask-Cors # Flask extension for cross-origin resource sharing
+Flask-Executor # Flask extension for launching concurrent tasks
+Flask-SQLAlchemy # Flask extension for a popular SQL object-relational mapper
+Flask-Migrate # Flask extension for migrating database models
+psycopg2-binary # library for interacting with PostgreSQL
 python-dotenv # library for .env files
 requests # library for making HTTP requests
 requests-toolbelt # we use this for logging HTTP requests
 structlog # package for structured logging
-wheel # package for building packages, not installed by default on Ubuntu

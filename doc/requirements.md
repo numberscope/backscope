@@ -1,18 +1,22 @@
 # Requirements
 
-The `requirements.txt` file should only contain "top-level" requirements
+The `requirements.txt` file should only contain the "top-level" requirements
 for backscope. That is, if we explicitly want a requirement, we list it
-in `requirements.txt`. If a requirement has dependencies, those are
-listed in `requirements-freeze.txt`. To generate
-`requirements-freeze.txt`, you can enter the following command if you
-have the virtual environment activated in a Posix shell:
+in `requirements.txt`. Once you've activated the virtual environment, you can
+install the top-level requirements by calling
+```
+pip install -r requirements.txt
+```
 
+The full list of requirements, including both the top-level requirements and
+their dependencies, is kept in `requirements-freeze.txt`. Once you've installed
+the top-level requirements in the virtual environment, you can generate
+`requirements-freeze.txt` by running the following command in a Posix shell:
 ```
 pip freeze --all > requirements-freeze.txt
 ```
-
-This file should be regenerated and updated every time a "top-level"
-dependency is installed or updated.
+You should regenerate and update this file every time you install or update a
+top-level requirement.
 
 The `requirements.txt` file is analogous to frontscope's `package.json`,
 and the `requirements-freeze.txt` is analogous to frontscope's
@@ -49,3 +53,19 @@ the dependencies must be installed in the proper order by the
 `tools/install-requirements.sh` script. When there is a need to update any
 of the packages explicitly listed in `tools/install-requirements.sh`, the
 version number of that package must be updated in that script as well.
+
+## Understanding dependencies
+
+To help understand the dependency graph, you can call
+```
+bash tools/explain-requirements.sh
+```
+after activating the virtual environment. This script classifies the packages in
+`requirements-freeze.txt` by the roles they play in the current environment.
+
+| Role | Meaning |
+| --- | --- |
+| Not installed | Not installed in the current environment. You might see packages in this category if you've created a fresh virtual environment by installing the packages in `requirements.txt`, but you haven't updated `requirements-freeze.txt` yet. If Backscope works in this environment, it should be safe to remove these packages from `requirements-freeze.txt`. |
+| Not required | Installed, but neither required by a package in the current environment nor listed in `requirements.txt`. |
+| Indirectly required | Installed, and required by a package in the current environment, but not listed in `requirements.txt`. Each package shown in this category is followed by the names of the packages that require it. |
+| Directly required | Installed, and listed in `requirements.txt`. |
