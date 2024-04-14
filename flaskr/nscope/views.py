@@ -172,7 +172,7 @@ def fetch_values(oeis_id):
             continue
         column = line.split()
         if len(column) < 2: continue
-        if not column[0][0].isdigit():
+        if not (column[0][0].isdigit() or column[0][0] == '-'):
             return LookupError(
                 f"Unparseable b-file line for ID '{oeis_id}': {line}")
         index = int(column[0])
@@ -184,6 +184,7 @@ def fetch_values(oeis_id):
     seq.values = [seq_vals[i] for i in range(first,last+1)]
     if not seq.name:
         seq.name = name or placeholder_name(oeis_id)
+    seq.shift = first
     db.session.commit()
     return seq
 
