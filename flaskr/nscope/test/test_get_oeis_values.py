@@ -28,13 +28,6 @@ class TestGetOEISValuesWithoutShift(abstract_endpoint_test.AbstractEndpointTest)
     }
   }
 
-# this test is skipped because it's sensitive to issue #77. the skip decorator
-# should be removed when the issue is fixed.
-#   https://github.com/numberscope/backscope/issues/77
-# the issue is that `fetch_values` never sets the `shift` attribute of the
-# Sequence it returns, so we end up indexing from zero even if the shift should
-# be nonzero
-@unittest.skip("Shift attribute isn't being set yet")
 class TestGetOEISValues(abstract_endpoint_test.AbstractEndpointTest):
   endpoint = 'http://localhost:5000/api/get_oeis_values/A321580/12'
   
@@ -62,6 +55,28 @@ class TestGetOEISValues(abstract_endpoint_test.AbstractEndpointTest):
     }
   }
 
+class TestGetOEISValuesNegativeShift(abstract_endpoint_test.AbstractEndpointTest):
+  endpoint = 'http://localhost:5000/api/get_oeis_values/A078302/10'
+
+  # we choose A078302 because:
+  # - it has a negative shift, so we can make sure such shifts do not prevent
+  #   the parsing of the b-file (per #50)
+  # - it currently has small values and few references, which speeds up the
+  #   background work triggered by the request
+  # - it only has four values, so we can make sure it works to request more
+  #   values than exist
+  # - its b-file has a comment, so we test that pulling the initial name from
+  #   such a comment works
+  expected_response = {
+    'id': 'A078302',
+    'name': ' A078302 (b-file synthesized from sequence entry)',
+    'values': {
+      '-43': '5',
+      '-42': '3',
+      '-41': '9',
+      '-40': '1'
+    }
+  }
 
 if __name__ == "__main__":
     unittest.main()
