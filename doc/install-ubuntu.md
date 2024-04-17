@@ -164,7 +164,7 @@ virtual environment.
 
   If/when this seems to have succeeded, execute `python3.9 --version`. It
   should succeed and display a version number like 3.9.13 (in any case,
-  starting with 3.9.
+  starting with 3.9).
 
 In all of the remaining commands in this guide, substitute one of `python`,
 `python3`, or `python3.9` for `[PYEXEC]` wherever it appears in a command,
