@@ -86,8 +86,51 @@ thinks it is running correctly, and you can point your browser for example at
 `https://numberscope.colorado.edu/api/get_oeis_values/A000040/128` for
 a list of the first 2^7 primes.
 
-On the other hand, if there are changes that affect the structure or contents
-of the database, then a slightly more involved procedure is necessary to first
+## Resetting the production database
+
+If there are changes that affect the structure or contents of the database,
+then just before restarting numberscope it is necessary to remove the prior
+contents of the database and update its structure. Here is how you perform
+that operation.
+
+1. `cd ~scope/repos/backscope` (if you are not already there).
+
+2. If you don't know the production database [NAME], `cat .env` to show it.
+
+3. Make sure Backscope's virtual environment is active, executing
+   `source .venv/bin/activate` if necessary.
+
+4. Halt the numberscope service with `sudo systemctl stop numberscope`.
+
+5. Remove the existing database with `sudo -u scope dropdb [NAME]`.
+
+6. Remove the generated database structure with
+   `sudo -u scope rm -r migrations`.
+
+7. Initialize a brand new database with `sudo -u scope createdb [NAME]`.
+
+7. Remove old log files (make sure that there is nothing in them you may need;
+   if so, move them to some out-of-the-way location rather than deleting them)
+   with `sudo rm logs/*.log*`
+
+8. Recompute and then install the database structure with the following
+   series of commands:
+
+   ```bash
+   sudo -u scope .venv/bin/flask db init
+   sudo -u scope .venv/bin/flask db migrate
+   sudo -u scope .venv/bin/flask db upgrade
+   ```
+
+9. Start the numberscope service with `sudo systemctl start numberscope`.
+
+10. Check that numberscope is operating properly in all the same ways as for
+    an ordinary installation that does not affect the database.
+
+
+
+ 
+a slightly more involved procedure is necessary to first
 remove the prior contents of the database and/or update its structure. While
 that procedure can probably be cobbled together from the instructions here and
 the database resetting documentation, the explicit steps should be listed here.
