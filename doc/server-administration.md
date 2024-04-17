@@ -127,15 +127,6 @@ that operation.
 10. Check that numberscope is operating properly in all the same ways as for
     an ordinary installation that does not affect the database.
 
-
-
- 
-a slightly more involved procedure is necessary to first
-remove the prior contents of the database and/or update its structure. While
-that procedure can probably be cobbled together from the instructions here and
-the database resetting documentation, the explicit steps should be listed here.
-Please whoever next does this procedure, record here what works.
-
 ## How Nginx is set up
 
 As of this writing, our Nginx configuration is simple. We preserve the
