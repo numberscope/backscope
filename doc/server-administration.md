@@ -109,11 +109,11 @@ that operation.
 
 7. Initialize a brand new database with `sudo -u scope createdb [NAME]`.
 
-7. Remove old log files (make sure that there is nothing in them you may need;
-   if so, move them to some out-of-the-way location rather than deleting them)
-   with `sudo rm logs/*.log*`
+8. Remove old log files with `sudo rm logs/*.log*` (presuming there is
+   nothing in them you need; if there is, move them to some out-of-the-way
+   location instead).
 
-8. Recompute and then install the database structure with the following
+9. Recompute and then install the database structure with the following
    series of commands:
 
    ```bash
@@ -122,9 +122,9 @@ that operation.
    sudo -u scope .venv/bin/flask db upgrade
    ```
 
-9. Start the numberscope service with `sudo systemctl start numberscope`.
+10. Start the numberscope service with `sudo systemctl start numberscope`.
 
-10. Check that numberscope is operating properly in all the same ways as for
+11. Check that numberscope is operating properly in all the same ways as for
     an ordinary installation that does not affect the database.
 
 ## How Nginx is set up
