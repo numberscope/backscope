@@ -13,6 +13,7 @@ import requests
 from requests_toolbelt.utils import dump
 import structlog
 import subprocess # for calling git
+import time
 from urllib.parse import urlunparse
 
 # internal imports
@@ -80,17 +81,30 @@ def fetch_metadata(oeis_id):
         Note that this also crawls all backreferences, so it can take quite
         a long time for popular sequences (potentially hours).
     """
+    log = current_app.structlogger.bind(tags=[])
     seq = find_oeis_sequence(oeis_id)
-    if seq.meta_requested:
+    if seq.meta_req_time is not None:
         if seq.raw_refs is None:
             return LookupError(f"Metadata fetching for {oeis_id} in progress")
-        return seq
-    seq.meta_requested = True
+        else:
+            return seq
+
+    #---------------------------------------------------------------------------
+    # if we've gotten this far, the metadata isn't in the database yet
+    #---------------------------------------------------------------------------
+
+    # Record the time we set out to fetch the metadata, so later threads can
+    # judge how likely we are to ever come back
+    our_req_time = time.time_ns()
+    seq.meta_req_time = our_req_time
     db.session.commit()
-    # Now grab the data
+    log.debug('wrote request time')
+
+    # Try to grab the metadata
     search_params = {'q': seq.id, 'fmt': 'json'}
     r = oeis_get('/search', search_params)
     if r['results'] != None: # Found some metadata
+        log.debug('reading results page')
         backrefs = []
         target_number = int(seq.id[1:])
         matches = r['count']
@@ -109,7 +123,18 @@ def fetch_metadata(oeis_id):
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
-    db.session.commit()
+
+    # We write what we've found to the database in the following situations:
+    #
+    # - No other thread has set out to fetch the same metadata
+    #
+    # - Another thread has set out to fetch the same metadata, fearing that we
+    #   would never come back, but we got back before the other thread did
+    #
+    log.debug('read all results')
+    if seq.meta_req_time == our_req_time or seq.raw_refs is None:
+        db.session.commit()
+
     return seq
 
 def find_oeis_sequence(oeis_id):

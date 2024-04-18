@@ -40,7 +40,10 @@ class Sequence(db.Model):
     values_requested = db.Column(db.Boolean, nullable=False, default=False)
     raw_refs = db.Column(db.String, unique=False, nullable=True)
     backrefs = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
-    meta_requested = db.Column(db.Boolean, nullable=False, default=False)
+    # The start time of the last attempt to fetch metadata, in nanoseconds since
+    # the UNIX epoch. A PostgreSQL BigInteger is eight bytes, including sign, so
+    # this should work until the early 2260s
+    meta_req_time = db.Column(db.BigInteger, nullable=True, default=None)
     # Sadly, multidimensional arrays can't vary in dimension
     # so we store factorization arrays as strings
     factors = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
