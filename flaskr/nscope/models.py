@@ -40,6 +40,7 @@ class Sequence(db.Model):
     values_requested = db.Column(db.Boolean, nullable=False, default=False)
     raw_refs = db.Column(db.String, unique=False, nullable=True)
     backrefs = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
+    ref_count = db.Column(db.Integer, nullable=True, default=None)
     # The start time of the last attempt to fetch metadata, in nanoseconds since
     # the UNIX epoch. A PostgreSQL BigInteger is eight bytes, including sign, so
     # this should work until the early 2260s

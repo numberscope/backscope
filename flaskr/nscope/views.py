@@ -83,11 +83,18 @@ def fetch_metadata(oeis_id):
     """
     log = current_app.structlogger.bind(tags=[])
     seq = find_oeis_sequence(oeis_id)
-    if seq.meta_req_time is not None:
-        if seq.raw_refs is None:
-            return LookupError(f"Metadata fetching for {oeis_id} in progress")
-        else:
-            return seq
+    if seq.raw_refs is not None:
+        return seq
+
+    our_req_time = time.time_ns()
+    last_req_time = seq.meta_req_time
+    if last_req_time is not None:
+        waited = (our_req_time - last_req_time) / 1e9
+        print('waited', waited, 'seconds')
+        stored_ref_count = seq.ref_count
+        max_wait = 1 + 1e-4 * stored_ref_count * stored_ref_count
+        if waited < max_wait:
+            return LookupError(f"Metadata for {oeis_id} was already requested {waited:.1f} seconds ago. A new request can be made if the old one takes longer than {max_wait:.1f} seconds.")
 
     #---------------------------------------------------------------------------
     # if we've gotten this far, the metadata isn't in the database yet
@@ -95,7 +102,6 @@ def fetch_metadata(oeis_id):
 
     # Record the time we set out to fetch the metadata, so later threads can
     # judge how likely we are to ever come back
-    our_req_time = time.time_ns()
     seq.meta_req_time = our_req_time
     db.session.commit()
     log.debug('wrote request time')
@@ -103,13 +109,18 @@ def fetch_metadata(oeis_id):
     # Try to grab the metadata
     search_params = {'q': seq.id, 'fmt': 'json'}
     r = oeis_get('/search', search_params).json()
-    if r['results'] != None: # Found some metadata
-        log.debug('reading results page')
+    if r['results'] != None:
+        # We found some metadata. Write down the reference count, so later
+        # threads can decide how long to wait for us
+        ref_count = r['count']
+        seq.ref_count = ref_count
+        db.session.commit()
+
+        log.debug('reading results pages')
         backrefs = []
         target_number = int(seq.id[1:])
-        matches = r['count']
         saw = 0
-        while (saw < matches):
+        while (saw < ref_count):
             for result in r['results']:
                 if result['number'] == target_number:
                     seq.name = result['name']
@@ -117,12 +128,15 @@ def fetch_metadata(oeis_id):
                 else:
                     backrefs.append('A' + str(result['number']).zfill(6))
                 saw += 1
-            if saw < matches:
+            if saw < ref_count:
                 search_params['start'] = saw
                 r = oeis_get('/search', search_params).json()
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
+    else:
+        # We didn't find any metadata
+        seq.ref_count = 0
 
     # We write what we've found to the database in the following situations:
     #
