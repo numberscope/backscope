@@ -102,7 +102,7 @@ def fetch_metadata(oeis_id):
 
     # Try to grab the metadata
     search_params = {'q': seq.id, 'fmt': 'json'}
-    r = oeis_get('/search', search_params)
+    r = oeis_get('/search', search_params).json()
     if r['results'] != None: # Found some metadata
         log.debug('reading results page')
         backrefs = []
@@ -119,7 +119,7 @@ def fetch_metadata(oeis_id):
                 saw += 1
             if saw < matches:
                 search_params['start'] = saw
-                r = oeis_get('\search', search_params).json()
+                r = oeis_get('/search', search_params).json()
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
