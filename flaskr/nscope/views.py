@@ -90,9 +90,11 @@ def fetch_metadata(oeis_id):
     last_req_time = seq.meta_req_time
     if last_req_time is not None:
         waited = (our_req_time - last_req_time) / 1e9
-        print('waited', waited, 'seconds')
         stored_ref_count = seq.ref_count
-        max_wait = 1 + 1e-4 * stored_ref_count * stored_ref_count
+        if stored_ref_count is None:
+            max_wait = 2
+        else:
+            max_wait = 1 + 1e-4 * stored_ref_count * stored_ref_count
         if waited < max_wait:
             return LookupError(f"Metadata for {oeis_id} was already requested {waited:.1f} seconds ago. A new request can be made if the old one takes longer than {max_wait:.1f} seconds.")
 
