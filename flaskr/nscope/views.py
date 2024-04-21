@@ -106,7 +106,6 @@ def fetch_metadata(oeis_id):
     # judge how likely we are to ever come back
     seq.meta_req_time = our_req_time
     db.session.commit()
-    log.debug('wrote request time')
 
     # Try to grab the metadata
     search_params = {'q': seq.id, 'fmt': 'json'}
@@ -118,7 +117,6 @@ def fetch_metadata(oeis_id):
         seq.ref_count = ref_count
         db.session.commit()
 
-        log.debug('reading results pages')
         backrefs = []
         target_number = int(seq.id[1:])
         saw = 0
@@ -147,7 +145,6 @@ def fetch_metadata(oeis_id):
     # - Another thread has set out to fetch the same metadata, fearing that we
     #   would never come back, but we got back before the other thread did
     #
-    log.debug('read all results')
     if seq.meta_req_time == our_req_time or seq.raw_refs is None:
         db.session.commit()
 
