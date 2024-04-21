@@ -1,5 +1,5 @@
 import os.path
-from flask import Flask, Blueprint, Response, request
+from flask import Flask, Blueprint, Response, current_app, request
 
 # you can launch a mock OEIS server by calling
 #
@@ -29,6 +29,8 @@ def get_data(oeis_id, filename):
   with open(filepath) as file:
     return Response(file.read(), mimetype='text/plain')
 
+unavailable_msg = 'You are crawling too fast.  Come back in a few minutes.\nMail questions to njasloane@gmail.com and rsc@swtch.com.\n'
+
 # since this sequence only has one page of results, the OEIS search endpoint
 # ignores the 'start' parameter
 @api.route('/search')
@@ -36,20 +38,30 @@ def search():
   result_format = request.args['fmt']
   if not (result_format == 'json'):
     return f"Mock OEIS can only return search results in 'json' format; '{result_format}' format was requested", 400
-  
-  search_query = request.args['q']
-  if search_query.startswith('id:'):
-    filename = f'search-id-{search_query[3:]}.json'
+
+  mode = current_app.config['mode']
+  if mode == 'normal':
+    search_query = request.args['q']
+    if search_query.startswith('id:'):
+      filename = f'search-id-{search_query[3:]}.json'
+    else:
+      filename = f'search-{search_query}.json'
+    filepath = os.path.join('mock_oeis', 'data', filename)
+    if not os.path.isfile(filepath):
+      return f"Mock OEIS doesn't have results for search query '{search_query}'", 400
+
+    with open(filepath) as file:
+      return Response(file.read(), mimetype='application/json')
+  elif mode == 'unavailable':
+    return unavailable_msg, 503
   else:
-    filename = f'search-{search_query}.json'
-  filepath = os.path.join('mock_oeis', 'data', filename)
-  if not os.path.isfile(filepath):
-    return f"Mock OEIS doesn't have results for search query '{search_query}'", 400
-  
-  with open(filepath) as file:
-    return Response(file.read(), mimetype='application/json')
+    return f"Mock OEIS doesn't have a '{mode}' mode", 500
 
 def create_app():
   app = Flask(__name__)
+
+  # configure behavior
+  app.config['mode'] = os.environ.get('MODE', 'normal')
+
   app.register_blueprint(api)
   return app
