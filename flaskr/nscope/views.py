@@ -115,7 +115,10 @@ def fetch_metadata(oeis_id):
 
     # Try to grab the metadata
     search_params = {'q': seq.id, 'fmt': 'json'}
-    r = oeis_get('/search', search_params).json()
+    response = oeis_get('/search', search_params)
+    if isinstance(response, Exception):
+        return response
+    r = response.json()
     if r['results'] != None:
         # We found some metadata. Write down the reference count, so later
         # threads can decide how long to wait for us
@@ -139,7 +142,10 @@ def fetch_metadata(oeis_id):
                 saw += 1
             if saw < ref_count:
                 search_params['start'] = saw
-                r = oeis_get('/search', search_params).json()
+                response = oeis_get('/search', search_params)
+                if isinstance(response, Exception):
+                    return response
+                r = response.json()
                 if r['results'] == None:
                     break
         seq.backrefs = backrefs
@@ -203,8 +209,11 @@ def fetch_values(oeis_id):
     r = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt')
     # Test for 404 error. Hat tip StackOverflow user Lukasa
     #   https://stackoverflow.com/a/19343099
-    if isinstance(r, requests.HTTPError) and r.response.status_code == 404:
-      return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
+    if isinstance(r, Exception):
+        if isinstance(r, requests.HTTPError) and r.response.status_code == 404:
+            return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
+        else:
+            return r
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')
@@ -365,7 +374,10 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        r = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'}).json()
+        response = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'})
+        if isinstance(response, Exception):
+            return f"Error: {response}"
+        r = response.json()
         if r['results'] != None:
             seq.name = r['results'][0]['name']
             db.session.commit()
