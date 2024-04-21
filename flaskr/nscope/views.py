@@ -81,9 +81,9 @@ def fetch_metadata(oeis_id):
         Note that this also crawls all backreferences, so it can take quite
         a long time for popular sequences (potentially hours).
     """
-    log = current_app.structlogger.bind(tags=[])
     seq = find_oeis_sequence(oeis_id)
-    if seq.raw_refs is not None:
+    if seq.backrefs is not None:
+        # We've cached all the metadata already, so we just return it
         return seq
 
     our_req_time = time.time_ns()
@@ -96,10 +96,16 @@ def fetch_metadata(oeis_id):
         else:
             max_wait = 3 + stored_ref_count*(2e-3 + stored_ref_count*1e-4)
         if waited < max_wait:
-            return LookupError(f"Metadata for {oeis_id} was already requested {waited:.1f} seconds ago. A new request can be made if the old one takes longer than {max_wait:.1f} seconds.")
+            # Return the sequence's name and raw references if we've got them,
+            # or an error message if we've got nothing
+            if seq.raw_refs is not None:
+                return seq
+            else:
+                return LookupError(f"Metadata for {oeis_id} was already requested {waited:.1f} seconds ago. A new request can be made if the old one takes longer than {max_wait:.1f} seconds.")
 
     #---------------------------------------------------------------------------
-    # if we've gotten this far, the metadata isn't in the database yet
+    # if we've gotten this far, we don't have all the metadata in the database
+    # yet, and we don't think any other thread is likely to come back with it
     #---------------------------------------------------------------------------
 
     # Record the time we set out to fetch the metadata, so later threads can
@@ -123,8 +129,11 @@ def fetch_metadata(oeis_id):
         while (saw < ref_count):
             for result in r['results']:
                 if result['number'] == target_number:
-                    seq.name = result['name']
-                    seq.raw_refs = "\n".join(result.get('xref', []))
+                    # Write the sequence's name and raw references as soon as we find them
+                    if seq.raw_refs is None:
+                        seq.name = result['name']
+                        seq.raw_refs = "\n".join(result.get('xref', []))
+                        db.session.commit()
                 else:
                     backrefs.append('A' + str(result['number']).zfill(6))
                 saw += 1
@@ -145,7 +154,7 @@ def fetch_metadata(oeis_id):
     # - Another thread has set out to fetch the same metadata, fearing that we
     #   would never come back, but we got back before the other thread did
     #
-    if seq.meta_req_time == our_req_time or seq.raw_refs is None:
+    if seq.meta_req_time == our_req_time or seq.backrefs is None:
         db.session.commit()
 
     return seq
