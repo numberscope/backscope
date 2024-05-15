@@ -47,31 +47,55 @@ def oeis_url(path=''):
     ''  # fragment
   ])
 
-def oeis_get(path='', params=None, timeout=4):
+def oeis_get(path='', params=None, json=True, timeout=4):
   # start keeping track of what's going on
   log = current_app.structlogger.bind(tags=[])
   tags = structlog.get_context(log)['tags']
+  warn = False
 
   # try request
   try:
+    # make request and check for history and bad status
     response = requests.get(oeis_url(path), params, timeout=timeout)
     if response.history:
       tags.append('history')
+      warn = True
     response.raise_for_status() # raise an exception on 4xx and 5xx status codes
+
+    # check content type. since the content type header can include charset and
+    # boundary directives, we split at ';' to get just the media type
+    actual_type = response.headers['content-type'].split(';')[0]
+    print('actual type:', actual_type)
+    expected_type = 'application/json' if json else 'text/plain'
+    if actual_type != expected_type:
+      tags.append('wrong content type')
+      warn = True
+
+    # decode response
+    if json:
+      content = response.json()
+    else:
+      content = response.text
   except requests.HTTPError as ex:
     tags.append('http error')
     write_request_log(log, response, error=True)
     return ex
   except requests.RequestException as ex:
-    tags.append('exception')
+    tags.append('request exception')
+    write_request_log(log, response, error=True)
+    return ex
+  except requests.exceptions.JSONDecodeError as ex:
+    tags.append('json decode error')
     write_request_log(log, response, error=True)
     return ex
 
   #-----------------------------------------------------------------------------
-  # if we've gotten this far, it's going well enough to return the response
+  # if we've gotten this far, it's going well enough to return response content
   #-----------------------------------------------------------------------------
 
-  return response
+  if warn:
+    write_request_log(log, response)
+  return content
 
 def fetch_metadata(oeis_id):
     """ When called with a *valid* oeis id, makes sure the metadata has been
@@ -115,14 +139,13 @@ def fetch_metadata(oeis_id):
 
     # Try to grab the metadata
     search_params = {'q': seq.id, 'fmt': 'json'}
-    response = oeis_get('/search', search_params)
-    if isinstance(response, Exception):
-        return response
-    r = response.json()
-    if r['results'] != None:
+    search_response = oeis_get('/search', search_params)
+    if isinstance(search_response, Exception):
+        return search_response
+    if search_response['results'] != None:
         # We found some metadata. Write down the reference count, so later
         # threads can decide how long to wait for us
-        ref_count = r['count']
+        ref_count = search_response['count']
         seq.ref_count = ref_count
         db.session.commit()
 
@@ -130,7 +153,7 @@ def fetch_metadata(oeis_id):
         target_number = int(seq.id[1:])
         saw = 0
         while (saw < ref_count):
-            for result in r['results']:
+            for result in search_response['results']:
                 if result['number'] == target_number:
                     # Write the sequence's name and raw references as soon as we find them
                     if seq.raw_refs is None:
@@ -142,11 +165,10 @@ def fetch_metadata(oeis_id):
                 saw += 1
             if saw < ref_count:
                 search_params['start'] = saw
-                response = oeis_get('/search', search_params)
-                if isinstance(response, Exception):
-                    return response
-                r = response.json()
-                if r['results'] == None:
+                search_response = oeis_get('/search', search_params)
+                if isinstance(search_response, Exception):
+                    return search_response
+                if search_response['results'] == None:
                     break
         seq.backrefs = backrefs
     else:
@@ -206,20 +228,20 @@ def fetch_values(oeis_id):
     seq.values_requested = True
     db.session.commit()
     # Now try to get it from the OEIS:
-    r = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt')
+    b_text = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt', json=False)
     # Test for 404 error. Hat tip StackOverflow user Lukasa
     #   https://stackoverflow.com/a/19343099
-    if isinstance(r, Exception):
-        if isinstance(r, requests.HTTPError) and r.response.status_code == 404:
+    if isinstance(b_text, Exception):
+        if isinstance(b_text, requests.HTTPError) and b_text.response.status_code == 404:
             return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
         else:
-            return r
+            return b_text
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')
     name = ''
     seq_vals = {}
-    for line in r.text.split("\n"):
+    for line in b_text.split("\n"):
         if not line: continue
         if line[0] == '#':
             # Some sequences have info in first comment that we can use as a
@@ -374,12 +396,11 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        response = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'})
-        if isinstance(response, Exception):
-            return f"Error: {response}"
-        r = response.json()
-        if r['results'] != None:
-            seq.name = r['results'][0]['name']
+        search_response = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'})
+        if isinstance(search_response, Exception):
+            return f"Error: {search_response}"
+        if search_response['results'] != None:
+            seq.name = search_response['results'][0]['name']
             db.session.commit()
     executor.submit(fetch_factors, valid_oeis_id)
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})

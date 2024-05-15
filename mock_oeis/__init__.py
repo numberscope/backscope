@@ -31,7 +31,7 @@ def get_data(oeis_id, filename):
   values_available = current_app.config['values available']
   if values_available == '1':
     with open(filepath) as file:
-      return Response(file.read(), mimetype='text/plain')
+      return Response(file.read(), mimetype='text/plain; charset=utf-8')
   elif values_available == '0':
     return unavailable_msg, 503
   else:
