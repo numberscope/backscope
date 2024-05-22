@@ -65,7 +65,6 @@ def oeis_get(path='', params=None, json=True, timeout=4):
     # check content type. since the content type header can include charset and
     # boundary directives, we split at ';' to get just the media type
     actual_type = response.headers['content-type'].split(';')[0]
-    print('actual type:', actual_type)
     expected_type = 'application/json' if json else 'text/plain'
     if actual_type != expected_type:
       tags.append('wrong content type')
