@@ -13,7 +13,7 @@ expected_oeis_response_b64 = 'PCBHRVQgL0EwMDAwMDAvYjAwMDAwMC50eHQgSFRUUC8xLjENCj
 
 # see `process_log_entry`
 def process_response(response_b64):
-  return response_b64[:380] + response_b64[424:5000]
+  return response_b64[:380]
 
 class TestNonexistentSequence(abstract_endpoint_test.AbstractEndpointTest):
   endpoint = 'http://localhost:5000/api/get_oeis_values/A000000/12'
@@ -30,9 +30,10 @@ class TestNonexistentSequence(abstract_endpoint_test.AbstractEndpointTest):
   def process_log_entry(self, entry):
     # an HTTP response includes a time-dependent 'Date' parameter. in addition,
     # the OEIS 404 page ends with a frequently updated paragraph that shows the
-    # time of the last update and the current number of sequences. to allow the
-    # test to use a fixed response value in the expected log entry, we cut out
-    # the frequently changing parts of the response
+    # time of the last update and the current number of sequences, and it can
+    # sometimes begin with a site notification banner. to allow the test to use
+    # a fixed response value in the expected log entry, we only check the very
+    # beginning of the response: the headers up to the 'Date:' key
     entry['response'] = process_response(entry['response'])
 
 

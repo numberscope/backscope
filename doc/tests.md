@@ -38,7 +38,7 @@ POSTGRES_DISPOSABLE_DB="<disposable database name>"
 
 to your `.env` file.
 
-:warning: **Beware:** running tests will clear the database `POSTGRES_DISPOSABLE_DB`. Other actions may also clear this database.
+:warning: **Beware:** running tests will clear the database `POSTGRES_DISPOSABLE_DB`, **and** leave it in a state in which it cannot be used for regular serving of sequence data. Other actions may also clear this database.
 
 For guidance, consult the basic instructions on how to [set up your environment](install-postgres.md#set-up-your-environment). If you're indecisive, put the line that specifies the disposable database just after the one that specifies the main database.
 
