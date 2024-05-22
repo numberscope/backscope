@@ -406,7 +406,7 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        search_response = oeis_get('/search', {'id': oeis_id, 'fmt': 'json'})
+        search_response = oeis_get('/search', {'q': f'id:{oeis_id}', 'fmt': 'json'})
         if isinstance(search_response, Exception):
             return f"Error: {search_response}"
         if search_response['results'] != None:
