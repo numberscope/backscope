@@ -124,7 +124,11 @@ def fetch_metadata(oeis_id):
             if seq.raw_refs is not None:
                 return seq
             else:
-                return LookupError(f"Metadata for {oeis_id} was already requested {waited:.1f} seconds ago. A new request can be made if the old one takes longer than {max_wait:.1f} seconds.")
+                return LookupError(
+                    f"Metadata for {oeis_id} was already requested "
+                    f"{waited:.1f} seconds ago. A new request can be made if "
+                    f"the old one takes longer than {max_wait:.1f} seconds."
+                )
 
     #---------------------------------------------------------------------------
     # if we've gotten this far, we don't have all the metadata in the database
@@ -154,7 +158,8 @@ def fetch_metadata(oeis_id):
         while (saw < ref_count):
             for result in search_response['results']:
                 if result['number'] == target_number:
-                    # Write the sequence's name and raw references as soon as we find them
+                    # Write the sequence's name and raw references as soon as we
+                    # find them
                     if seq.raw_refs is None:
                         seq.name = result['name']
                         seq.raw_refs = "\n".join(result.get('xref', []))
@@ -231,7 +236,10 @@ def fetch_values(oeis_id):
     # Test for 404 error. Hat tip StackOverflow user Lukasa
     #   https://stackoverflow.com/a/19343099
     if isinstance(b_text, Exception):
-        if isinstance(b_text, requests.HTTPError) and b_text.response.status_code == 404:
+        if (
+            isinstance(b_text, requests.HTTPError) and
+            b_text.response.status_code == 404
+        ):
             return LookupError(f"B-file for ID '{oeis_id}' not found in OEIS.")
         else:
             return b_text

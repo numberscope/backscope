@@ -159,7 +159,11 @@ class TestUnavailableValuesInNameAndValues(unittest.TestCase):
       print()
 
     # create app
-    self.app = create_app('testing', oeis_scheme='http', oeis_hostport=f'localhost:{self.mock_port}')
+    self.app = create_app(
+      'testing',
+      oeis_scheme='http',
+      oeis_hostport=f'localhost:{self.mock_port}'
+    )
     self.ctx = self.app.app_context()
     with self.ctx:
       db.drop_all()
