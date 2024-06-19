@@ -11,10 +11,11 @@ from flaskr import create_app, db
 import flaskr.nscope.views as views
 
 
-# for starting and stopping the server, hat tip StackOverflow user moe asal...
+# the StackOverflow users credited here provided their ideas under the CC BY-SA
+# 4.0 license, and any associated code under the MIT license
+
+# for starting and stopping the server, hat tip StackOverflow user moe asal
 #   https://stackoverflow.com/q/63422975
-# ... who provided code under the MIT license, and ideas under CC BY-SA 4.0
-#   https://meta.stackexchange.com/q/271080
 
 
 class AbstractMockOEISTest(unittest.TestCase):
@@ -38,11 +39,9 @@ class AbstractMockOEISTest(unittest.TestCase):
     self.assert_mock_oeis_test_attr('expected_response')
   
     # check whether unittest is running in verbose mode
-    # hat tip StackOverflow users Dimitris Fasarakis Hilliard and EquipDev...
+    # hat tip StackOverflow users Dimitris Fasarakis Hilliard and EquipDev
     #   https://stackoverflow.com/a/43002355
     #   https://stackoverflow.com/questions/43001768/how-can-a-test-in-python-unittest-get-access-to-the-verbosity-level#comment73163492_43002355
-    # ... who provided this code under the MIT license
-    #   https://meta.stackexchange.com/q/271080
     self.verbose = ('-v' in sys.argv) or ('--verbose' in sys.argv)
 
     super().__init__(*args, *kwargs)
@@ -76,11 +75,9 @@ class AbstractMockOEISTest(unittest.TestCase):
 
   def setUp(self):
     # check whether unittest is running in verbose mode
-    # hat tip StackOverflow users Dimitris Fasarakis Hilliard and EquipDev...
+    # hat tip StackOverflow users Dimitris Fasarakis Hilliard and EquipDev
     #   https://stackoverflow.com/a/43002355
     #   https://stackoverflow.com/questions/43001768/how-can-a-test-in-python-unittest-get-access-to-the-verbosity-level#comment73163492_43002355
-    # ... who provided this code under the MIT license
-    #   https://meta.stackexchange.com/q/271080
     self.verbose = ('-v' in sys.argv) or ('--verbose' in sys.argv)
     if self.verbose:
       print()
@@ -136,7 +133,7 @@ class AbstractMockOEISTest(unittest.TestCase):
       response = client.get(self.endpoint)
       self.assertEqual(response.status_code, 200)
 
-      # check response. so far, mock OEIS tests all use text responses, so
+      # check response. so far, most mock OEIS tests use text responses, so
       # there's no need to condition on the response type like we do in the
       # abstract endpoint test
       self.assertEqual(response.text, self.expected_response)
