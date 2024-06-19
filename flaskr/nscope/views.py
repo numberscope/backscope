@@ -181,11 +181,14 @@ def fetch_metadata(oeis_id):
 
     # We write what we've found to the database in the following situations:
     #
-    # - No other thread has set out to fetch the same metadata
+    # - No more recent thread has set out to fetch the same metadata
     #
-    # - Another thread has set out to fetch the same metadata, fearing that we
-    #   would never come back, but we got back before the other thread did
+    # - A more recent thread has set out to fetch the same metadata, but we got
+    #   back before any other thread did
     #
+    # This is equivalent to the condition in the `if` statement below because
+    # the only way for `seq.meta_req_time == our_req_time` to be false is for a
+    # more recent thread to have overwritten the request time
     if seq.meta_req_time == our_req_time or seq.backrefs is None:
         db.session.commit()
 
