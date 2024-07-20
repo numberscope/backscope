@@ -6,7 +6,7 @@ click==8.1.7
 cypari2==2.1.5
 cysignals==1.11.4
 Flask==3.0.3
-Flask-Cors==4.0.0
+Flask-Cors==4.0.1
 Flask-Executor==1.0.0
 Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
