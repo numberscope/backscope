@@ -1,27 +1,8 @@
-import unittest
-import requests
-import requests.exceptions
-import sys
-import time
-import mock_oeis
-from urllib.parse import urlunparse
-from subprocess import Popen
-from flaskr import create_app, db
-import flaskr.nscope.views as views
+import flaskr.nscope.test.abstract_mock_oeis_test as abstract_mock_oeis_test
 
-# for starting and stopping the server, hat tip StackOverflow user moe asal...
-#   https://stackoverflow.com/q/63422975
-# ... who provided code under the MIT license, and ideas under CC BY-SA 4.0
-#   https://meta.stackexchange.com/q/271080
-
-class TestMockOEIS(unittest.TestCase):
-  mock_scheme = 'http'
-  mock_host = 'localhost'
-  mock_port = '5001'
-  mock_hostport = f'{mock_host}:{mock_port}'
-  
+class TestMockOEIS(abstract_mock_oeis_test.AbstractMockOEISTest):
   endpoint = 'http://localhost:5000/api/get_oeis_values/A153080/12'
-  initial_expected_response_json = {
+  expected_response = {
     'id': 'A153080',
     'name': 'A153080 [name not yet loaded]',
     'values': {
@@ -39,82 +20,15 @@ class TestMockOEIS(unittest.TestCase):
       '11': '145'
     }
   }
-  updated_expected_response_json = initial_expected_response_json.copy()
-  updated_expected_response_json['name'] = 'a(n) = 13*n + 2.'
-  
-  def mock_oeis_url(self, path):
-    return urlunparse([
-      self.mock_scheme,
-      self.mock_hostport,
-      path,
-      '', # path parameters
-      '', # query
-      ''  # fragment
-    ])
-  
-  def waitUntilReady(self):
-    # wait for the server to start up
-    interval = 0.25
-    retry = True
-    while retry:
-      if interval > 2:
-        raise RuntimeError('Mock OEIS server took too long to start')
-      time.sleep(interval)
-      if self.verbose:
-        print(f'  Waited {interval}s; attempting connection to mock OEIS server')
-      try:
-        response = requests.get(self.mock_oeis_url('/ready'))
-        retry = not response.status_code == 200
-      except requests.exceptions.ConnectionError:
-        retry = True
-      interval = 2*interval
-  
-  def setUp(self):
-    # check whether unittest is running in verbose mode
-    # hat tip StackOverflow users Dimitris Fasarakis Hilliard and EquipDev...
-    #   https://stackoverflow.com/a/43002355
-    #   https://stackoverflow.com/questions/43001768/how-can-a-test-in-python-unittest-get-access-to-the-verbosity-level#comment73163492_43002355
-    # ... who provided this code under the MIT license
-    #   https://meta.stackexchange.com/q/271080
-    self.verbose = ('-v' in sys.argv) or ('--verbose' in sys.argv)
-    if self.verbose:
-      print()
-    
-    # create app
-    self.app = create_app('testing', oeis_scheme='http', oeis_hostport=f'localhost:{self.mock_port}')
-    self.ctx = self.app.app_context()
-    with self.ctx:
-      db.drop_all()
-      db.create_all()
-    
-    # start serving mock OEIS
-    self.oeis_server = Popen(['flask', '--app', 'mock_oeis', 'run', '--port', self.mock_port])
-  
-  def tearDown(self):
-    # wait for background work to finish
-    if self.verbose:
-      print("  Waiting for background work")
-    views.executor.shutdown()
-    if self.verbose:
-      print("  Background work done")
-    
-    # clear database
-    db.session.remove()
-    with self.ctx:
-      db.drop_all()
-    
-    # send termination signal to server thread
-    self.oeis_server.terminate()
-    
-    # wait for server subprocess to terminate
-    self.oeis_server.wait()
-  
+  updated_expected_response = expected_response.copy()
+  updated_expected_response['name'] = 'a(n) = 13*n + 2.'
+
+  # we override the `test_endpoint` method because the default implementation
+  # uses a fixed response, but we need to allow two different responses: one
+  # with a placeholder sequence name, and one with the actual sequence name
+  # included. by overriding, we also avoid having to handle JSON responses in
+  # the default implementation
   def test_endpoint(self):
-    # using test client is recommended in Flask testing how-to
-    #   https://flask.palletsprojects.com/en/2.3.x/testing/
-    # "The test client makes requests to the application without running a live
-    # server." the `with` block runs teardown
-    #   https://github.com/pallets/flask/issues/2949
     self.waitUntilReady()
     with self.app.test_client() as client:
       if self.verbose:
@@ -123,11 +37,11 @@ class TestMockOEIS(unittest.TestCase):
       self.assertEqual(response.status_code, 200)
       if (
         'name' in response.json
-        and response.json['name'] == self.updated_expected_response_json['name']
+        and response.json['name'] == self.updated_expected_response['name']
       ):
-        self.assertDictEqual(response.json, self.updated_expected_response_json)
+        self.assertDictEqual(response.json, self.updated_expected_response)
       else:
-        self.assertDictEqual(response.json, self.initial_expected_response_json)
+        self.assertDictEqual(response.json, self.expected_response)
 
 
 if __name__ == "__main__":
