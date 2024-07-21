@@ -308,7 +308,7 @@ def fetch_factors(oeis_id, num_elements = -1):
     if len_factors >= num_elements:
         return seq
     # Factor whatever else is requested, within reason.
-    pari = cypari2.Pari()
+    pari = None
     for i in range(len_factors, num_elements):
         val = int(seq.values[i])
         # the factorization of 1 is empty
@@ -321,6 +321,7 @@ def fetch_factors(oeis_id, num_elements = -1):
                 # elements are arrays [p, e] for factor p^e
                 # including [-1,1] for negative numbers
                 # and [0,1] for zero
+                if not pari: pari = cypari2.Pari()
                 fac = gen_to_python(pari(val).factor())
             except Exception as ex:
                 log = log.bind(exception = ex, value = val)
