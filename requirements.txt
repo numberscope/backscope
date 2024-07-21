@@ -1,4 +1,3 @@
-cypari2 # library for factoring
 Flask # web framework
 Flask-Cors # Flask extension for cross-origin resource sharing
 Flask-Executor # Flask extension for launching concurrent tasks
@@ -9,3 +8,4 @@ python-dotenv # library for .env files
 requests # library for making HTTP requests
 requests-toolbelt # we use this for logging HTTP requests
 structlog # package for structured logging
+sympy # used for factoring

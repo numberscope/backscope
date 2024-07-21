@@ -4,15 +4,15 @@ Views for nscope model
 
 # external imports
 import base64 # for encoding response dumps
-import cypari2
-from cypari2.convert import gen_to_python
 from flask import Blueprint, jsonify, current_app, render_template
 from flask_executor import Executor
 import re
 import requests
 from requests_toolbelt.utils import dump
 import structlog
-import subprocess # for calling git
+from subprocess import check_output
+from sympy import factorint
+from tempfile import NamedTemporaryFile
 import time
 from urllib.parse import urlunparse
 
@@ -308,28 +308,44 @@ def fetch_factors(oeis_id, num_elements = -1):
     if len_factors >= num_elements:
         return seq
     # Factor whatever else is requested, within reason.
-    pari = None
+    USE_SYMPY_BELOW = 2**64 + 1 # Picked out of a hat; no research done
+    USE_PARI_BELOW = 2**256 + 1 # Arbitrary limit; a timeout would be better
+    for_pari = []
     for i in range(len_factors, num_elements):
         val = int(seq.values[i])
         # the factorization of 1 is empty
-        if val == 1:
-            fac = []
-        elif abs(val) <= 2**200: # Arbitrary limit; a timeout would be better
-            log = current_app.structlogger.bind(tags=[])
-            fac = []
-            try:
-                # elements are arrays [p, e] for factor p^e
-                # including [-1,1] for negative numbers
-                # and [0,1] for zero
-                if not pari: pari = cypari2.Pari()
-                fac = gen_to_python(pari(val).factor())
-            except Exception as ex:
-                log = log.bind(exception = ex, value = val)
-                log.warn('Cython factoring error')
-                fac = 'no_fac'
+        if val == 0:
+            fac = '[0, 1]'
+        elif val == 1:
+            fac = '[]'
+        elif abs(val) < USE_SYMPY_BELOW:
+            symfac = factorint(val)
+            facs = [f"{prime},{power}" for prime, power in symfac.items()]
+            fac = f"[{';'.join(facs)}]"
+        elif abs(val) < USE_PARI_BELOW:
+            for_pari.append((val, len(factors)))
+            fac = 'no_fac_yet'
         else:
             fac = 'no_fac'
-        factors.append(str(fac).replace(" ",""));
+        factors.append(fac)
+    # Farm out the tough ones to pari:
+    if len(for_pari):
+        results = ''
+        # Note delete should be changed to delete_on_close when we switch
+        # to Python 3.12 or higher
+        with NamedTemporaryFile(mode='w+t', delete=False) as temp:
+            tempname = temp.name
+            for item in for_pari:
+                temp.write(f"print(factor({item[0]}))\n")
+            temp.write("\\q\n")
+            temp.close()
+            results = check_output(['gp', '-q', '-s', '256000000', tempname])
+        if results:
+            lines = results.decode('utf-8').split("\n")
+            for i in range(0, len(for_pari)):
+                cyfac = lines[i]
+                if cyfac[0:3] == 'Mat': cyfac = cyfac[4:-1]
+                factors[for_pari[i][1]] = cyfac
     # And further it seems that we are obliged to actually modify the identity
     # of seq.factors in order for the database to update. It is hard to believe
     # that both the .copy() above and this copy() are required, yet testing
