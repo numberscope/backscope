@@ -315,11 +315,17 @@ def fetch_factors(oeis_id, num_elements = -1):
         if val == 1:
             fac = []
         elif abs(val) <= 2**200: # Arbitrary limit; a timeout would be better
+            log = current_app.structlogger.bind(tags=[])
             fac = []
-            # elements are arrays [p, e] for factor p^e
-            # including [-1,1] for negative numbers
-            # and [0,1] for zero
-            fac = gen_to_python(pari(val).factor())
+            try:
+                # elements are arrays [p, e] for factor p^e
+                # including [-1,1] for negative numbers
+                # and [0,1] for zero
+                fac = gen_to_python(pari(val).factor())
+            except Exception as ex:
+                log = log.bind(exception = ex, value = val)
+                log.warn('Cython factoring error')
+                fac = 'no_fac'
         else:
             fac = 'no_fac'
         factors.append(str(fac).replace(" ",""));

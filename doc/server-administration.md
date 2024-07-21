@@ -63,9 +63,12 @@ sudo systemctl stop numberscope
 ### Accessing `numberscope` logs
 
 You can see the standard error output of the backscope process via
-`sudo journalctl -u backscope`. However, most diagnostic output is directed to
+`sudo journalctl -u numberscope`. However, most diagnostic output is directed to
 backscope's own rotating log files, in the `~scope/repos/backscope/logs`
 directory.
+
+When trying to figure out what is going on with the server, it may also be
+helpful to look at the `nginx` logs, in the `/var/log/nginx` directory.
 
 ## Updating the server to a new version of backscope
 
