@@ -20,7 +20,7 @@ psycopg2-binary==2.9.9
 python-dotenv==1.0.1
 requests==2.32.3
 requests-toolbelt==1.0.0
-setuptools==65.5.0
+setuptools==70.0.0
 SQLAlchemy==2.0.31
 structlog==24.4.0
 sympy==1.13.1
