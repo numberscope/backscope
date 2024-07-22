@@ -10,7 +10,7 @@ import re
 import requests
 from requests_toolbelt.utils import dump
 import structlog
-from subprocess import check_output
+from subprocess import check_output, TimeoutExpired
 from sympy import factorint
 from tempfile import NamedTemporaryFile
 import time
@@ -276,11 +276,13 @@ def fetch_values(oeis_id):
     db.session.commit()
     return seq
 
-def fetch_factors(oeis_id, num_elements = -1):
+def fetch_factors(oeis_id, num_elements = -1, timeout = 10):
     """ The first argument oeis_id must be a valid OEIS id that is already
         stored in the database **with all of its values**.
         The second argument num_elements gives the number of terms to factor,
         or the default -1 means to factor all known elements.
+        The third argument timeout gives the maximum number of seconds
+        to wait for Pari to factor large numbers encountered.
 
         This function factors the first num_elements terms (if they aren't
         already) and adds them to the database.
@@ -308,8 +310,8 @@ def fetch_factors(oeis_id, num_elements = -1):
     if len_factors >= num_elements:
         return seq
     # Factor whatever else is requested, within reason.
-    USE_SYMPY_BELOW = 2**64 + 1 # Picked out of a hat; no research done
-    USE_PARI_BELOW = 2**256 + 1 # Arbitrary limit; a timeout would be better
+    USE_SYMPY_BELOW = 2**32 + 1 # Kate found 2**64 too big -- hits slow spots
+    USE_PARI_BELOW = 2**512 + 1 # Arbitrary limit; is it needed with timeout?
     for_pari = []
     for i in range(len_factors, num_elements):
         val = int(seq.values[i])
@@ -339,10 +341,15 @@ def fetch_factors(oeis_id, num_elements = -1):
                 temp.write(f"print(factor({item[0]}))\n")
             temp.write("\\q\n")
             temp.close()
-            results = check_output(['gp', '-q', '-s', '256000000', tempname])
+            try:
+                results = check_output(
+                    ['gp', '-q', '-s', '256000000', tempname],
+                    timeout=timeout)
+            except TimeoutExpired as te:
+                results = te.output
         if results:
-            lines = results.decode('utf-8').split("\n")
-            for i in range(0, len(for_pari)):
+            lines = results.decode('utf-8').split("\n")[0:-1]
+            for i in range(0, len(lines)):
                 cyfac = lines[i]
                 if cyfac[0:3] == 'Mat': cyfac = cyfac[4:-1]
                 factors[for_pari[i][1]] = cyfac
@@ -406,7 +413,7 @@ def get_oeis_values(oeis_id, num_elements):
         return f"Error: {seq}"
     # OK, got valid sequence, so schedule grabbing of metadata and factors:
     executor.submit(fetch_metadata, valid_oeis_id)
-    executor.submit(fetch_factors, valid_oeis_id)
+    executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
     # Finally, trim return sequence as requested:
     raw_vals = seq.values
     wants = int(num_elements)
@@ -435,7 +442,7 @@ def get_oeis_name_and_values(oeis_id):
         if search_response['results'] != None:
             seq.name = search_response['results'][0]['name']
             db.session.commit()
-    executor.submit(fetch_factors, valid_oeis_id)
+    executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
 @bp.route("/api/get_oeis_metadata/<oeis_id>", methods=["GET"])
