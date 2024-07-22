@@ -4,15 +4,15 @@ Views for nscope model
 
 # external imports
 import base64 # for encoding response dumps
-import cypari2
-from cypari2.convert import gen_to_python
 from flask import Blueprint, jsonify, current_app, render_template
 from flask_executor import Executor
 import re
 import requests
 from requests_toolbelt.utils import dump
 import structlog
-import subprocess # for calling git
+from subprocess import check_output, TimeoutExpired
+from sympy import factorint
+from tempfile import NamedTemporaryFile
 import time
 from urllib.parse import urlunparse
 
@@ -276,11 +276,13 @@ def fetch_values(oeis_id):
     db.session.commit()
     return seq
 
-def fetch_factors(oeis_id, num_elements = -1):
+def fetch_factors(oeis_id, num_elements = -1, timeout = 10):
     """ The first argument oeis_id must be a valid OEIS id that is already
         stored in the database **with all of its values**.
         The second argument num_elements gives the number of terms to factor,
         or the default -1 means to factor all known elements.
+        The third argument timeout gives the maximum number of seconds
+        to wait for Pari to factor large numbers encountered.
 
         This function factors the first num_elements terms (if they aren't
         already) and adds them to the database.
@@ -308,28 +310,49 @@ def fetch_factors(oeis_id, num_elements = -1):
     if len_factors >= num_elements:
         return seq
     # Factor whatever else is requested, within reason.
-    pari = None
+    USE_SYMPY_BELOW = 2**32 + 1 # Kate found 2**64 too big -- hits slow spots
+    USE_PARI_BELOW = 2**512 + 1 # Arbitrary limit; is it needed with timeout?
+    for_pari = []
     for i in range(len_factors, num_elements):
         val = int(seq.values[i])
         # the factorization of 1 is empty
-        if val == 1:
-            fac = []
-        elif abs(val) <= 2**200: # Arbitrary limit; a timeout would be better
-            log = current_app.structlogger.bind(tags=[])
-            fac = []
-            try:
-                # elements are arrays [p, e] for factor p^e
-                # including [-1,1] for negative numbers
-                # and [0,1] for zero
-                if not pari: pari = cypari2.Pari()
-                fac = gen_to_python(pari(val).factor())
-            except Exception as ex:
-                log = log.bind(exception = ex, value = val)
-                log.warn('Cython factoring error')
-                fac = 'no_fac'
+        if val == 0:
+            fac = '[0, 1]'
+        elif val == 1:
+            fac = '[]'
+        elif abs(val) < USE_SYMPY_BELOW:
+            symfac = factorint(val)
+            facs = [f"{prime},{power}" for prime, power in symfac.items()]
+            fac = f"[{';'.join(facs)}]"
+        elif abs(val) < USE_PARI_BELOW:
+            for_pari.append((val, len(factors)))
+            fac = 'no_fac_yet'
         else:
             fac = 'no_fac'
-        factors.append(str(fac).replace(" ",""));
+        factors.append(fac)
+    # Farm out the tough ones to pari:
+    if len(for_pari):
+        results = ''
+        # Note delete should be changed to delete_on_close when we switch
+        # to Python 3.12 or higher
+        with NamedTemporaryFile(mode='w+t', delete=False) as temp:
+            tempname = temp.name
+            for item in for_pari:
+                temp.write(f"print(factor({item[0]}))\n")
+            temp.write("\\q\n")
+            temp.close()
+            try:
+                results = check_output(
+                    ['gp', '-q', '-s', '256000000', tempname],
+                    timeout=timeout)
+            except TimeoutExpired as te:
+                results = te.output
+        if results:
+            lines = results.decode('utf-8').split("\n")[0:-1]
+            for i in range(0, len(lines)):
+                cyfac = lines[i]
+                if cyfac[0:3] == 'Mat': cyfac = cyfac[4:-1]
+                factors[for_pari[i][1]] = cyfac
     # And further it seems that we are obliged to actually modify the identity
     # of seq.factors in order for the database to update. It is hard to believe
     # that both the .copy() above and this copy() are required, yet testing
@@ -390,7 +413,7 @@ def get_oeis_values(oeis_id, num_elements):
         return f"Error: {seq}"
     # OK, got valid sequence, so schedule grabbing of metadata and factors:
     executor.submit(fetch_metadata, valid_oeis_id)
-    executor.submit(fetch_factors, valid_oeis_id)
+    executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
     # Finally, trim return sequence as requested:
     raw_vals = seq.values
     wants = int(num_elements)
@@ -419,7 +442,7 @@ def get_oeis_name_and_values(oeis_id):
         if search_response['results'] != None:
             seq.name = search_response['results'][0]['name']
             db.session.commit()
-    executor.submit(fetch_factors, valid_oeis_id)
+    executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
 @bp.route("/api/get_oeis_metadata/<oeis_id>", methods=["GET"])
