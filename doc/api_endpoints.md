@@ -134,8 +134,8 @@ SEARCH_TERM, which should be url encoded if it contains any characters
 disallowed in urls. Currently the search criterion is identical to whatever
 the OEIS does when you type SEARCH_TERM into its search box. For example,
 if you are running the server on your local machine, a full URL would be
-http://127.0.0.1:5000/api/search_oeis/germaine which gives results concerning
-Sophie Germaine primes.
+http://127.0.0.1:5000/api/search_oeis/germain which gives results concerning
+Sophie Germain primes.
 
 #### Key: term
 
