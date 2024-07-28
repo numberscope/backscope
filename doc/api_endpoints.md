@@ -127,3 +127,20 @@ A string showing the short hash resulting from calling
 git rev-parse --short HEAD
 ```
 
+### URL: `api/search_oeis/<SEARCH_TERM>`
+
+Returns up to ten (id, sequence-name) pairs of sequences matching the
+SEARCH_TERM, which should be url encoded if it contains any characters
+disallowed in urls. Currently the search criterion is identical to whatever
+the OEIS does when you type SEARCH_TERM into its search box.
+
+#### Key: term
+
+A string giving the search term as supplied.
+
+#### Key: results
+
+An array of results. Each element in the array is a two-element array
+of strings. The first entry of each of these arrays is an OEIS id in "Annnnnn"
+format, and the second is the OEIS name of the corresponding sequence.
+

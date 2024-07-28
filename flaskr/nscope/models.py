@@ -54,9 +54,14 @@ class Sequence(db.Model):
         ret = self.query.filter_by(id=id).first()
         return ret
 
+class Search(db.Model):
+    __tablename__ = 'searches'
 
+    term = db.Column(db.String, unique=True, nullable=False, primary_key=True)
+    ids = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
+    names = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
 
-
-
-
-
+    @classmethod
+    def get_search_by_term(self, term):
+        ret = self.query.filter_by(term=term).first()
+        return ret
