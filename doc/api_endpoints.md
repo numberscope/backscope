@@ -132,7 +132,10 @@ git rev-parse --short HEAD
 Returns up to ten (id, sequence-name) pairs of sequences matching the
 SEARCH_TERM, which should be url encoded if it contains any characters
 disallowed in urls. Currently the search criterion is identical to whatever
-the OEIS does when you type SEARCH_TERM into its search box.
+the OEIS does when you type SEARCH_TERM into its search box. For example,
+if you are running the server on your local machine, a full URL would be
+http://127.0.0.1:5000/api/search_oeis/germaine which gives results concerning
+Sophie Germaine primes.
 
 #### Key: term
 
