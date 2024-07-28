@@ -117,7 +117,7 @@ that operation.
    the additional flags to ensure the proper encoding of the resulting
    database; these are not necessary in a typical postgres setup but for some
    reason the default on the server is SQL_ASCII encoding (at least as of
-   this writing.
+   this writing).
 
 8. Remove old log files with `sudo rm logs/*.log*` (presuming there is
    nothing in them you need; if there is, move them to some out-of-the-way
