@@ -23,6 +23,9 @@ from flaskr.nscope.models import *
 executor = Executor()
 bp = Blueprint("nscope", __name__)
 
+# Convert a number to an OEIS id:
+def oeis_a_id(num):
+    return 'A' + str(num).zfill(6)
 
 # Creating a simple index route (this will error because we currently dont have an index.html"j
 @bp.route("/index")
@@ -30,12 +33,15 @@ def index():
     return render_template("index.html")
 
 def write_request_log(log, response, error=False):
-  response_b64 = base64.b64encode(dump.dump_all(response)).decode('ascii')
-  log = log.bind(response=response_b64)
-  if error:
-    log.error('request issue')
-  else:
-    log.warning('request issue')
+    if isinstance(response, str):
+        log = log.bind(response=response)
+    else: # TODO: Need human readable errors!
+        response_b64 = base64.b64encode(dump.dump_all(response)).decode('ascii')
+        log = log.bind(response=response_b64)
+        if error:
+            log.error('request issue')
+        else:
+            log.warning('request issue')
 
 def oeis_url(path=''):
   return urlunparse([
@@ -55,8 +61,12 @@ def oeis_get(path='', params=None, json=True, timeout=4):
 
   # try request
   try:
+    # Initialize response in case an exception occurs before response
+    # can be set:
+    url = oeis_url(path)
+    response = f"... No response from ${url} with ${params} ..."
     # make request and check for history and bad status
-    response = requests.get(oeis_url(path), params, timeout=timeout)
+    response = requests.get(url, params, timeout=timeout)
     if response.history:
       tags.append('history')
       warn = True
@@ -165,7 +175,7 @@ def fetch_metadata(oeis_id):
                         seq.raw_refs = "\n".join(result.get('xref', []))
                         db.session.commit()
                 else:
-                    backrefs.append('A' + str(result['number']).zfill(6))
+                    backrefs.append(oeis_a_id(result['number']))
                 saw += 1
             if saw < ref_count:
                 search_params['start'] = saw
@@ -493,3 +503,36 @@ def get_git_commit():
     return jsonify({
         'short_commit_hash': current_app.config['git_revision_hash']
     })
+
+@bp.route("/api/search_oeis/<search_term>", methods=["GET"])
+def search_oeis(search_term):
+    srch = Search.get_search_by_term(search_term)
+    if not srch:
+        srch = Search(term=search_term)
+        db.session.add(srch)
+        db.session.commit()
+    if srch.ids is None:
+        search_response = oeis_get('/search', {'q': search_term, 'fmt': 'json'})
+        if isinstance(search_response, Exception):
+            srch.ids=[]
+            srch.names=[]
+        else:
+            ids = []
+            names = []
+            resultList = search_response['results']
+            if resultList is None:
+                resultList = []
+            for result in resultList:
+                current = oeis_a_id(result['number'])
+                ids.append(current)
+                names.append(result['name'])
+                seq = find_oeis_sequence(current)
+                seq.name = result['name'] # might as well update
+                db.session.commit()
+            srch.ids = ids
+            srch.names = names
+            db.session.commit()
+    return jsonify({
+        'term': search_term,
+        'results': [
+            [srch.ids[i], srch.names[i]] for i in range(0, len(srch.ids))]})

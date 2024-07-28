@@ -20,7 +20,7 @@ OEIS.
 This is the most rapid endpoint, it makes at most one request to the OEIS server
 (and only if the OEIS_ID has not previously been requested). If you are running
 the server to test it on your local host, a full URL would be
-`http://127.0.0.1:5000/api/get_oeis_values/A000030/50` which will return the
+http://127.0.0.1:5000/api/get_oeis_values/A000030/50 which will return the
 first digits of the numbers 0 through 49.
 
 #### Key: name
@@ -40,7 +40,7 @@ datatype.
 This one is potentially a bit slower than the above URL, as it may make
 an extra request to ensure that the name is correct. If you are running
 the server on your local host, a full URL would be
-`http://127.0.0.1:5000/api/get_oeis_name_and_values/A003173`, which will
+http://127.0.0.1:5000/api/get_oeis_name_and_values/A003173, which will
 return the nine Heegner numbers and their full name as an OEIS
 sequence (basically, the name describes what a Heegner number is).
 
@@ -59,7 +59,7 @@ A potentially very slow endpoint (if the sequence is unknown to the backscope);
 may make hundreds of requests to the OEIS to generate all of the back
 references to the sequence. If you are running the server on your local
 machine, a full URL would be
-`http://127.0.0.1:5000/api/get_oeis_metadata/A028444` which will show the full
+http://127.0.0.1:5000/api/get_oeis_metadata/A028444 which will show the full
 name of the Busy Beaver sequence, the one text line of sequences it
 references, and the IDs of the ten sequences that refer to it.
 
@@ -83,7 +83,7 @@ This could take a long time. It internally does everything that the endpoint
 it proceeds to factor the first `<COUNT>` terms of the sequence (or all of them
 if there are not that many). If you are running the server to test it on your
 local host, a full URL would be
-`http://127.0.0.1:5000/api/get_oeis_factors/A006862/50` which will return the
+http://127.0.0.1:5000/api/get_oeis_factors/A006862/50 which will return the
 factorizations of 1 + the product of the first n primes, for n < 50. The
 first 42 terms will be factored and larger terms will return `no_fac` (since
 they are deemed too large to factor in a reasonable time).
@@ -116,8 +116,7 @@ the factorization is stored as `no_fac`.
 
 Returns the most recent git hash of the currently running version of
 backscope.  If you are running the server on your local
-machine, a full URL would be
-`http://127.0.0.1:5000/api/get_commit`
+machine, a full URL would be http://127.0.0.1:5000/api/get_commit.
 
 #### Key: short_commit_hash
 
@@ -126,4 +125,24 @@ A string showing the short hash resulting from calling
 ```
 git rev-parse --short HEAD
 ```
+
+### URL: `api/search_oeis/<SEARCH_TERM>`
+
+Returns up to ten (id, sequence-name) pairs of sequences matching the
+SEARCH_TERM, which should be url encoded if it contains any characters
+disallowed in urls. Currently the search criterion is identical to whatever
+the OEIS does when you type SEARCH_TERM into its search box. For example,
+if you are running the server on your local machine, a full URL would be
+http://127.0.0.1:5000/api/search_oeis/germain which gives results concerning
+Sophie Germain primes.
+
+#### Key: term
+
+A string giving the search term as supplied.
+
+#### Key: results
+
+An array of results. Each element in the array is a two-element array
+of strings. The first entry of each of these arrays is an OEIS id in "Annnnnn"
+format, and the second is the OEIS name of the corresponding sequence.
 
