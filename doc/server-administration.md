@@ -72,9 +72,11 @@ helpful to look at the `nginx` logs, in the `/var/log/nginx` directory.
 
 ## Updating the server to a new version of backscope
 
-There are two main cases. If the change in version of backscope does not
-involve any changes to database schema or changes to the data that should
-be stored for any previously-downloaded sequences, then updating the server
+There are three main aspects to such an update. If the change in version of
+backscope does not (A) involve any changes to database schema or changes to the
+data that should be stored for any previously-downloaded sequences, and (B)
+does not involve removing any python packages from the Python virtual
+environment in which backscope runs, then updating the server
 should consist of three simple steps:
 
 1. Log into the server and `cd ~scope/repos/backscope`.
@@ -89,7 +91,7 @@ thinks it is running correctly, and you can point your browser for example at
 `https://numberscope.colorado.edu/api/get_oeis_values/A000040/128` for
 a list of the first 2^7 primes.
 
-## Resetting the production database
+### Resetting the production database
 
 If there are changes that affect the structure or contents of the database,
 then just before restarting numberscope it is necessary to remove the prior
@@ -110,7 +112,12 @@ that operation.
 6. Remove the generated database structure with
    `sudo -u scope rm -r migrations`.
 
-7. Initialize a brand new database with `sudo -u scope createdb [NAME]`.
+7. Initialize a brand new database with
+   `sudo -u scope createdb [NAME] -E UTF8 -l en_US.UTF-8 -T template0`. NOTE
+   the additional flags to ensure the proper encoding of the resulting
+   database; these are not necessary in a typical postgres setup but for some
+   reason the default on the server is SQL_ASCII encoding (at least as of
+   this writing).
 
 8. Remove old log files with `sudo rm logs/*.log*` (presuming there is
    nothing in them you need; if there is, move them to some out-of-the-way
@@ -129,6 +136,35 @@ that operation.
 
 11. Check that numberscope is operating properly in all the same ways as for
     an ordinary installation that does not affect the database.
+
+### Resetting the production virtual environment
+
+If there are changes that affect the Python environment beyond simply updating
+packages, then you should remove and recreate the python environment before
+restarting backscope. You can do that as follows:
+
+1. `cd ~scope/repos/backscope` (if you are not already there).
+
+2. Halt the numberscope service with `sudo systemctl stop numberscope`.
+
+3. Remove the old virtual environment with `sudo rm -r .venv`
+
+4. Create a new virtual environment with
+   `sudo -u scope python3.11 -m venv .venv`. Note that the python version
+   number, 3.11 in this command, may increase over time.
+
+5. If you need the virtual environment immediately, before restarting the
+   backscope service (say to clear the database), install it with
+   ```
+   sudo -u scope bash -c 'source .venv/bin/activate && sh tools/install-requirements.sh'
+   ```
+
+6. When ready, start the numberscope service with
+   `sudo systemctl start numberscope`.
+
+7. Check that numberscope is operating properly in all the same ways as for
+   an ordinary installation that does not affect the Python virtual
+   environment.
 
 ## How Nginx is set up
 
