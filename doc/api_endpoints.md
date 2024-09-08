@@ -76,6 +76,34 @@ OEIS text "xref" records for the sequence with id OEIS_ID.
 
 An array of strings giving all OEIS ids that mention the given OEIS_ID.
 
+### URL: `api/get_oeis_header/<OEIS_ID>`
+
+A lighter-weight endpoint that provides some summary information about the
+sequence designated by <OEIS_ID>. If you are running the server on your local
+machine, a full URL would be http://127.0.0.1:5000/api/get_oeis_header/A028444
+which will show the full name of the Busy Beaver sequence, the first and last
+indices of the sequence as avaialable through oeis.org, and the chunk size that
+will be used if values are requested in chunks.
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID.
+
+#### Key: first
+
+The index of the first entry in the sequence available for download from
+oeis.org.
+
+#### Key: last
+
+The index of the first entry in the sequence available for download from
+oeis.org.
+
+#### Key: chunk_size
+
+The maximum number of entries provided per chunk if chunked access is used
+to download entries for this sequence.
+
 ### URL: `api/get_oeis_factors/<OEIS_ID>/<COUNT>`
 
 This could take a long time. It internally does everything that the endpoint

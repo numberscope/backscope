@@ -118,7 +118,11 @@ def fetch_metadata(oeis_id):
     if seq.backrefs is not None:
         # We've cached all the metadata already, so we just return it
         return seq
+    # Start with the basic data on the main page:
+    seq = fetch_oeis_name_etc(oeis_id)
+    if isinstance(seq, Exception): return seq
 
+    # Now hunt for the backrefs
     our_req_time = time.time_ns()
     last_req_time = seq.meta_req_time
     if last_req_time is not None:
@@ -167,14 +171,7 @@ def fetch_metadata(oeis_id):
         saw = 0
         while (saw < ref_count):
             for result in search_response['results']:
-                if result['number'] == target_number:
-                    # Write the sequence's name and raw references as soon as we
-                    # find them
-                    if seq.raw_refs is None:
-                        seq.name = result['name']
-                        seq.raw_refs = "\n".join(result.get('xref', []))
-                        db.session.commit()
-                else:
+                if result['number'] != target_number: # Don't add self-backref
                     backrefs.append(oeis_a_id(result['number']))
                 saw += 1
             if saw < ref_count:
@@ -184,6 +181,7 @@ def fetch_metadata(oeis_id):
                     return search_response
                 if search_response['results'] == None:
                     break
+            # Do we need to break out of this loop if we fail to make progress?
         seq.backrefs = backrefs
     else:
         # We didn't find any metadata
@@ -279,10 +277,10 @@ def fetch_values(oeis_id):
         seq_vals[index] = column[1]
     if last < first:
         return IndexError(f"No terms found for ID '{oeis_id}'.")
-    seq.values = [seq_vals[i] for i in range(first,last+1)]
+    seq.values = [seq_vals[i] for i in range(first, last+1)]
     if not seq.name:
         seq.name = name or placeholder_name(oeis_id)
-    seq.shift = first
+    seq.shift = str(first)
     db.session.commit()
     return seq
 
@@ -429,9 +427,63 @@ def get_oeis_values(oeis_id, num_elements):
     wants = int(num_elements)
     if wants and wants < len(raw_vals):
         raw_vals = raw_vals[0:wants]
-    vals = {(i+seq.shift):raw_vals[i] for i in range(len(raw_vals))}
+    first = int(seq.shift)
+    vals = {(i+first):raw_vals[i] for i in range(len(raw_vals))}
 
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
+
+# We grab the actual page rather than the json data because the auto-generated
+# link describing the b-file is not in the json data =(
+def fetch_oeis_name_etc(valid_oeis_id):
+    seq = find_oeis_sequence(valid_oeis_id)
+    if (not seq.name or seq.raw_refs is None
+            or seq.name == placeholder_name(valid_oeis_id)):
+        seq_page = oeis_get('/' + valid_oeis_id, json=False)
+        if isinstance(seq_page, Exception):
+            return seq_page
+        body = seq_page.split('<body')[1]
+        belowform = body.split('</form')[1]
+        lines = belowform.split("\n")
+        name = ''
+        seekingName = False
+        xrefs = ''
+        ix = -1
+        limit = len(lines)
+        while (ix := ix+1) < limit:
+            current = lines[ix].strip()
+            # Name occurs a little below the OEIS ID:
+            if current == valid_oeis_id:
+                seekingName = True
+                continue
+            if name == '' and seekingName and current and current[0] != '<':
+                name = current
+                continue
+            # Otherwise, we are searching for various fields
+            if 'OFFSET' in current:
+                ix += 3
+                current = lines[ix].strip()
+                offsets = current.split('<tt>')[1]
+                seq.shift = offsets.split(',')[0]
+                continue
+            if 'LINKS' in current:
+                ix += 3
+                current = lines[ix].strip()
+                lastetc = current.split('..')[1]
+                seq.last_index = re.search(r'[-\d]*', lastetc)[0]
+                continue
+            if 'CROSSREFS' in current:
+                ix += 2
+                while (ix := ix+1) < limit:
+                    current = lines[ix].strip()
+                    if current == '<tr>': break
+                    if current == '': continue
+                    current = current.removeprefix('<div class="Seq SeqY"><tt>')
+                    current = current.removesuffix('</tt></div>')
+                    xrefs += current + "\n"
+        if name: seq.name = name
+        if xrefs: seq.raw_refs = xrefs
+        db.session.commit()
+    return seq
 
 @bp.route("/api/get_oeis_name_and_values/<oeis_id>", methods=["GET"])
 def get_oeis_name_and_values(oeis_id):
@@ -442,18 +494,31 @@ def get_oeis_name_and_values(oeis_id):
     if isinstance(seq, Exception):
         return f"Error: {seq}"
     raw_vals = seq.values
-    vals = {(i + seq.shift): raw_vals[i] for i in range(len(raw_vals))}
-    # Now get the name
-    seq = find_oeis_sequence(valid_oeis_id)
-    if not seq.name or seq.name == placeholder_name(oeis_id):
-        search_response = oeis_get('/search', {'q': f'id:{oeis_id}', 'fmt': 'json'})
-        if isinstance(search_response, Exception):
-            return f"Error: {search_response}"
-        if search_response['results'] != None:
-            seq.name = search_response['results'][0]['name']
-            db.session.commit()
+    first = int(seq.shift)
+    vals = {(i + first): raw_vals[i] for i in range(len(raw_vals))}
+    seq = fetch_oeis_name_etc(valid_oeis_id)
+    if isinstance(seq, Exception):
+        return f"Error: {seq}"
     executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
+
+chunk_size = 1024 # A constant now; may someday want it to depend on sequence
+
+@bp.route("/api/get_oeis_header/<oeis_id>", methods=["GET"])
+def get_oeis_header(oeis_id):
+    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    if isinstance(valid_oeis_id, Exception):
+        return f"Error: {valid_oeis_id}"
+    seq = fetch_oeis_name_etc(valid_oeis_id)
+    if isinstance(seq, Exception):
+        return f"Error: {seq}"
+    executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
+    return jsonify({
+        'id': seq.id,
+        'name': seq.name,
+        'first': seq.shift,
+        'last': seq.last_index,
+        'chunk_size': chunk_size})
 
 @bp.route("/api/get_oeis_metadata/<oeis_id>", methods=["GET"])
 def get_oeis_metadata(oeis_id):
@@ -486,7 +551,8 @@ def get_oeis_factors(oeis_id, num_elements):
     raw_fac = seq.factors
     if wants and wants < len(raw_fac):
         raw_fac = raw_fac[0:wants]
-    facs = {(i+seq.shift):raw_fac[i] for i in range(len(raw_fac))}
+    first = int(seq.shift)
+    facs = {(i+first):raw_fac[i] for i in range(len(raw_fac))}
     executor.submit(fetch_metadata, valid_oeis_id)
     return jsonify({
         'id': seq.id,
