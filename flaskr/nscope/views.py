@@ -428,8 +428,32 @@ def get_oeis_values(oeis_id, num_elements):
     if wants and wants < len(raw_vals):
         raw_vals = raw_vals[0:wants]
     first = int(seq.shift)
-    vals = {(i+first):raw_vals[i] for i in range(len(raw_vals))}
+    vals = {(i+first): raw_vals[i] for i in range(len(raw_vals))}
 
+    return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
+
+chunk_size = 1024 # A constant now; may someday want it to depend on sequence
+
+@bp.route("/api/get_oeis_chunk/<oeis_id>/<chunk_string>", methods=["GET"])
+def get_oeis_chunk(oeis_id, chunk_string):
+    valid_oeis_id = get_valid_oeis_id(oeis_id)
+    if isinstance(valid_oeis_id, Exception):
+        return f"Error: {valid_oeis_id}"
+    seq = fetch_values(valid_oeis_id)
+    if isinstance(seq, Exception):
+        return f"Error: {seq}"
+    # OK, got valid sequence, so schedule grabbing of metadata and factors:
+    executor.submit(fetch_metadata, valid_oeis_id)
+    executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
+    # Finally, trim return sequence as requested:
+    raw_vals = seq.values
+    chunk = int(chunk_string)
+    first = int(seq.shift)
+    least = chunk*chunk_size
+    toobig = (chunk+1)*chunk_size
+    leasti = max(least - first, 0)
+    toobigi = min(toobig - first, len(raw_vals))
+    vals = {(i+first): raw_vals[i] for i in range(leasti, toobigi)}
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
 # We grab the actual page rather than the json data because the auto-generated
@@ -501,8 +525,6 @@ def get_oeis_name_and_values(oeis_id):
         return f"Error: {seq}"
     executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
-
-chunk_size = 1024 # A constant now; may someday want it to depend on sequence
 
 @bp.route("/api/get_oeis_header/<oeis_id>", methods=["GET"])
 def get_oeis_header(oeis_id):

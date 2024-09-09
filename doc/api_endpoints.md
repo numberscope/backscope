@@ -35,6 +35,31 @@ with id OEIS_ID. Since some sequence values correspond to extremely large
 numbers, strings are used to avoid the limitations of any particular numeric
 datatype.
 
+### URL: `api/get_oeis_chunk/<OEIS_ID>/<CHUNK_NUMBER>`
+
+Similar to the `get_oeis_values` endpoint, but allows some level of random
+access. Every sequence has a "chunk size" that can be obtained via the
+`get_oeis_header` endpoint described below. This endpoint returns (just) the
+sequence values in the CHUNK_NUMBERth chunk, in other words, all of the entries
+with index no smaller than CHUNK_NUMBER×chunk_size and less than
+(CHUNK_NUMBER+1)×(chunk_size). Note that CHUNK_NUMBER is allowed to be negative.
+
+If you are running the server to test it on your local host, a full URL would
+be http://127.0.0.1:5000/api/get_oeis_chunk/A000030/1 which will return the
+first digits of the numbers 1024 through 2047 (so 976 '1's followed by 48 '2's).
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID,
+if already known to backscope, or a temporary name if not.
+
+#### Key: values
+
+An array of _strings_ (of digits) giving the first COUNT values of the sequence
+with id OEIS_ID. Since some sequence values correspond to extremely large
+numbers, strings are used to avoid the limitations of any particular numeric
+datatype.
+
 ### URL: `api/get_oeis_name_and_values/<OEIS_ID>`
 
 This one is potentially a bit slower than the above URL, as it may make
