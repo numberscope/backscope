@@ -281,6 +281,7 @@ def fetch_values(oeis_id):
     if not seq.name:
         seq.name = name or placeholder_name(oeis_id)
     seq.shift = str(first)
+    seq.last_index = str(last)
     db.session.commit()
     return seq
 
@@ -456,57 +457,40 @@ def get_oeis_chunk(oeis_id, chunk_string):
     vals = {(i+first): raw_vals[i] for i in range(leasti, toobigi)}
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
-# We grab the actual page rather than the json data because the auto-generated
-# link describing the b-file is not in the json data =(
+# We grab and parse the text format of the OEIS. If we don't find a link,
+# go ahead and fetch the values and use the info from there.
 def fetch_oeis_name_etc(valid_oeis_id):
     seq = find_oeis_sequence(valid_oeis_id)
     if (not seq.name or seq.raw_refs is None
             or seq.name == placeholder_name(valid_oeis_id)):
-        seq_page = oeis_get('/' + valid_oeis_id, json=False)
-        if isinstance(seq_page, Exception):
-            return seq_page
-        body = seq_page.split('<body')[1]
-        belowform = body.split('</form')[1]
-        lines = belowform.split("\n")
-        name = ''
-        seekingName = False
+        text = oeis_get(f"/search?q=id:{valid_oeis_id}&fmt=text", json=False)
+        if isinstance(text, Exception):
+            return text
+        seenLink = False
+        needLast = True
         xrefs = ''
-        ix = -1
-        limit = len(lines)
-        while (ix := ix+1) < limit:
-            current = lines[ix].strip()
-            # Name occurs a little below the OEIS ID:
-            if current == valid_oeis_id:
-                seekingName = True
-                continue
-            if name == '' and seekingName and current and current[0] != '<':
-                name = current
-                continue
-            # Otherwise, we are searching for various fields
-            if 'OFFSET' in current:
-                ix += 3
-                current = lines[ix].strip()
-                offsets = current.split('<tt>')[1]
-                seq.shift = offsets.split(',')[0]
-                continue
-            if 'LINKS' in current:
-                ix += 3
-                current = lines[ix].strip()
-                lastetc = current.split('..')[1]
-                seq.last_index = re.search(r'[-\d]*', lastetc)[0]
-                continue
-            if 'CROSSREFS' in current:
-                ix += 2
-                while (ix := ix+1) < limit:
-                    current = lines[ix].strip()
-                    if current == '<tr>': break
-                    if current == '': continue
-                    current = current.removeprefix('<div class="Seq SeqY"><tt>')
-                    current = current.removesuffix('</tt></div>')
-                    xrefs += current + "\n"
-        if name: seq.name = name
+        for line in text.split("\n"):
+            line = line.strip()
+            if not line.startswith('%'): continue
+            value = line[11:] # Value starts in column 11
+            match line[1]:
+                case 'N': seq.name = value
+                case 'O': seq.shift = value.split(',')[0]
+                case 'H':
+                    if seenLink: continue
+                    seenLink = True
+                    found = re.search(
+                        r'Table of.*=\s*([-\d]+)[.][.]([-\d]+)', value)
+                    if found:
+                        if seq.shift: assert seq.shift == found[1]
+                        seq.last_index = found[2]
+                        needLast = False
+                case 'Y':
+                    xrefs += value + "\n"
         if xrefs: seq.raw_refs = xrefs
         db.session.commit()
+        if needLast:
+            seq = fetch_values(valid_oeis_id)
     return seq
 
 @bp.route("/api/get_oeis_name_and_values/<oeis_id>", methods=["GET"])
