@@ -35,6 +35,31 @@ with id OEIS_ID. Since some sequence values correspond to extremely large
 numbers, strings are used to avoid the limitations of any particular numeric
 datatype.
 
+### URL: `api/get_oeis_chunk/<OEIS_ID>/<CHUNK_NUMBER>`
+
+Similar to the `get_oeis_values` endpoint, but allows some level of random
+access. Every sequence has a "chunk size" that can be obtained via the
+`get_oeis_header` endpoint described below. This endpoint returns (just) the
+sequence values in the CHUNK_NUMBERth chunk, in other words, all of the entries
+with index no smaller than CHUNK_NUMBER×chunk_size and less than
+(CHUNK_NUMBER+1)×(chunk_size). Note that CHUNK_NUMBER is allowed to be negative.
+
+If you are running the server to test it on your local host, a full URL would
+be http://127.0.0.1:5000/api/get_oeis_chunk/A000030/1 which will return the
+first digits of the numbers 1024 through 2047 (so 976 '1's followed by 48 '2's).
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID,
+if already known to backscope, or a temporary name if not.
+
+#### Key: values
+
+An array of _strings_ (of digits) giving the first COUNT values of the sequence
+with id OEIS_ID. Since some sequence values correspond to extremely large
+numbers, strings are used to avoid the limitations of any particular numeric
+datatype.
+
 ### URL: `api/get_oeis_name_and_values/<OEIS_ID>`
 
 This one is potentially a bit slower than the above URL, as it may make
@@ -75,6 +100,34 @@ OEIS text "xref" records for the sequence with id OEIS_ID.
 #### Key: backrefs
 
 An array of strings giving all OEIS ids that mention the given OEIS_ID.
+
+### URL: `api/get_oeis_header/<OEIS_ID>`
+
+A lighter-weight endpoint that provides some summary information about the
+sequence designated by <OEIS_ID>. If you are running the server on your local
+machine, a full URL would be http://127.0.0.1:5000/api/get_oeis_header/A028444
+which will show the full name of the Busy Beaver sequence, the first and last
+indices of the sequence as avaialable through oeis.org, and the chunk size that
+will be used if values are requested in chunks.
+
+#### Key: name
+
+A string giving the official name of the OEIS sequence with id OEIS_ID.
+
+#### Key: first
+
+The index of the first entry in the sequence available for download from
+oeis.org.
+
+#### Key: last
+
+The index of the first entry in the sequence available for download from
+oeis.org.
+
+#### Key: chunk_size
+
+The maximum number of entries provided per chunk if chunked access is used
+to download entries for this sequence.
 
 ### URL: `api/get_oeis_factors/<OEIS_ID>/<COUNT>`
 

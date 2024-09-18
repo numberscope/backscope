@@ -35,7 +35,13 @@ class Sequence(db.Model):
     name = db.Column(db.String, unique=False, nullable=True)
     # The following is called the "offset" in the OEIS, but that is a
     # Postgres reserved word, so we use a different name.
-    shift = db.Column(db.Integer, unique=False, nullable=False, default=0)
+    # Moreover, it is a string, not a number, because some OEIS sequences have
+    # shifts too large to fit in an integer.
+    shift = db.Column(db.String, unique=False, nullable=True)
+    # Similarly, the last index must be a string as well.
+    last_index = db.Column(db.String, unique=False, nullable=True)
+    # Should still work to keep values in an array, since there can't be so
+    # many of them, and we store the shift separately
     values = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
     values_requested = db.Column(db.Boolean, nullable=False, default=False)
     raw_refs = db.Column(db.String, unique=False, nullable=True)
