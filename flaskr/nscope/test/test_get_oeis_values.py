@@ -11,7 +11,7 @@ class TestGetOEISValuesWithoutShift(abstract_endpoint_test.AbstractEndpointTest)
   #   background work triggered by the request
   expected_response = {
     'id': 'A153080',
-    'name': 'A153080 [name not yet loaded]',
+    'name': 'a(n) = 13*n + 2.',
     'values': {
       '0': '2',
       '1': '15',
@@ -38,7 +38,7 @@ class TestGetOEISValues(abstract_endpoint_test.AbstractEndpointTest):
   #   background work triggered by the request
   expected_response = {
     'id': 'A321580',
-    'name': 'A321580 [name not yet loaded]',
+    'name': 'Numbers k such that it is possible to reverse a deck of k cards by a sequence of perfect Faro shuffles with cut.',
     'values': {
       '1': '1',
       '2': '2',
@@ -69,7 +69,7 @@ class TestGetOEISValuesNegativeShift(abstract_endpoint_test.AbstractEndpointTest
   #   such a comment works
   expected_response = {
     'id': 'A078302',
-    'name': ' A078302 (b-file synthesized from sequence entry)',
+    'name': 'Decimal expansion of Planck time (in seconds).',
     'values': {
       '-43': '5',
       '-42': '3',

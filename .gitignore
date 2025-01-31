@@ -3,6 +3,9 @@ node_modules
 /dist
 migrations
 
+# OEIS metadata
+oeisdata
+
 # Python specific
 __pycache__/
 *.py[cod]
