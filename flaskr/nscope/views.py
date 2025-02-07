@@ -264,15 +264,9 @@ def fetch_values(oeis_id):
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')
-    name = ''
     seq_vals = {}
     for line in b_text.split("\n"):
-        if not line: continue
-        if line[0] == '#':
-            # Some sequences have info in first comment that we can use as a
-            # stopgap until the real name is obtained.
-            if not name: name = line[1:]
-            continue
+        if not line or line[0] == '#': continue
         column = line.split()
         if len(column) < 2: continue
         if not (column[0][0].isdigit() or column[0][0] == '-'):
@@ -286,7 +280,7 @@ def fetch_values(oeis_id):
         return IndexError(f"No terms found for ID '{oeis_id}'.")
     seq.values = [seq_vals[i] for i in range(first,last+1)]
     if not seq.name:
-        seq.name = name or placeholder_name(oeis_id)
+        seq.name = placeholder_name(oeis_id)
     seq.shift = first
     db.session.commit()
     return seq
