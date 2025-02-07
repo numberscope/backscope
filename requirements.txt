@@ -7,5 +7,6 @@ psycopg2-binary # library for interacting with PostgreSQL
 python-dotenv # library for .env files
 requests # library for making HTTP requests
 requests-toolbelt # we use this for logging HTTP requests
+ripgrep # used for searching the local metadata
 structlog # package for structured logging
 sympy # used for factoring
