@@ -451,7 +451,7 @@ def get_oeis_name_and_values(oeis_id):
                 # the OEIS internal format specification says that only one %N line
                 # can appear, so the line we just found must be the whole name
                 prefix_len = 4 + len(seq.id)
-                seq.name = line[prefix_len:]
+                seq.name = line[prefix_len:].strip()
                 db.session.commit()
                 break
     executor.submit(fetch_factors, valid_oeis_id, timeout=1000)

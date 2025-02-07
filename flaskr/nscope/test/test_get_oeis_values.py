@@ -78,5 +78,39 @@ class TestGetOEISValuesNegativeShift(abstract_endpoint_test.AbstractEndpointTest
     }
   }
 
+class TestGetOEISNameAndValues(abstract_endpoint_test.AbstractEndpointTest):
+  endpoint = 'http://localhost:5000/api/get_oeis_name_and_values/A178600'
+  
+  # we choose A178600 because:
+  # - it only has fifteen entries, so we can hard-code all of them into the
+  #   test. since it's a finite sequence, we don't have to worry about more
+  #   values being added
+  # - it has zero shift, so the test can pass even if the shift defaults to zero
+  # - it has small values and few references, which speeds up the background
+  #   work triggered by the request
+  # sequence A070178 ("coefficients of Lehmer's polynomial") would be an
+  # equally good choice
+  expected_response = {
+    'id': 'A178600',
+    'name': 'Expansion of the polynomial (1+x^3)*(1+x^11).',
+    'values': {
+      '0': '1',
+      '1': '0',
+      '2': '0',
+      '3': '1',
+      '4': '0',
+      '5': '0',
+      '6': '0',
+      '7': '0',
+      '8': '0',
+      '9': '0',
+      '10': '0',
+      '11': '1',
+      '12': '0',
+      '13': '0',
+      '14': '1'
+    }
+  }
+
 if __name__ == "__main__":
     unittest.main()
