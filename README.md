@@ -22,9 +22,12 @@ disruptive and wastefully repetitive if performed in each visitor's browser.
 [installing backscope on Ubuntu](doc/install-ubuntu.md), which can perhaps
 also be tailored to other Linux distributions or other operating systems.)
 
-1. Install Git if need be and clone this repo from
-   `github.com/numberscope/backscope`. Switch to the top-level directory
+1. Install Git, if need be, and clone this repo by calling
+   `git clone github.com/numberscope/backscope`. Switch to the top-level directory
    of the clone.
+2. Nest the OEIS metadata repository within this one by calling `git clone https://github.com/oeis/oeisdata`.
+   + As of 2025, the metadata repository contains about 0.6&nbsp;GB of current data and 0.5&nbsp;GB of Git history, for a total of 1.1&nbsp;GB.
+   + To do Git operations on the nested metadata repository, call Git from anywhere inside the `oeisdata` directory.
 2. Install prerequisites:
    + Python 3 (>= version 3.9)
    + The Python 3 dev package

@@ -54,6 +54,12 @@ cd backscope
 All later commands in the installation sequence assume that you are in this
 directory.
 
+### Clone the OEIS metadata
+
+Nest the OEIS metadata repository within the backscope repository by calling `git clone https://github.com/oeis/oeisdata`. As of 2025, the metadata repository contains about 0.6&nbsp;GB of current data and 0.5&nbsp;GB of Git history, for a total of 1.1&nbsp;GB.
+
+The `oeisdata` directory is already listed in backscope's `.gitignore`, so the metadata files won't clutter your view when you call Git from outside `oeisdata`. To do Git operations on the nested metadata repository, call Git from anywhere inside `oeisdata`.
+
 ### Install pari-gp, required for cypari2
 
 This is the actual PARI/GP package. You need to have a full installation,

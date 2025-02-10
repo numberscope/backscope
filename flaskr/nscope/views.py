@@ -6,11 +6,12 @@ Views for nscope model
 import base64 # for encoding response dumps
 from flask import Blueprint, jsonify, current_app, render_template
 from flask_executor import Executor
+import os
 import re
 import requests
 from requests_toolbelt.utils import dump
 import structlog
-from subprocess import check_output, TimeoutExpired
+import subprocess
 from sympy import factorint
 from tempfile import NamedTemporaryFile
 import time
@@ -109,10 +110,10 @@ def oeis_get(path='', params=None, json=True, timeout=4):
 def fetch_metadata(oeis_id):
     """ When called with a *valid* oeis id, makes sure the metadata has been
         obtained, and returns the corresponding Sequence object with valid
-        metadata.
-
-        Note that this also crawls all backreferences, so it can take quite
-        a long time for popular sequences (potentially hours).
+        metadata. The sequence's name and raw references should be written to
+        the database almost immediately, but the function won't return until
+        we also finish searching for backreferences, which can take several
+        seconds.
     """
     seq = find_oeis_sequence(oeis_id)
     if seq.backrefs is not None:
@@ -150,46 +151,50 @@ def fetch_metadata(oeis_id):
     seq.meta_req_time = our_req_time
     db.session.commit()
 
-    # Try to grab the metadata
-    search_params = {'q': seq.id, 'fmt': 'json'}
-    search_response = oeis_get('/search', search_params)
-    if isinstance(search_response, Exception):
-        return search_response
-    if search_response['results'] != None:
-        # We found some metadata. Write down the reference count, so later
-        # threads can decide how long to wait for us
-        ref_count = search_response['count']
-        seq.ref_count = ref_count
-        db.session.commit()
+    # Look up our sequence's name and raw references. The metadata file we're
+    # parsing is written in the OEIS internal format, which is specified here:
+    #
+    #   https://oeis.org/eishelp1.html
+    #
+    short_id = seq.id[:4]
+    oeis_data_path = os.path.join('oeisdata', 'seq')
+    seq_file_path = os.path.join(oeis_data_path, short_id, seq.id + '.seq')
+    prefix_len = 4 + len(seq.id)
+    seq.raw_refs = ''
+    for line in open(seq_file_path):
+        if line.startswith('%N'):
+            # the OEIS internal format specification says that only one %N line
+            # can appear, so the line we just found must be the whole name
+            seq.name = line[prefix_len:]
+        elif line.startswith('%Y'):
+            seq.raw_refs += line[prefix_len:]
+    seq.name = seq.name.strip()
+    seq.raw_refs = seq.raw_refs.strip()
+    db.session.commit()
 
-        backrefs = []
-        target_number = int(seq.id[1:])
-        saw = 0
-        while (saw < ref_count):
-            for result in search_response['results']:
-                if result['number'] == target_number:
-                    # Write the sequence's name and raw references as soon as we
-                    # find them
-                    if seq.raw_refs is None:
-                        seq.name = result['name']
-                        seq.raw_refs = "\n".join(result.get('xref', []))
-                        db.session.commit()
-                else:
-                    backrefs.append(oeis_a_id(result['number']))
-                saw += 1
-            if saw < ref_count:
-                search_params['start'] = saw
-                search_response = oeis_get('/search', search_params)
-                if isinstance(search_response, Exception):
-                    return search_response
-                if search_response['results'] == None:
-                    break
-        seq.backrefs = backrefs
+    # Find all the other sequences whose metadata mentions our sequence
+    backref_search = subprocess.run(
+        ['rg', seq.id, '--glob', f'!{seq.id}.seq', '--files-with-matches'],
+        cwd=oeis_data_path,
+        capture_output=True,
+        encoding='utf8'
+    )
+    if backref_search.returncode:
+        # ripgrep returned status code 1, which means it didn't find anything
+        seq.backrefs = []
     else:
-        # We didn't find any metadata
-        seq.ref_count = 0
+        # ripgrep returned status code 0, which means its output lists all the
+        # sequence files that mention our sequence
+        seq.backrefs = list(map(
+            lambda name: os.path.splitext(os.path.basename(name))[0],
+            backref_search.stdout.strip().split('\n')
+        ))
 
-    # We write what we've found to the database in the following situations:
+    # Count the references to our sequence, including the sequence itself
+    seq.ref_count = len(seq.backrefs) + 1
+
+    # We write the backreferences we've found to the database in the following
+    # situations:
     #
     # - No more recent thread has set out to fetch the same metadata
     #
@@ -259,15 +264,9 @@ def fetch_values(oeis_id):
     # Parse the b-file:
     first = float('inf')
     last = float('-inf')
-    name = ''
     seq_vals = {}
     for line in b_text.split("\n"):
-        if not line: continue
-        if line[0] == '#':
-            # Some sequences have info in first comment that we can use as a
-            # stopgap until the real name is obtained.
-            if not name: name = line[1:]
-            continue
+        if not line or line[0] == '#': continue
         column = line.split()
         if len(column) < 2: continue
         if not (column[0][0].isdigit() or column[0][0] == '-'):
@@ -281,7 +280,7 @@ def fetch_values(oeis_id):
         return IndexError(f"No terms found for ID '{oeis_id}'.")
     seq.values = [seq_vals[i] for i in range(first,last+1)]
     if not seq.name:
-        seq.name = name or placeholder_name(oeis_id)
+        seq.name = placeholder_name(oeis_id)
     seq.shift = first
     db.session.commit()
     return seq
@@ -352,10 +351,10 @@ def fetch_factors(oeis_id, num_elements = -1, timeout = 10):
             temp.write("\\q\n")
             temp.close()
             try:
-                results = check_output(
+                results = subprocess.check_output(
                     ['gp', '-q', '-s', '256000000', tempname],
                     timeout=timeout)
-            except TimeoutExpired as te:
+            except subprocess.TimeoutExpired as te:
                 results = te.output
         if results:
             lines = results.decode('utf-8').split("\n")[0:-1]
@@ -446,12 +445,15 @@ def get_oeis_name_and_values(oeis_id):
     # Now get the name
     seq = find_oeis_sequence(valid_oeis_id)
     if not seq.name or seq.name == placeholder_name(oeis_id):
-        search_response = oeis_get('/search', {'q': f'id:{oeis_id}', 'fmt': 'json'})
-        if isinstance(search_response, Exception):
-            return f"Error: {search_response}"
-        if search_response['results'] != None:
-            seq.name = search_response['results'][0]['name']
-            db.session.commit()
+        seq_file_path = os.path.join('oeisdata', 'seq', seq.id[:4], seq.id + '.seq')
+        for line in open(seq_file_path):
+            if line.startswith('%N'):
+                # the OEIS internal format specification says that only one %N line
+                # can appear, so the line we just found must be the whole name
+                prefix_len = 4 + len(seq.id)
+                seq.name = line[prefix_len:].strip()
+                db.session.commit()
+                break
     executor.submit(fetch_factors, valid_oeis_id, timeout=1000)
     return jsonify({'id': seq.id, 'name': seq.name, 'values': vals})
 
@@ -519,7 +521,7 @@ def search_oeis(search_term):
         else:
             ids = []
             names = []
-            resultList = search_response['results']
+            resultList = search_response
             if resultList is None:
                 resultList = []
             for result in resultList:
