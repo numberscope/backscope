@@ -521,7 +521,7 @@ def search_oeis(search_term):
         else:
             ids = []
             names = []
-            resultList = search_response['results']
+            resultList = search_response
             if resultList is None:
                 resultList = []
             for result in resultList:
