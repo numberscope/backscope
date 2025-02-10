@@ -8,7 +8,9 @@ Numberscope's maintainers.
 
 In the `/home` directory, there's a directory `scope` for the user
 `scope`. Within the `scope` directory, there's a `repos` directory.
-Within the repos directory, there's a checkout of `backscope`.
+Within the repos directory, there's a checkout of `backscope`, and
+within that backscope directory at its top level, there is a checkout
+of the `oeisdata` repository from the OEIS.
 
 We can't simply clone `backscope`, install its dependencies, and run the
 Flask development server. We need to set `backscope` up as a production
@@ -83,7 +85,9 @@ should consist of three simple steps:
 
 2. `sudo -u scope git pull`
 
-3. `sudo systemctl restart numberscope`
+3. `cd oeisdata; sudo -u scope git pull`
+
+4. `sudo systemctl restart numberscope`
 
 You can then try `sudo systemctl status numberscope` to see if the service
 thinks it is running correctly, and you can point your browser for example at
