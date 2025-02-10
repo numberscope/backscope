@@ -240,16 +240,38 @@ def fetch_values(oeis_id):
         OEIS (if it has not already been), and returns a Sequence object
         with the values filled in.
     """
-    # First check if it is in the database
     seq = find_oeis_sequence(oeis_id)
-    # See if we already have the values:
-    if seq.values is not None: return seq
-    # See if getting them is in progress:
-    if seq.values_requested:
-        return LookupError("Value fetching for {oeis_id} in progress.")
-    seq.values_requested = True
+    if seq.values is not None:
+        # We already have the values in the database, so we just return them
+        return seq
+    
+    our_req_time = time.time_ns()
+    last_req_time = seq.values_req_time
+    if last_req_time is not None:
+        # we chose `max_wait = 3` pretty haphazardly. it matches the minimum
+        # `max_wait` for a metadata request that has some refs downloaded
+        # already, and it's longer than the time it took to download the A000521
+        # b-file on Glen's connection (two seconds for 4 MB)
+        waited = (our_req_time - last_req_time) / 1e9
+        max_wait = 3
+        if waited < max_wait:
+            return LookupError(
+                f"Values for {oeis_id} were already requested {waited:.1f} "
+                "seconds ago. A new request can be made if the old one takes "
+                f"longer than {max_wait:.1f} seconds."
+            )
+    
+    #---------------------------------------------------------------------------
+    # if we've gotten this far, we don't have the values in the database yet,
+    # and we don't think any other thread is likely to come back with them
+    #---------------------------------------------------------------------------
+
+    # Record the time we set out to fetch the values, so later threads can
+    # judge how likely we are to ever come back
+    seq.values_req_time = our_req_time
     db.session.commit()
-    # Now try to get it from the OEIS:
+    
+    # Try to get the b-file from the OEIS:
     b_text = oeis_get(f'/{oeis_id}/b{oeis_id[1:]}.txt', json=False)
     # Test for 404 error. Hat tip StackOverflow user Lukasa
     #   https://stackoverflow.com/a/19343099
@@ -282,7 +304,20 @@ def fetch_values(oeis_id):
     if not seq.name:
         seq.name = placeholder_name(oeis_id)
     seq.shift = first
-    db.session.commit()
+    
+    # We write what we've found to the database in the following situations:
+    #
+    # - No more recent thread has set out to fetch the same metadata
+    #
+    # - A more recent thread has set out to fetch the same metadata, but we got
+    #   back before any other thread did
+    #
+    # This is equivalent to the condition in the `if` statement below because
+    # the only way for `seq.values_req_time == our_req_time` to be false is for
+    # a more recent thread to have overwritten the request time
+    if seq.values_req_time == our_req_time or seq.values is None:
+        db.session.commit()
+    
     return seq
 
 def fetch_factors(oeis_id, num_elements = -1, timeout = 10):
