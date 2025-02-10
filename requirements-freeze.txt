@@ -27,4 +27,4 @@ structlog==24.4.0
 sympy==1.13.1
 typing_extensions==4.12.2
 urllib3==2.2.2
-Werkzeug==3.0.3
+Werkzeug==3.0.6
