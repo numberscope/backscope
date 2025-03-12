@@ -37,13 +37,13 @@ class Sequence(db.Model):
     # Postgres reserved word, so we use a different name.
     shift = db.Column(db.Integer, unique=False, nullable=False, default=0)
     values = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
-    values_requested = db.Column(db.Boolean, nullable=False, default=False)
     raw_refs = db.Column(db.String, unique=False, nullable=True)
     backrefs = db.Column(db.ARRAY(db.String), unique=False, nullable=True)
     ref_count = db.Column(db.Integer, nullable=True, default=None)
-    # The start time of the last attempt to fetch metadata, in nanoseconds since
-    # the UNIX epoch. A PostgreSQL BigInteger is eight bytes, including sign, so
-    # this should work until the early 2260s
+    # The start times of the last attempt to fetch values and metadata, in
+    # nanoseconds since the UNIX epoch. A PostgreSQL BigInteger is eight bytes,
+    # including sign, so this should work until the early 2260s
+    values_req_time = db.Column(db.BigInteger, nullable=True, default=None)
     meta_req_time = db.Column(db.BigInteger, nullable=True, default=None)
     # Sadly, multidimensional arrays can't vary in dimension
     # so we store factorization arrays as strings
