@@ -26,5 +26,5 @@ SQLAlchemy==2.0.31
 structlog==24.4.0
 sympy==1.13.1
 typing_extensions==4.12.2
-urllib3==2.2.2
+urllib3==2.5.0
 Werkzeug==3.0.6
